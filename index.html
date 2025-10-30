@@ -18,10 +18,26 @@
         <span class="logo" aria-hidden="true">📇</span>
         <h1 class="site-title">Livre de Sajin</h1>
       </div>
-      <label class="searchbar" aria-label="Recherche">
-        <input id="searchInput" type="search" placeholder="Rechercher..." autocomplete="off" aria-label="Rechercher une personne" />
-        <button id="clearSearch" class="icon-btn" type="button" aria-label="Effacer la recherche">✕</button>
-      </label>
+
+      <div class="header-actions">
+        <label class="searchbar" aria-label="Recherche">
+          <input id="searchInput" type="search" placeholder="Rechercher..." autocomplete="off" aria-label="Rechercher une personne" />
+          <button id="clearSearch" class="icon-btn" type="button" aria-label="Effacer la recherche">✕</button>
+        </label>
+
+        <div class="admin-toolbar">
+          <button id="adminLoginToggle" class="icon-btn" type="button" aria-label="Se connecter en admin">🔐 Admin</button>
+          <label id="adminSwitchWrap" class="switch hidden" title="Activer/Désactiver le mode admin">
+            <input id="adminModeSwitch" type="checkbox" />
+            <span>Mode admin</span>
+          </label>
+          <button id="addBtn" class="icon-btn hidden" type="button" aria-label="Ajouter une fiche">＋</button>
+          <button id="exportBtn" class="icon-btn hidden" type="button" aria-label="Exporter JSON">📤</button>
+          <label id="importWrap" class="file-label hidden" title="Importer JSON">📥
+            <input type="file" id="importFile" accept="application/json" hidden>
+          </label>
+        </div>
+      </div>
     </header>
 
     <main id="main" tabindex="-1">
@@ -35,6 +51,7 @@
           <div class="card-overlay">
             <div class="card-name"></div>
           </div>
+          <button class="card-del hidden" title="Supprimer">🗑️</button>
         </article>
       </template>
     </main>
@@ -42,51 +59,37 @@
     <dialog id="personModal" class="modal" aria-label="Détails de la personne">
       <button class="modal-close" id="modalClose" type="button" aria-label="Fermer">✕</button>
       <div class="modal-body">
-        <img id="modalPhoto" alt="Photo" />
+        <div class="photo-col">
+          <div id="dropZone" class="dropzone" aria-label="Glissez-déposez une image ou cliquez pour choisir">
+            <img id="modalPhoto" alt="Photo" />
+            <div class="dz-hint">
+              <p>Glissez-déposez une image<br>ou <span class="underline">cliquez</span> — vous pouvez aussi <span class="underline">coller</span> (Ctrl/Cmd+V)</p>
+            </div>
+            <input id="photoFile" type="file" accept="image/*" hidden>
+          </div>
+        </div>
+
         <div class="modal-info">
-          <h2 id="modalName"></h2>
-          <p id="modalRole" class="muted"></p>
-          <p id="modalBio"></p>
-          <div id="modalTags" class="tags"></div>
+          <h2 id="modalNameView" class="ro"></h2>
+          <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
+          <input id="lastNameInput" class="ed hidden" placeholder="Nom">
+          <p id="modalRoleView" class="muted ro"></p>
+          <input id="roleInput" class="ed hidden" placeholder="Rôle">
+          <p id="modalBioView" class="ro"></p>
+          <textarea id="bioInput" class="ed hidden" placeholder="Bio"></textarea>
+          <div id="modalTags" class="tags ro"></div>
+          <input id="tagsInput" class="ed hidden" placeholder="Tags séparés par des virgules">
+          <div class="admin-row hidden" id="editActions">
+            <button id="saveBtn" class="icon-btn">💾 Enregistrer</button>
+            <button id="closeEditBtn" class="ghost">Annuler</button>
+          </div>
         </div>
       </div>
     </dialog>
 
-    <button id="adminFab" class="fab" type="button" aria-label="Ouvrir l’administration">⚙️</button>
-
-    <dialog id="adminPanel" class="admin" aria-label="Panneau d’administration">
-      <form class="admin-inner" id="adminForm" method="dialog">
-        <header class="admin-header">
-          <h3>Administration</h3>
-          <button id="adminClose" type="button" class="ghost" aria-label="Fermer">✕</button>
-        </header>
-
-        <section id="adminLogin">
-          <label for="adminPassword">Mot de passe admin</label>
-          <input type="password" id="adminPassword" />
-          <button id="adminLoginBtn" type="button">Connexion</button>
-          <p id="adminLoginMsg" role="status" aria-live="polite"></p>
-        </section>
-
-        <section id="adminActions" class="hidden">
-          <h4>Ajouter / Modifier une personne</h4>
-          <input id="pfId" type="hidden" />
-          <label for="pfFirstName">Prénom</label><input id="pfFirstName" />
-          <label for="pfLastName">Nom</label><input id="pfLastName" />
-          <label for="pfPhotoUrl">Photo (URL)</label><input id="pfPhotoUrl" />
-          <label for="pfRole">Rôle</label><input id="pfRole" />
-          <label for="pfBio">Bio</label><textarea id="pfBio"></textarea>
-          <label for="pfTags">Tags (séparés par des virgules)</label><input id="pfTags" />
-          <div class="admin-actions-row">
-            <button id="savePersonBtn" type="button">💾 Enregistrer</button>
-            <button id="deletePersonBtn" type="button" class="danger">🗑️ Supprimer</button>
-            <button id="exportJsonBtn" type="button" class="ghost">📤 Exporter JSON</button>
-            <label class="file-label">📥 Importer JSON <input type="file" id="importFile" accept="application/json" hidden></label>
-            <button id="importBtn" type="button">Importer</button>
-          </div>
-        </section>
-      </form>
-    </dialog>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite">
+      Supprimé. <button id="undoBtn" class="link">Annuler</button>
+    </div>
 
     <noscript>Veuillez activer JavaScript pour utiliser ce site.</noscript>
 
