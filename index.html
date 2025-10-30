@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Classeur de Personnes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="logo">📇</span>
+        <h1>Classeur</h1>
+      </div>
+      <label class="searchbar">
+        <input id="searchInput" type="search" placeholder="Rechercher..." autocomplete="off" />
+        <button id="clearSearch">✕</button>
+      </label>
+    </header>
+
+    <main>
+      <div id="stats" class="stats"></div>
+      <section id="grid" class="grid"></section>
+
+      <template id="cardTemplate">
+        <article class="card">
+          <div class="card-image"></div>
+          <div class="card-overlay">
+            <div class="card-name"></div>
+          </div>
+        </article>
+      </template>
+    </main>
+
+    <dialog id="personModal" class="modal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-body">
+        <img id="modalPhoto" alt="" />
+        <div class="modal-info">
+          <h2 id="modalName"></h2>
+          <p id="modalRole" class="muted"></p>
+          <p id="modalBio"></p>
+          <div id="modalTags" class="tags"></div>
+        </div>
+      </div>
+    </dialog>
+
+    <button id="adminFab" class="fab">⚙️</button>
+
+    <dialog id="adminPanel" class="admin">
+      <form class="admin-inner" id="adminForm">
+        <header class="admin-header">
+          <h3>Administration</h3>
+          <button id="adminClose" type="button" class="ghost">✕</button>
+        </header>
+
+        <section id="adminLogin">
+          <label>Mot de passe admin</label>
+          <input type="password" id="adminPassword" />
+          <button id="adminLoginBtn" type="button">Connexion</button>
+          <p id="adminLoginMsg"></p>
+        </section>
+
+        <section id="adminActions" class="hidden">
+          <h4>Ajouter / Modifier une personne</h4>
+          <input id="pfId" type="hidden" />
+          <label>Prénom</label><input id="pfFirstName" />
+          <label>Nom</label><input id="pfLastName" />
+          <label>Photo (URL)</label><input id="pfPhotoUrl" />
+          <label>Rôle</label><input id="pfRole" />
+          <label>Bio</label><textarea id="pfBio"></textarea>
+          <label>Tags (séparés par des virgules)</label><input id="pfTags" />
+          <button id="savePersonBtn" type="button">💾 Enregistrer</button>
+          <button id="deletePersonBtn" type="button">🗑️ Supprimer</button>
+          <button id="exportJsonBtn" type="button">📤 Exporter JSON</button>
+          <input type="file" id="importFile" accept="application/json" />
+          <button id="importBtn" type="button">📥 Importer JSON</button>
+        </section>
+      </form>
+    </dialog>
+
+    <script src="config.js"></script>
+    <script src="script.js" type="module"></script>
+  </body>
+</html>

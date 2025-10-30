@@ -1,0 +1,136 @@
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #0b0f14;
+  color: #e9eef6;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(10, 15, 20, 0.9);
+  border-bottom: 1px solid #1c2531;
+  position: sticky;
+  top: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.searchbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.searchbar input {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: none;
+  background: #151b23;
+  color: white;
+}
+.searchbar button {
+  border: none;
+  background: #151b23;
+  color: white;
+  cursor: pointer;
+  border-radius: 20px;
+  padding: 0.5rem 0.75rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  height: 280px;
+  cursor: pointer;
+  background: #151b23;
+}
+.card-image {
+  position: absolute;
+  inset: 0;
+  background: center/cover no-repeat;
+}
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.8), transparent);
+}
+.card-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.modal {
+  border: none;
+  border-radius: 12px;
+  background: #0c121c;
+  color: white;
+  max-width: 90vw;
+}
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+.modal-body {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+  gap: 1rem;
+}
+.modal-body img {
+  max-width: 300px;
+  border-radius: 12px;
+}
+.muted {
+  color: #8b97a6;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tags .tag {
+  background: #151b23;
+  border-radius: 8px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  border: none;
+  border-radius: 50%;
+  background: #3366ff;
+  color: white;
+  font-size: 1.3rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+}
+
+.admin {
+  border: none;
+  border-radius: 12px;
+  background: #0c121c;
+  color: white;
+  max-width: 600px;
+  padding: 1rem;
+}
+.hidden {
+  display: none;
+}
