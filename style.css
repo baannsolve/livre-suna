@@ -118,15 +118,15 @@ body{
   right: 0.75rem;
   width: 44px;
   height: 44px;
-  background: rgba(12, 18, 28, 0.7);
+  /* background: rgba(12, 18, 28, 0.7); */ /* Retiré pour les logos transparents */
   border-radius: 50%;
   padding: 6px;
   object-fit: contain;
   z-index: 1;
-  backdrop-filter: blur(3px);
-  border: 1px solid var(--border);
-  outline: 1px solid rgba(255, 255, 255, 0.5);
-  outline-offset: -1px;
+  /* backdrop-filter: blur(3px); */
+  /* border: 1px solid var(--border); */
+  /* outline: 1px solid rgba(255, 255, 255, 0.5); */
+  /* outline-offset: -1px; */
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
 }
 
@@ -214,14 +214,12 @@ body{
 .info-grid p {
   margin: 0;
   background: var(--elev);
-  /* MODIFIÉ: Augmenté le padding pour les pilules d'info */
-  padding: 0.8rem 1rem; /* Ancien: 0.6rem 0.8rem */
+  padding: 0.8rem 1rem;
   border-radius: 8px;
-  /* MODIFIÉ: Augmenté la taille de police */
-  font-size: 1rem; /* Ancien: 0.9rem */
+  font-size: 1rem;
   border: 1px solid var(--border);
   display: flex;
-  align-items: center; /* Assure l'alignement vertical */
+  align-items: center;
 }
 .info-grid p strong {
   color: var(--muted);
@@ -233,16 +231,14 @@ body{
   line-height: 1.6;
 }
 
-/* MODIFIÉ: Ajusté la taille du logo du village pour 100x100 */
+/* MODIFIÉ : Logo Village (styles de cercle retirés) */
 .village-logo {
-  width: 32px; /* Ancien: 24px */
-  height: 32px; /* Ancien: 24px */
-  object-fit: contain;
+  width: 32px;
+  height: 32px;
+  object-fit: contain; /* S'assure que l'image entière est visible */
   vertical-align: middle;
-  margin-right: 0.75em; /* Ancien: 0.5em */
-  outline: 1px solid rgba(255, 255, 255, 0.4);
-  outline-offset: -1px;
-  border-radius: 50%;
+  margin-right: 0.75em;
+  /* Les styles 'outline' et 'border-radius' sont retirés */
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
@@ -271,6 +267,7 @@ body{
   height: 80px;
   object-fit: contain;
 }
+
 
 .ed{
   display:block;
