@@ -111,23 +111,18 @@ body{
   border: 1px solid var(--border);
 }
 
-/* Logo Village (coin supérieur droit) */
+/* MODIFIÉ : Logo Village (styles de cercle retirés) */
 .card-village-logo {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
   width: 44px;
   height: 44px;
-  /* background: rgba(12, 18, 28, 0.7); */ /* Retiré pour les logos transparents */
-  border-radius: 50%;
-  padding: 6px;
-  object-fit: contain;
+  /* background, border-radius, outline, etc. ont été retirés */
+  padding: 0; /* Pas de padding pour ne pas réduire l'image */
+  object-fit: contain; /* Assure que l'image entière est visible */
   z-index: 1;
-  /* backdrop-filter: blur(3px); */
-  /* border: 1px solid var(--border); */
-  /* outline: 1px solid rgba(255, 255, 255, 0.5); */
-  /* outline-offset: -1px; */
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)); /* Ombre portée pour la visibilité */
 }
 
 .card-content {
@@ -231,14 +226,13 @@ body{
   line-height: 1.6;
 }
 
-/* MODIFIÉ : Logo Village (styles de cercle retirés) */
 .village-logo {
   width: 32px;
   height: 32px;
-  object-fit: contain; /* S'assure que l'image entière est visible */
+  object-fit: contain;
   vertical-align: middle;
   margin-right: 0.75em;
-  /* Les styles 'outline' et 'border-radius' sont retirés */
+  /* Les styles de cercle sont retirés */
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
