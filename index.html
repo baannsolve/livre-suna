@@ -78,29 +78,45 @@
 
         <div class="modal-info">
           <h2 id="modalNameView" class="ro"></h2>
+          <p class="muted ro">
+            <strong>Grade:</strong> <span id="modalGradeView"></span>
+          </p>
+          <p id="modalInfoView" class="ro"></p>
+          <div id="modalTags" class="tags ro"></div>
+
           <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
           <input id="lastNameInput" class="ed hidden" placeholder="Nom">
-          <p id="modalRoleView" class="muted ro"></p>
-          <input id="roleInput" class="ed hidden" placeholder="Rôle">
-          <p id="modalBioView" class="ro"></p>
-          <textarea id="bioInput" class="ed hidden" placeholder="Bio"></textarea>
-          <div id="modalTags" class="tags ro"></div>
+          
+          <label class="ed hidden" for="gradeInput">Grade :</label>
+          <select id="gradeInput" class="ed hidden">
+            <option value="">-- Sélectionner un grade --</option>
+            <option value="Genin">Genin</option>
+            <option value="Genin Confirmé">Genin Confirmé</option>
+            <option value="Tokubetsu Chunin">Tokubetsu Chunin</option>
+            <option value="Chunin">Chunin</option>
+            <option value="Chunin Confirmé">Chunin Confirmé</option>
+            <option value="Tokubetsu Jonin">Tokubetsu Jonin</option>
+            <option value="Jonin">Jonin</option>
+            <option value="Commandant Jonin">Commandant Jonin</option>
+            <option value="Kage">Kage</option>
+          </select>
+
+          <textarea id="informationInput" class="ed hidden" placeholder="Information"></textarea>
           <input id="tagsInput" class="ed hidden" placeholder="Tags séparés par des virgules">
+          
           <div class="admin-row hidden" id="editActions">
             <button id="saveBtn" class="icon-btn">💾 Enregistrer</button>
             <button id="closeEditBtn" class="ghost">Annuler</button>
           </div>
         </div>
+
       </div>
     </dialog>
-
-    <div id="toast" class="toast hidden" role="status" aria-live="polite">
-      Supprimé. <button id="undoBtn" class="link">Annuler</button>
-    </div>
 
     <noscript>Veuillez activer JavaScript pour utiliser ce site.</noscript>
 
     <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js" type="module"></script>
   </body>
 </html>

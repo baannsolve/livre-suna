@@ -1,20 +1,26 @@
+// script.js (Version Finale avec Authentification)
+
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
 let isAdmin = false;
 let adminMode = false;
-let currentSortKey = "lastName"; // "lastName" ou "firstName"
+let currentSortKey = "lastName";
+
+// Initialisation de Supabase
+const { createClient } = supabase;
+const supabaseClient = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
+// Sélecteurs
 const grid = $("#grid");
 const statsEl = $("#stats");
 const modal = $("#personModal");
 const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
-const toast = $("#toast");
-const undoBtn = $("#undoBtn");
 const sortButtons = {
   lastName: $("#sortLastNameBtn"),
   firstName: $("#sortFirstNameBtn"),
@@ -22,33 +28,17 @@ const sortButtons = {
 
 let currentEditingId = null;
 let photoDataUrl = null;
-let deletedStack = [];
 
 function debounce(fn, delay = 150){
   let t;return (...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),delay)}
 }
 
-async function sha256Hex(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-/**
- * NOUVELLE FONCTION : Compresse et redimensionne une image
- * @param {string} dataUrl - L'image en Data URL (base64)
- * @param {number} maxWidth - Largeur maximale
- * @param {number} maxHeight - Hauteur maximale
- * @param {number} quality - Qualité JPEG (0 à 1)
- * @returns {Promise<string>} - La nouvelle image en Data URL (base64, JPEG)
- */
 function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       let width = img.width;
       let height = img.height;
-
-      // Calcul du redimensionnement en gardant les proportions
       if (width > height) {
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
@@ -60,14 +50,11 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
           height = maxHeight;
         }
       }
-
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-
-      // Résout avec la nouvelle image en JPEG
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
     img.onerror = reject;
@@ -77,25 +64,19 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
 
 function personMatches(p, term){
   if(!term) return true;
-  const hay = (p.firstName+" "+p.lastName+" "+(p.role||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
+  const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
   return hay.includes(term.toLowerCase());
 }
 
-/**
- * NOUVELLE FONCTION : Trie le tableau PEOPLE en place
- */
 function sortPeople() {
   PEOPLE.sort((a, b) => {
     const aFirst = (a.firstName || '').toLowerCase();
     const bFirst = (b.firstName || '').toLowerCase();
     const aLast = (a.lastName || '').toLowerCase();
     const bLast = (b.lastName || '').toLowerCase();
-
     if (currentSortKey === 'firstName') {
-      // Tri par prénom, puis par nom
       return aFirst.localeCompare(bFirst) || aLast.localeCompare(bLast);
     }
-    // Tri par nom (défaut), puis par prénom
     return aLast.localeCompare(bLast) || aFirst.localeCompare(bFirst);
   });
 }
@@ -104,8 +85,6 @@ function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
   const tmpl = $("#cardTemplate");
-
-  // Le tri est déjà fait dans PEOPLE, on filtre seulement
   const filtered = PEOPLE.filter(p=>personMatches(p,FILTER));
   
   filtered.forEach(p=>{
@@ -126,22 +105,19 @@ function renderGrid(){
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
-  $("#modalRoleView").textContent = p.role || "";
-  $("#modalBioView").textContent = p.bio || "";
+  $("#modalGradeView").textContent = p.grade || "N/A";
+  $("#modalInfoView").textContent = p.information || "";
   const tags = $("#modalTags");
   tags.innerHTML = "";
   (p.tags||[]).forEach(t=>{
     const span = document.createElement("span");
     span.className = "tag"; span.textContent = t; tags.appendChild(span);
   });
-  // read-only vs edit fields
   $$(".ro").forEach(el=>el.classList.remove("hidden"));
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden");
   modal.showModal();
-  
-  // AMÉLIORATION Accessibilité
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
@@ -151,17 +127,14 @@ function openModalEdit(p){
   $("#modalPhoto").src = photoDataUrl || "";
   $("#firstNameInput").value = p?.firstName || "";
   $("#lastNameInput").value = p?.lastName || "";
-  $("#roleInput").value = p?.role || "";
-  $("#bioInput").value = p?.bio || "";
+  $("#gradeInput").value = p?.grade || "";
+  $("#informationInput").value = p?.information || "";
   $("#tagsInput").value = (p?.tags||[]).join(", ");
-  // show edit fields
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
   $("#editActions").classList.remove("hidden");
   dropZone.classList.remove("hidden");
   modal.showModal();
-  
-  // AMÉLIORATION Accessibilité
   requestAnimationFrame(() => $("#firstNameInput").focus());
 }
 
@@ -174,24 +147,18 @@ function readFileToDataURL(file){
   });
 }
 
-/**
- * FONCTION MISE À JOUR : Gère les fichiers (upload/drop/paste)
- * Utilise maintenant la compression d'image.
- */
 async function handleFiles(files) {
   const f = files && files[0];
   if (!f) return;
   if (!f.type.startsWith("image/")) return alert("Veuillez déposer une image.");
-
   try {
     const data = await readFileToDataURL(f);
-    // AMÉLIORATION Performance : Compresser l'image avant de la stocker
     const compressedData = await compressImage(data);
     photoDataUrl = compressedData;
     $("#modalPhoto").src = compressedData;
   } catch (err) {
-    console.error("Erreur lors de la compression de l'image:", err);
-    alert("Une erreur est survenue lors du traitement de l'image.");
+    console.error("Erreur compression image:", err);
+    alert("Erreur lors du traitement de l'image.");
   }
 }
 
@@ -199,7 +166,7 @@ $("#modalClose").addEventListener("click",()=>modal.close());
 modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.close(); });
 
 // Card interactions
-grid.addEventListener('click', (e)=>{
+grid.addEventListener('click', async (e)=>{
   const card = e.target.closest('.card');
   if(!card) return;
   const id = card.dataset.id;
@@ -207,16 +174,21 @@ grid.addEventListener('click', (e)=>{
   if(!p) return;
 
   if(e.target.classList.contains("card-del")){
-    // AMÉLIORATION UX : Confirmation avant suppression
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) {
       return;
     }
     
-    // one-click delete with undo
-    deletedStack.push({ person: p, index: PEOPLE.findIndex(x=>x.id===id) });
-    PEOPLE = PEOPLE.filter(x=>x.id!==id);
-    savePeople(); renderGrid();
-    showToast();
+    const { error } = await supabaseClient
+      .from('people')
+      .delete()
+      .eq('id', p.id);
+
+    if (error) {
+      console.error("Erreur de suppression:", error);
+      alert("La suppression a échoué.");
+    } else {
+      loadPeople(); 
+    }
     return;
   }
 
@@ -247,33 +219,72 @@ $("#clearSearch").addEventListener("click", ()=>{
   $("#searchInput").value = ""; FILTER = ""; renderGrid();
 });
 
-// Admin auth & mode
+// --- AUTHENTIFICATION (SECTION MISE À JOUR) ---
+
+/**
+ * Affiche ou cache les boutons d'administration
+ * @param {boolean} state - true pour admin, false pour public
+ */
+function setAdminUIVisible(state) {
+  isAdmin = state;
+  adminMode = state; // Par défaut, si on est admin, on est en mode admin
+  
+  $("#adminSwitchWrap").classList.toggle("hidden", !state);
+  $("#addBtn").classList.toggle("hidden", !state);
+  $("#exportBtn").classList.toggle("hidden", !state);
+  $("#importWrap").classList.add("hidden"); // L'import est désactivé
+  
+  if (state) {
+    $("#adminModeSwitch").checked = true;
+  }
+  
+  toggleAdminUI(state);
+}
+
+/**
+ * Gère la connexion/déconnexion admin
+ */
 async function adminLoginFlow(){
-  if(isAdmin){
-    // toggle switch visibility
-    $("#adminSwitchWrap").classList.toggle("hidden", false);
-    adminMode = !adminMode;
-    $("#adminModeSwitch").checked = adminMode;
-    toggleAdminUI(adminMode);
+  // 1. Vérifie si on est déjà connecté
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  
+  if (session) {
+    // Si oui, on se déconnecte
+    const logout = confirm("Vous êtes connecté. Voulez-vous vous déconnecter ?");
+    if(logout) {
+      const { error } = await supabaseClient.auth.signOut();
+      if(error) {
+        alert("Erreur lors de la déconnexion.");
+      } else {
+        setAdminUIVisible(false);
+      }
+    }
     return;
   }
+
+  // 2. Si non, on tente de se connecter
+  const email = prompt("Email admin :");
+  if(!email) return;
   const pass = prompt("Mot de passe admin :");
   if(!pass) return;
-  const hash = await sha256Hex(pass);
-  if(hash === CONFIG.adminPasswordHash){
-    isAdmin = true;
-    $("#adminSwitchWrap").classList.remove("hidden");
-    $("#addBtn").classList.remove("hidden");
-    $("#exportBtn").classList.remove("hidden");
-    $("#importWrap").classList.remove("hidden");
-    adminMode = true;
-    $("#adminModeSwitch").checked = true;
-    toggleAdminUI(true);
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: pass,
+  });
+
+  if(error){
+    alert("Email ou mot de passe incorrect.");
   } else {
-    alert("Mot de passe incorrect.");
+    // Connexion réussie !
+    alert("Connecté !");
+    setAdminUIVisible(true);
   }
 }
 
+/**
+ * Gère le basculement visuel du mode admin (icônes poubelle)
+ */
 function toggleAdminUI(state){
   if(state){
     $$(".card-del").forEach(b=>b.classList.remove("hidden"));
@@ -284,10 +295,29 @@ function toggleAdminUI(state){
 }
 
 $("#adminLoginToggle").addEventListener("click", adminLoginFlow);
+
 $("#adminModeSwitch").addEventListener("change", (e)=>{
+  // On ne peut désactiver le mode admin que si on est admin
+  if(!isAdmin) {
+    e.target.checked = false;
+    return;
+  }
   adminMode = e.target.checked;
   toggleAdminUI(adminMode);
 });
+
+/**
+ * Vérifie la session au chargement de la page
+ */
+async function checkSession() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    setAdminUIVisible(true);
+  }
+}
+
+// --- FIN AUTHENTIFICATION ---
+
 
 // Add / Export / Import
 $("#addBtn").addEventListener("click", ()=>{
@@ -300,18 +330,12 @@ $("#exportBtn").addEventListener("click", ()=>{
   a.download = "people.json";
   a.click();
 });
-$("#importFile").addEventListener("change", async (e)=>{
-  const f = e.target.files[0]; if(!f) return;
-  const txt = await f.text();
-  const data = JSON.parse(txt);
-  if(Array.isArray(data)){
-    PEOPLE = data.map(p=> ({...p, id: p.id || crypto.randomUUID()}));
-    sortPeople(); // Tri après import
-    savePeople(); renderGrid();
-  }
+$("#importFile").addEventListener("change", (e)=>{
+  alert("L'importation de JSON est désactivée avec Supabase.");
+  e.target.value = null;
 });
 
-// Dropzone & file selection & paste
+// Dropzone & file
 dropZone.addEventListener("click", ()=> photoFile.click());
 dropZone.addEventListener("dragover", (e)=>{ e.preventDefault(); dropZone.classList.add("dragover"); });
 dropZone.addEventListener("dragleave", ()=> dropZone.classList.remove("dragover"));
@@ -332,72 +356,58 @@ document.addEventListener("paste", (e)=>{
 });
 
 // Save / Cancel
-$("#saveBtn").addEventListener("click", ()=>{
+$("#saveBtn").addEventListener("click", async ()=>{
   const p = {
-    id: currentEditingId || crypto.randomUUID(),
+    id: currentEditingId || undefined, 
     firstName: $("#firstNameInput").value.trim(),
     lastName: $("#lastNameInput").value.trim(),
-    photoUrl: photoDataUrl || "",
-    role: $("#roleInput").value.trim(),
-    bio: $("#bioInput").value.trim(),
+    photoUrl: photoDataUrl || null,
+    grade: $("#gradeInput").value || null,
+    information: $("#informationInput").value.trim() || null,
     tags: $("#tagsInput").value.split(",").map(t=>t.trim()).filter(Boolean)
   };
+  
   if(!p.firstName || !p.lastName){
     alert("Prénom et nom sont obligatoires."); return;
   }
-  const idx = PEOPLE.findIndex(x=>x.id===p.id);
-  if(idx>=0) PEOPLE[idx]=p; else PEOPLE.push(p);
   
-  // MISE À JOUR : Utilise la nouvelle fonction de tri
-  sortPeople();
-  
-  savePeople(); renderGrid();
-  modal.close();
+  const { data, error } = await supabaseClient
+    .from('people')
+    .upsert(p)
+    .select();
+
+  if(error){
+    console.error("Erreur de sauvegarde:", error);
+    alert("La sauvegarde a échoué. Vérifiez la console (F12).");
+  } else {
+    await loadPeople();
+    modal.close();
+  }
 });
 $("#closeEditBtn").addEventListener("click", ()=> modal.close());
 
-// Undo toast
-function showToast(){
-  toast.classList.remove("hidden");
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=> toast.classList.add("hidden"), 5000);
-}
-undoBtn.addEventListener("click", ()=>{
-  const last = deletedStack.pop();
-  if(!last) return;
-  PEOPLE.splice(last.index, 0, last.person);
-  // Pas besoin de re-trier, on le remet à sa place exacte
-  savePeople(); renderGrid();
-  toast.classList.add("hidden");
-});
-
 // Persistence & load
 function savePeople(){
-  localStorage.setItem("people-data", JSON.stringify(PEOPLE));
+  // N'est plus utilisé.
 }
 
 async function loadPeople(){
-  const cached = localStorage.getItem("people-data");
-  if(cached){
-    try{ PEOPLE = JSON.parse(cached); }catch{}
+  const { data, error } = await supabaseClient
+    .from('people')
+    .select('*');
+
+  if(error) {
+    console.error("Erreur de chargement:", error);
+    alert("Impossible de charger les données. Vérifiez la console (F12).");
+    return;
   }
-  try{
-    const res = await fetch("data/people.json", {cache:'no-store'});
-    if(res.ok){
-      const remote = await res.json();
-      const byId = new Map((PEOPLE||[]).map(p=>[p.id,p]));
-      remote.forEach(p=>byId.set(p.id||crypto.randomUUID(), {...p, id:p.id||crypto.randomUUID()}));
-      PEOPLE = Array.from(byId.values());
-      
-      // MISE À JOUR : Utilise la nouvelle fonction de tri
-      sortPeople();
-      savePeople();
-    }
-  }catch{}
+  
+  PEOPLE = data || [];
+  sortPeople();
   renderGrid();
 }
 
-// NOUVEAU : Listeners pour les boutons de tri
+// Sort buttons
 sortButtons.lastName.addEventListener("click", () => {
   currentSortKey = "lastName";
   sortButtons.lastName.classList.add("active");
@@ -414,6 +424,10 @@ sortButtons.firstName.addEventListener("click", () => {
   renderGrid();
 });
 
-
 // Init
-loadPeople();
+async function init() {
+  await loadPeople();
+  await checkSession(); // Vérifie si l'admin est déjà connecté
+}
+
+init();

@@ -51,7 +51,6 @@ body{
 
 .file-label{display:inline-flex;gap:.5rem;align-items:center;border:1px dashed var(--border);padding:.4rem .8rem;border-radius:.6rem;cursor:pointer}
 
-/* STYLE MODIFIÉ : marge retirée */
 .stats{padding:0;margin:0;opacity:.85;}
 
 .grid{
@@ -84,9 +83,9 @@ body{
 .muted{color:var(--muted)}
 
 .ro{margin:.25rem 0}
-.ed{display:block;width:100%;padding:.6rem .8rem;background:var(--elev);border:1px solid var(--border);border-radius:.6rem;color:#fff}
+.ed{display:block;width:100%;padding:.6rem .8rem;background:var(--elev);border:1px solid var(--border);border-radius:.6rem;color:#fff; margin-bottom: 0.5rem;}
 
-.tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.tags{display:flex;flex-wrap:wrap;gap:.4rem; margin-top: 0.5rem;}
 .tags .tag{background:var(--elev);border-radius:8px;padding:.2rem .6rem;font-size:.85rem}
 
 .dropzone{position:relative;border:2px dashed var(--border);border-radius:12px;min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -103,7 +102,6 @@ body{
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:var(--elev);border:1px solid var(--border);padding:.6rem .9rem;border-radius:.75rem;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .link{background:none;border:none;color:var(--ring);cursor:pointer;text-decoration:underline;padding:0;margin-left:.5rem}
 
-/* NOUVEAUX STYLES */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -144,6 +142,17 @@ body{
   border-color: var(--primary);
   box-shadow: 0 0 0 1px var(--primary);
 }
-/* FIN DES NOUVEAUX STYLES */
+
+/* NOUVEAU STYLE POUR LA LISTE DÉROULANTE */
+select.ed { 
+  background-image: linear-gradient(45deg, transparent 50%, #8b97a6 50%), linear-gradient(135deg, #8b97a6 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(1em + 2px), calc(100% - 15px) calc(1em + 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 2.5rem;
+}
 
 .hidden{display:none}
