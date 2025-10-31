@@ -1,4 +1,4 @@
-// script.js (Version Finale avec Modal de Connexion)
+// script.js (Version avec correctifs de modal)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -7,7 +7,6 @@ let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
 
-// NOUVEAU : Placeholder pour les images
 const PLACEHOLDER_IMG = "https://placehold.co/600x600/0c121c/8b97a6?text=Photo";
 
 // Initialisation de Supabase
@@ -31,7 +30,7 @@ const personModal = $("#personModal");
 const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
 
-// NOUVEAU : Sélecteurs Modal Connexion
+// Sélecteurs Modal Connexion
 const loginModal = $("#loginModal");
 const loginForm = $("#loginForm");
 const loginEmail = $("#loginEmail");
@@ -107,7 +106,6 @@ function renderGrid(){
     const c = tmpl.content.firstElementChild.cloneNode(true);
     c.dataset.id = p.id;
     const img = c.querySelector('.card-img');
-    // MODIFIÉ : Utilise le placeholder si photoUrl est null
     img.src = p.photoUrl || PLACEHOLDER_IMG;
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
@@ -119,7 +117,6 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFIÉ : Utilise le placeholder
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -139,7 +136,6 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// MODIFIÉ : Utilise le placeholder
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -181,8 +177,18 @@ async function handleFiles(files) {
   }
 }
 
+// ÉCOUTEURS D'ÉVÉNEMENTS DU MODAL PERSONNE (MODIFIÉS)
 $("#modalClose").addEventListener("click",()=>personModal.close());
-personModal.addEventListener('click', (e)=>{ if(e.target === personModal) personModal.close(); });
+
+// La ligne suivante a été SUPPRIMÉE pour empêcher la fermeture en cliquant sur le padding
+// personModal.addEventListener('click', (e)=>{ if(e.target === personModal) personModal.close(); });
+
+// NOUVEAU : Empêche la fermeture par clic sur le fond (backdrop) ou Echap
+personModal.addEventListener("cancel", (e) => {
+  e.preventDefault();
+});
+// FIN DES MODIFICATIONS DU MODAL PERSONNE
+
 
 // Card interactions
 grid.addEventListener('click', async (e)=>{
@@ -228,11 +234,8 @@ $("#clearSearch").addEventListener("click", ()=>{
   $("#searchInput").value = ""; FILTER = ""; renderGrid();
 });
 
-// --- AUTHENTIFICATION (SECTION ENTIÈREMENT MISE À JOUR) ---
+// --- AUTHENTIFICATION ---
 
-/**
- * Affiche ou cache les boutons d'administration
- */
 function setAdminUIVisible(state) {
   isAdmin = state;
   adminMode = state;
@@ -249,14 +252,10 @@ function setAdminUIVisible(state) {
   toggleAdminUI(state);
 }
 
-/**
- * Gère le clic sur le bouton "Admin" principal
- */
 async function adminLoginFlow(){
   const { data: { session } } = await supabaseClient.auth.getSession();
   
   if (session) {
-    // Si déjà connecté, proposer la déconnexion
     const logout = confirm("Vous êtes connecté. Voulez-vous vous déconnecter ?");
     if(logout) {
       const { error } = await supabaseClient.auth.signOut();
@@ -267,7 +266,6 @@ async function adminLoginFlow(){
       }
     }
   } else {
-    // Si non connecté, ouvrir le modal de connexion
     loginPassword.value = "";
     loginError.textContent = "";
     loginError.classList.add("hidden");
@@ -276,9 +274,6 @@ async function adminLoginFlow(){
   }
 }
 
-/**
- * Gère la soumission du formulaire de connexion
- */
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.classList.add("hidden");
@@ -294,7 +289,6 @@ loginForm.addEventListener("submit", async (e) => {
     loginError.textContent = "Email ou mot de passe incorrect.";
     loginError.classList.remove("hidden");
   } else {
-    // Connexion réussie !
     setAdminUIVisible(true);
     loginModal.close();
   }
@@ -309,12 +303,9 @@ loginCancelBtn.addEventListener("click", () => loginModal.close());
 loginModal.addEventListener('click', (e)=>{ if(e.target === loginModal) loginModal.close(); });
 
 
-/**
- * Gère le basculement visuel du mode admin (icônes poubelle)
- */
 function toggleAdminUI(state){
   $$(".card-del").forEach(b => b.classList.toggle("hidden", !state));
-  renderGrid(); // Re-render pour appliquer les changements
+  renderGrid();
 }
 
 $("#adminLoginToggle").addEventListener("click", adminLoginFlow);
@@ -328,9 +319,6 @@ $("#adminModeSwitch").addEventListener("change", (e)=>{
   toggleAdminUI(adminMode);
 });
 
-/**
- * Vérifie la session au chargement de la page
- */
 async function checkSession() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
@@ -367,7 +355,6 @@ dropZone.addEventListener("drop", (e)=>{
 });
 photoFile.addEventListener("change", (e)=> handleFiles(e.target.files));
 document.addEventListener("paste", (e)=>{
-  // MODIFIÉ : vérifie le bon modal
   if(!personModal.open || !adminMode) return;
   const items = e.clipboardData?.items || [];
   for(const it of items){

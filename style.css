@@ -165,6 +165,13 @@ select.ed {
   padding-right: 2.5rem;
 }
 
+textarea.ed {
+  min-height: 120px; /* Donne une hauteur visible au champ Information */
+  resize: vertical; /* Permet à l'utilisateur de le redimensionner verticalement */
+  font-family: inherit; /* Assure la même police que les autres champs */
+  font-size: inherit;   /* Assure la même taille de police */
+}
+
 /* NOUVEAUX STYLES : MODAL CONNEXION */
 .modal-close {
   position: absolute;
