@@ -1,4 +1,4 @@
-// script.js (Version avec correctifs de modal)
+// script.js (Version avec correctif du bug d'affichage)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -117,6 +117,7 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
+// MODIFICATION : Correction du bug d'affichage
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -131,11 +132,18 @@ function openModalReadOnly(p){
   $$(".ro").forEach(el=>el.classList.remove("hidden"));
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
-  dropZone.classList.add("hidden");
+
+  // --- CORRECTION DU BUG ---
+  $("#dropZone").classList.remove("hidden"); // On AFFICHE la dropzone (qui contient l'image)
+  dropZone.querySelector(".dz-hint").classList.add("hidden"); // MAIS on CACHE le message d'aide
+  $("#dropZone").style.pointerEvents = "none"; // Et on désactive le clic/glisser
+  // --- FIN CORRECTION ---
+
   personModal.showModal();
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
+// MODIFICATION : Logique pour le mode édition
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -148,7 +156,13 @@ function openModalEdit(p){
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
   $("#editActions").classList.remove("hidden");
-  dropZone.classList.remove("hidden");
+  
+  // --- Logique d'affichage pour l'édition ---
+  $("#dropZone").classList.remove("hidden"); // On AFFICHE la dropzone
+  dropZone.querySelector(".dz-hint").classList.remove("hidden"); // On AFFICHE le message d'aide
+  $("#dropZone").style.pointerEvents = "auto"; // On ACTIVE le clic/glisser
+  // --- FIN Logique ---
+
   personModal.showModal();
   requestAnimationFrame(() => $("#firstNameInput").focus());
 }
@@ -171,23 +185,18 @@ async function handleFiles(files) {
     const compressedData = await compressImage(data);
     photoDataUrl = compressedData;
     $("#modalPhoto").src = compressedData;
-  } catch (err) {
+  } catch (err)
+ {
     console.error("Erreur compression image:", err);
     alert("Erreur lors du traitement de l'image.");
   }
 }
 
-// ÉCOUTEURS D'ÉVÉNEMENTS DU MODAL PERSONNE (MODIFIÉS)
+// Écouteurs Modal Personne
 $("#modalClose").addEventListener("click",()=>personModal.close());
-
-// La ligne suivante a été SUPPRIMÉE pour empêcher la fermeture en cliquant sur le padding
-// personModal.addEventListener('click', (e)=>{ if(e.target === personModal) personModal.close(); });
-
-// NOUVEAU : Empêche la fermeture par clic sur le fond (backdrop) ou Echap
 personModal.addEventListener("cancel", (e) => {
   e.preventDefault();
 });
-// FIN DES MODIFICATIONS DU MODAL PERSONNE
 
 
 // Card interactions
@@ -297,7 +306,6 @@ loginForm.addEventListener("submit", async (e) => {
   loginSubmitBtn.textContent = "Se connecter";
 });
 
-// Gère la fermeture du modal de connexion
 loginClose.addEventListener("click", () => loginModal.close());
 loginCancelBtn.addEventListener("click", () => loginModal.close());
 loginModal.addEventListener('click', (e)=>{ if(e.target === loginModal) loginModal.close(); });

@@ -56,7 +56,7 @@
         <article class="card" role="listitem" tabindex="0">
           <img class="card-img" alt="" loading="lazy" />
           <div class="card-overlay">
-            <div class="card-name"></div>
+            <h3 class="card-name"></h3>
           </div>
           <button class="card-del hidden" title="Supprimer">🗑️</button>
         </article>
@@ -80,6 +80,7 @@
         </form>
       </div>
     </dialog>
+
     <dialog id="personModal" class="modal" aria-label="Détails de la personne">
       <button class="modal-close" id="modalClose" type="button" aria-label="Fermer">✕</button>
       <div class="modal-body">
@@ -87,7 +88,7 @@
           <div id="dropZone" class="dropzone" aria-label="Glissez-déposez une image ou cliquez pour choisir">
             <img id="modalPhoto" alt="Photo" />
             <div class="dz-hint">
-              <p>Glissez-déposez une image<br>ou <span class="underline">cliquez</span> — vous pouvez aussi <span class="underline">coller</span> (Ctrl/Cmd+V)</p>
+              <p>Glissez-déposez une image<br>ou <span class="underline">cliquez</span> — vous pouvez aussi <span class="underline"><strong>coller</strong></span> (Ctrl/Cmd+V)</p>
             </div>
             <input id="photoFile" type="file" accept="image/*" hidden>
           </div>
