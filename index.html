@@ -63,6 +63,23 @@
       </template>
     </main>
 
+    <dialog id="loginModal" class="modal modal--small" aria-label="Connexion administrateur">
+      <button class="modal-close" id="loginClose" type="button" aria-label="Fermer">✕</button>
+      <div class="modal-body">
+        <form id="loginForm" class="login-form">
+          <h2>Connexion Admin</h2>
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" class="ed" required>
+          <label for="loginPassword">Mot de passe</label>
+          <input id="loginPassword" type="password" class="ed" required>
+          <p id="loginError" class="login-error hidden" role="alert"></p>
+          <div class="admin-row">
+            <button id="loginSubmitBtn" type="submit" class="icon-btn">Se connecter</button>
+            <button id="loginCancelBtn" type="button" class="ghost">Annuler</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
     <dialog id="personModal" class="modal" aria-label="Détails de la personne">
       <button class="modal-close" id="modalClose" type="button" aria-label="Fermer">✕</button>
       <div class="modal-body">

@@ -1,4 +1,4 @@
-// script.js (Version Finale avec Authentification)
+// script.js (Version Finale avec Modal de Connexion)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -6,6 +6,9 @@ let FILTER = "";
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
+
+// NOUVEAU : Placeholder pour les images
+const PLACEHOLDER_IMG = "https://placehold.co/600x600/0c121c/8b97a6?text=Photo";
 
 // Initialisation de Supabase
 const { createClient } = supabase;
@@ -18,13 +21,26 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 // Sélecteurs
 const grid = $("#grid");
 const statsEl = $("#stats");
-const modal = $("#personModal");
-const dropZone = $("#dropZone");
-const photoFile = $("#photoFile");
 const sortButtons = {
   lastName: $("#sortLastNameBtn"),
   firstName: $("#sortFirstNameBtn"),
 };
+
+// Sélecteurs Modal Personne
+const personModal = $("#personModal");
+const dropZone = $("#dropZone");
+const photoFile = $("#photoFile");
+
+// NOUVEAU : Sélecteurs Modal Connexion
+const loginModal = $("#loginModal");
+const loginForm = $("#loginForm");
+const loginEmail = $("#loginEmail");
+const loginPassword = $("#loginPassword");
+const loginError = $("#loginError");
+const loginSubmitBtn = $("#loginSubmitBtn");
+const loginClose = $("#loginClose");
+const loginCancelBtn = $("#loginCancelBtn");
+
 
 let currentEditingId = null;
 let photoDataUrl = null;
@@ -91,7 +107,8 @@ function renderGrid(){
     const c = tmpl.content.firstElementChild.cloneNode(true);
     c.dataset.id = p.id;
     const img = c.querySelector('.card-img');
-    img.src = p.photoUrl;
+    // MODIFIÉ : Utilise le placeholder si photoUrl est null
+    img.src = p.photoUrl || PLACEHOLDER_IMG;
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     const del = c.querySelector('.card-del');
@@ -102,8 +119,9 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
+// MODIFIÉ : Utilise le placeholder
 function openModalReadOnly(p){
-  $("#modalPhoto").src = p.photoUrl;
+  $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
   $("#modalInfoView").textContent = p.information || "";
@@ -117,14 +135,15 @@ function openModalReadOnly(p){
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden");
-  modal.showModal();
+  personModal.showModal();
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
+// MODIFIÉ : Utilise le placeholder
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
-  $("#modalPhoto").src = photoDataUrl || "";
+  $("#modalPhoto").src = p?.photoUrl || PLACEHOLDER_IMG;
   $("#firstNameInput").value = p?.firstName || "";
   $("#lastNameInput").value = p?.lastName || "";
   $("#gradeInput").value = p?.grade || "";
@@ -134,7 +153,7 @@ function openModalEdit(p){
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
   $("#editActions").classList.remove("hidden");
   dropZone.classList.remove("hidden");
-  modal.showModal();
+  personModal.showModal();
   requestAnimationFrame(() => $("#firstNameInput").focus());
 }
 
@@ -162,8 +181,8 @@ async function handleFiles(files) {
   }
 }
 
-$("#modalClose").addEventListener("click",()=>modal.close());
-modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.close(); });
+$("#modalClose").addEventListener("click",()=>personModal.close());
+personModal.addEventListener('click', (e)=>{ if(e.target === personModal) personModal.close(); });
 
 // Card interactions
 grid.addEventListener('click', async (e)=>{
@@ -177,12 +196,7 @@ grid.addEventListener('click', async (e)=>{
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) {
       return;
     }
-    
-    const { error } = await supabaseClient
-      .from('people')
-      .delete()
-      .eq('id', p.id);
-
+    const { error } = await supabaseClient.from('people').delete().eq('id', p.id);
     if (error) {
       console.error("Erreur de suppression:", error);
       alert("La suppression a échoué.");
@@ -191,12 +205,7 @@ grid.addEventListener('click', async (e)=>{
     }
     return;
   }
-
-  if(adminMode){
-    openModalEdit(p);
-  } else {
-    openModalReadOnly(p);
-  }
+  if(adminMode){ openModalEdit(p); } else { openModalReadOnly(p); }
 });
 
 grid.addEventListener('keydown', (e)=>{
@@ -219,20 +228,19 @@ $("#clearSearch").addEventListener("click", ()=>{
   $("#searchInput").value = ""; FILTER = ""; renderGrid();
 });
 
-// --- AUTHENTIFICATION (SECTION MISE À JOUR) ---
+// --- AUTHENTIFICATION (SECTION ENTIÈREMENT MISE À JOUR) ---
 
 /**
  * Affiche ou cache les boutons d'administration
- * @param {boolean} state - true pour admin, false pour public
  */
 function setAdminUIVisible(state) {
   isAdmin = state;
-  adminMode = state; // Par défaut, si on est admin, on est en mode admin
+  adminMode = state;
   
   $("#adminSwitchWrap").classList.toggle("hidden", !state);
   $("#addBtn").classList.toggle("hidden", !state);
   $("#exportBtn").classList.toggle("hidden", !state);
-  $("#importWrap").classList.add("hidden"); // L'import est désactivé
+  $("#importWrap").classList.add("hidden");
   
   if (state) {
     $("#adminModeSwitch").checked = true;
@@ -242,14 +250,13 @@ function setAdminUIVisible(state) {
 }
 
 /**
- * Gère la connexion/déconnexion admin
+ * Gère le clic sur le bouton "Admin" principal
  */
 async function adminLoginFlow(){
-  // 1. Vérifie si on est déjà connecté
   const { data: { session } } = await supabaseClient.auth.getSession();
   
   if (session) {
-    // Si oui, on se déconnecte
+    // Si déjà connecté, proposer la déconnexion
     const logout = confirm("Vous êtes connecté. Voulez-vous vous déconnecter ?");
     if(logout) {
       const { error } = await supabaseClient.auth.signOut();
@@ -259,45 +266,60 @@ async function adminLoginFlow(){
         setAdminUIVisible(false);
       }
     }
-    return;
+  } else {
+    // Si non connecté, ouvrir le modal de connexion
+    loginPassword.value = "";
+    loginError.textContent = "";
+    loginError.classList.add("hidden");
+    loginModal.showModal();
+    requestAnimationFrame(() => loginEmail.focus());
   }
+}
 
-  // 2. Si non, on tente de se connecter
-  const email = prompt("Email admin :");
-  if(!email) return;
-  const pass = prompt("Mot de passe admin :");
-  if(!pass) return;
+/**
+ * Gère la soumission du formulaire de connexion
+ */
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginError.classList.add("hidden");
+  loginSubmitBtn.disabled = true;
+  loginSubmitBtn.textContent = "Connexion...";
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: pass,
+    email: loginEmail.value,
+    password: loginPassword.value,
   });
 
   if(error){
-    alert("Email ou mot de passe incorrect.");
+    loginError.textContent = "Email ou mot de passe incorrect.";
+    loginError.classList.remove("hidden");
   } else {
     // Connexion réussie !
-    alert("Connecté !");
     setAdminUIVisible(true);
+    loginModal.close();
   }
-}
+  
+  loginSubmitBtn.disabled = false;
+  loginSubmitBtn.textContent = "Se connecter";
+});
+
+// Gère la fermeture du modal de connexion
+loginClose.addEventListener("click", () => loginModal.close());
+loginCancelBtn.addEventListener("click", () => loginModal.close());
+loginModal.addEventListener('click', (e)=>{ if(e.target === loginModal) loginModal.close(); });
+
 
 /**
  * Gère le basculement visuel du mode admin (icônes poubelle)
  */
 function toggleAdminUI(state){
-  if(state){
-    $$(".card-del").forEach(b=>b.classList.remove("hidden"));
-  }else{
-    $$(".card-del").forEach(b=>b.classList.add("hidden"));
-  }
-  renderGrid();
+  $$(".card-del").forEach(b => b.classList.toggle("hidden", !state));
+  renderGrid(); // Re-render pour appliquer les changements
 }
 
 $("#adminLoginToggle").addEventListener("click", adminLoginFlow);
 
 $("#adminModeSwitch").addEventListener("change", (e)=>{
-  // On ne peut désactiver le mode admin que si on est admin
   if(!isAdmin) {
     e.target.checked = false;
     return;
@@ -345,7 +367,8 @@ dropZone.addEventListener("drop", (e)=>{
 });
 photoFile.addEventListener("change", (e)=> handleFiles(e.target.files));
 document.addEventListener("paste", (e)=>{
-  if(!modal.open || !adminMode) return;
+  // MODIFIÉ : vérifie le bon modal
+  if(!personModal.open || !adminMode) return;
   const items = e.clipboardData?.items || [];
   for(const it of items){
     if(it.type.startsWith("image/")){
@@ -381,16 +404,12 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
     await loadPeople();
-    modal.close();
+    personModal.close();
   }
 });
-$("#closeEditBtn").addEventListener("click", ()=> modal.close());
+$("#closeEditBtn").addEventListener("click", ()=> personModal.close());
 
 // Persistence & load
-function savePeople(){
-  // N'est plus utilisé.
-}
-
 async function loadPeople(){
   const { data, error } = await supabaseClient
     .from('people')
