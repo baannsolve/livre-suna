@@ -60,18 +60,17 @@ body{
   padding:clamp(1rem,2.5vw,1.5rem);max-width:1200px;margin:0 auto 4rem;
 }
 
-/* --- NOUVEAU DESIGN DE LA CARTE --- */
 .card {
   position: relative;
   overflow: hidden;
-  border-radius: 12px; /* Rayon ajusté */
+  border-radius: 12px;
   background: var(--elev);
   display: flex;
   flex-direction: column;
-  height: auto; /* Hauteur automatique */
+  height: auto;
   cursor: pointer;
   transition: transform .28s ease, box-shadow .28s ease;
-  border: 1px solid var(--border); /* Petite bordure */
+  border: 1px solid var(--border);
 }
 .card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
 @media (prefers-reduced-motion: reduce){
@@ -81,24 +80,22 @@ body{
 
 .card-img {
   width: 100%;
-  height: 240px; /* Hauteur fixe pour l'image */
+  height: 240px;
   object-fit: cover;
   display: block;
 }
 
 .card-overlay {
-  padding: 1rem; /* Padding pour le texte */
-  border-top: 1px solid var(--border); /* Ligne de séparation */
+  padding: 1rem;
+  border-top: 1px solid var(--border);
 }
 
 .card-name {
-  font-weight: 600; /* Moins gras */
+  font-weight: 600;
   font-size: 1.05rem;
   margin: 0;
   line-height: 1.4;
 }
-/* --- FIN DU NOUVEAU DESIGN DE CARTE --- */
-
 
 .card-del{position:absolute;top:.5rem;right:.5rem;border:none;border-radius:999px;background:var(--danger);color:#fff;padding:.35rem .5rem;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35)}
 .card-del:hover{filter:brightness(1.05)}
@@ -121,24 +118,42 @@ body{
 .muted{color:var(--muted)}
 
 .ro{margin:.25rem 0}
-.ed{display:block;width:100%;padding:.6rem .8rem;background:var(--elev);border:1px solid var(--border);border-radius:.6rem;color:#fff; margin-bottom: 0.5rem;}
+
+/* MODIFICATION : .ed (champ de saisie) global a perdu son margin-bottom */
+.ed{
+  display:block;
+  width:100%;
+  padding:.6rem .8rem;
+  background:var(--elev);
+  border:1px solid var(--border);
+  border-radius:.6rem;
+  color:#fff;
+  /* margin-bottom: 0.5rem; -- SUPPRIMÉ D'ICI */
+}
+
+/* MODIFICATION : On ré-applique les marges pour le modal de personne */
+.modal-info > .ed {
+  margin-bottom: 0.75rem;
+}
+.modal-info > label.ed {
+  margin-bottom: 0.75rem;
+}
+
 
 .tags{display:flex;flex-wrap:wrap;gap:.4rem; margin-top: 0.5rem;}
 .tags .tag{background:var(--elev);border-radius:8px;padding:.2rem .6rem;font-size:.85rem}
 
 .dropzone{position:relative;border:2px dashed var(--border);border-radius:12px;min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .dropzone.dragover{border-color:var(--ring);box-shadow:0 0 0 3px rgba(122,162,255,.25) inset}
-
-/* MODIFICATION : Message plus visible */
 .dropzone .dz-hint{
   position:absolute;
   inset:auto 0 0 0;
   text-align:center;
-  padding:1rem; /* Plus de padding */
-  background:linear-gradient(0deg,rgba(0,0,0,.85),transparent); /* Plus sombre */
-  font-size: 1rem; /* Plus grand */
-  opacity: 1; /* Non-transparent */
-  pointer-events: none; /* N'intercepte pas les clics */
+  padding:1rem;
+  background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);
+  font-size: 1rem;
+  opacity: 1;
+  pointer-events: none;
 }
 .underline{text-decoration:underline}
 
@@ -203,15 +218,14 @@ select.ed {
   padding-right: 2.5rem;
 }
 
-/* MODIFICATION : Correction du champ "Information" */
 textarea.ed {
   min-height: 120px;
   resize: vertical;
   font-family: inherit;
   font-size: inherit;
+  margin-bottom: 0.75rem; /* On remet la marge ici */
 }
 
-/* MODIFICATION : Bouton "X" au-dessus de tout */
 .modal-close {
   position: absolute;
   top: 0.5rem;
@@ -222,7 +236,7 @@ textarea.ed {
   font-size: 1.5rem;
   padding: 0.5rem;
   cursor: pointer;
-  z-index: 10; /* Ajout du Z-index */
+  z-index: 10;
 }
 .modal-close:hover {
   color: var(--text);
@@ -236,24 +250,31 @@ textarea.ed {
   display: block;
 }
 
+/* --- SECTION CORRIGÉE : MODAL CONNEXION --- */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem; /* Un seul 'gap' propre pour espacer tous les éléments */
 }
+
 .login-form h2 {
   margin-top: 0;
   text-align: center;
+  margin-bottom: 0; /* Le gap s'en occupe */
 }
+
 .login-form label {
   font-size: 0.9rem;
   color: var(--muted);
-  margin-top: 0.5rem;
+  margin-top: 0; /* Le gap s'en occupe */
+  margin-bottom: -0.5rem; /* Rapproche le label de son champ */
 }
+
 .login-error {
   font-size: 0.9rem;
   color: var(--danger);
-  margin: 0.5rem 0 0;
+  margin: 0; /* Le gap s'en occupe */
 }
+/* --- FIN SECTION CORRIGÉE --- */
 
 .hidden{display:none}
