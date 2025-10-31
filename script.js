@@ -1,4 +1,4 @@
-// script.js (Version avec correctif de sauvegarde ENUM)
+// script.js (Version avec masquage des champs N/A)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -162,24 +162,43 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
+// CORRIGÉ : Logique de masquage des champs N/A
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
-  $("#modalGradeView").textContent = p.grade || "N/A";
-  $("#modalClanView").textContent = p.clan || "N/A";
   
-  const villageView = $("#modalVillageView");
+  // Grade
+  const gradeInfo = $("#gradeInfo");
+  if (p.grade) {
+    $("#modalGradeView").textContent = p.grade;
+    gradeInfo.classList.remove("hidden");
+  } else {
+    gradeInfo.classList.add("hidden");
+  }
+
+  // Clan
+  const clanInfo = $("#clanInfo");
+  if (p.clan) {
+    $("#modalClanView").textContent = p.clan;
+    clanInfo.classList.remove("hidden");
+  } else {
+    clanInfo.classList.add("hidden");
+  }
+  
+  // Village
+  const villageInfo = $("#villageInfo");
   if (p.village) {
     const villageName = p.village;
     const logoSrc = `villages/${villageName.toLowerCase()}.png`;
-    villageView.innerHTML = `<img class="village-logo" src="${logoSrc}" alt="${villageName}"> ${villageName}`;
+    $("#modalVillageView").innerHTML = `<img class="village-logo" src="${logoSrc}" alt="${villageName}"> ${villageName}`;
+    villageInfo.classList.remove("hidden");
   } else {
-    villageView.textContent = "N/A";
+    villageInfo.classList.add("hidden");
   }
 
+  // Kekkei Genkai
   const kekkeiBox = personModal.querySelector(".info-box-kg");
   const kekkeiContent = $("#modalKekkeiContent");
-  
   if (p.kekkeiGenkai) {
     const kgName = p.kekkeiGenkai;
     const logoSrc = `kg/${kgName.toLowerCase()}.png`;
@@ -194,6 +213,7 @@ function openModalReadOnly(p){
     kekkeiBox.classList.add("hidden");
   }
   
+  // Statut
   if (p.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
     $("#modalNameView").classList.add('deceased');
@@ -202,7 +222,14 @@ function openModalReadOnly(p){
     $("#modalNameView").classList.remove('deceased');
   }
   
-  $("#modalInfoView").textContent = p.information || "";
+  // Information
+  const infoView = $("#modalInfoView");
+  if (p.information) {
+    infoView.textContent = p.information;
+    infoView.classList.remove("hidden");
+  } else {
+    infoView.classList.add("hidden");
+  }
   
   $$(".ro").forEach(el=>el.classList.remove("hidden"));
   $$(".ed").forEach(el=>el.classList.add("hidden"));
@@ -213,7 +240,6 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// CORRIGÉ : Gère le 'null' (en mettant "") pour tous les champs ENUM
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -225,7 +251,7 @@ function openModalEdit(p){
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").value = p?.information || "";
-  $("#statusInput").value = p?.status || ""; // Gère 'null'
+  $("#statusInput").value = p?.status || "";
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -462,7 +488,6 @@ $("#saveBtn").addEventListener("click", async ()=>{
     .select();
 
   if(error){
-    // MODIFIÉ : Affiche le message d'erreur réel
     console.error("Erreur de sauvegarde:", error.message);
     alert(`La sauvegarde a échoué: ${error.message}`);
   } else {
