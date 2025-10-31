@@ -214,12 +214,14 @@ body{
 .info-grid p {
   margin: 0;
   background: var(--elev);
-  padding: 0.6rem 0.8rem;
+  /* MODIFIÉ: Augmenté le padding pour les pilules d'info */
+  padding: 0.8rem 1rem; /* Ancien: 0.6rem 0.8rem */
   border-radius: 8px;
-  font-size: 0.9rem;
+  /* MODIFIÉ: Augmenté la taille de police */
+  font-size: 1rem; /* Ancien: 0.9rem */
   border: 1px solid var(--border);
   display: flex;
-  align-items: center;
+  align-items: center; /* Assure l'alignement vertical */
 }
 .info-grid p strong {
   color: var(--muted);
@@ -231,20 +233,19 @@ body{
   line-height: 1.6;
 }
 
-/* MODIFIÉ : Logo Village (plus petit pour ne pas être rogné) */
+/* MODIFIÉ: Ajusté la taille du logo du village pour 100x100 */
 .village-logo {
-  width: 24px;
-  height: 24px;
+  width: 32px; /* Ancien: 24px */
+  height: 32px; /* Ancien: 24px */
   object-fit: contain;
   vertical-align: middle;
-  margin-right: 0.5em;
+  margin-right: 0.75em; /* Ancien: 0.5em */
   outline: 1px solid rgba(255, 255, 255, 0.4);
   outline-offset: -1px;
   border-radius: 50%;
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
-/* MODIFIÉ : Boîte KG (plus de "N/A" visible) */
 .info-box-kg {
   background: var(--elev);
   border: 1px solid var(--border);
@@ -270,8 +271,6 @@ body{
   height: 80px;
   object-fit: contain;
 }
-/* Le span "N/A" est géré par la classe .hidden en JS */
-
 
 .ed{
   display:block;
