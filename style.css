@@ -51,7 +51,8 @@ body{
 
 .file-label{display:inline-flex;gap:.5rem;align-items:center;border:1px dashed var(--border);padding:.4rem .8rem;border-radius:.6rem;cursor:pointer}
 
-.stats{padding:0 1rem;margin:1rem auto 0;opacity:.85;max-width:1200px}
+/* STYLE MODIFIÉ : marge retirée */
+.stats{padding:0;margin:0;opacity:.85;}
 
 .grid{
   display:grid;gap:clamp(.8rem,2vw,1.2rem);
@@ -101,5 +102,48 @@ body{
 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:var(--elev);border:1px solid var(--border);padding:.6rem .9rem;border-radius:.75rem;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .link{background:none;border:none;color:var(--ring);cursor:pointer;text-decoration:underline;padding:0;margin-left:.5rem}
+
+/* NOUVEAUX STYLES */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Pour les petits écrans */
+  gap: 1rem;
+  padding: 0 clamp(1rem, 2.5vw, 1.5rem); /* Aligné avec padding du .grid */
+  margin: 1rem auto 0;
+  max-width: 1200px;
+}
+
+.sort-buttons {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.sort-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: .6rem;
+  padding: .4rem .7rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.sort-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.sort-btn.active {
+  background: var(--elev);
+  color: var(--text);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+/* FIN DES NOUVEAUX STYLES */
 
 .hidden{display:none}

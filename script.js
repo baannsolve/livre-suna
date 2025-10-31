@@ -3,6 +3,7 @@ let PEOPLE = [];
 let FILTER = "";
 let isAdmin = false;
 let adminMode = false;
+let currentSortKey = "lastName"; // "lastName" ou "firstName"
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -14,6 +15,10 @@ const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
 const toast = $("#toast");
 const undoBtn = $("#undoBtn");
+const sortButtons = {
+  lastName: $("#sortLastNameBtn"),
+  firstName: $("#sortFirstNameBtn"),
+};
 
 let currentEditingId = null;
 let photoDataUrl = null;
@@ -28,10 +33,71 @@ async function sha256Hex(str) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * NOUVELLE FONCTION : Compresse et redimensionne une image
+ * @param {string} dataUrl - L'image en Data URL (base64)
+ * @param {number} maxWidth - Largeur maximale
+ * @param {number} maxHeight - Hauteur maximale
+ * @param {number} quality - Qualité JPEG (0 à 1)
+ * @returns {Promise<string>} - La nouvelle image en Data URL (base64, JPEG)
+ */
+function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      // Calcul du redimensionnement en gardant les proportions
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Résout avec la nouvelle image en JPEG
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
 function personMatches(p, term){
   if(!term) return true;
   const hay = (p.firstName+" "+p.lastName+" "+(p.role||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
   return hay.includes(term.toLowerCase());
+}
+
+/**
+ * NOUVELLE FONCTION : Trie le tableau PEOPLE en place
+ */
+function sortPeople() {
+  PEOPLE.sort((a, b) => {
+    const aFirst = (a.firstName || '').toLowerCase();
+    const bFirst = (b.firstName || '').toLowerCase();
+    const aLast = (a.lastName || '').toLowerCase();
+    const bLast = (b.lastName || '').toLowerCase();
+
+    if (currentSortKey === 'firstName') {
+      // Tri par prénom, puis par nom
+      return aFirst.localeCompare(bFirst) || aLast.localeCompare(bLast);
+    }
+    // Tri par nom (défaut), puis par prénom
+    return aLast.localeCompare(bLast) || aFirst.localeCompare(bFirst);
+  });
 }
 
 function renderGrid(){
@@ -39,7 +105,9 @@ function renderGrid(){
   grid.innerHTML = "";
   const tmpl = $("#cardTemplate");
 
+  // Le tri est déjà fait dans PEOPLE, on filtre seulement
   const filtered = PEOPLE.filter(p=>personMatches(p,FILTER));
+  
   filtered.forEach(p=>{
     const c = tmpl.content.firstElementChild.cloneNode(true);
     c.dataset.id = p.id;
@@ -72,6 +140,9 @@ function openModalReadOnly(p){
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden");
   modal.showModal();
+  
+  // AMÉLIORATION Accessibilité
+  requestAnimationFrame(() => $("#modalClose").focus());
 }
 
 function openModalEdit(p){
@@ -89,6 +160,9 @@ function openModalEdit(p){
   $("#editActions").classList.remove("hidden");
   dropZone.classList.remove("hidden");
   modal.showModal();
+  
+  // AMÉLIORATION Accessibilité
+  requestAnimationFrame(() => $("#firstNameInput").focus());
 }
 
 function readFileToDataURL(file){
@@ -100,14 +174,25 @@ function readFileToDataURL(file){
   });
 }
 
-function handleFiles(files){
+/**
+ * FONCTION MISE À JOUR : Gère les fichiers (upload/drop/paste)
+ * Utilise maintenant la compression d'image.
+ */
+async function handleFiles(files) {
   const f = files && files[0];
-  if(!f) return;
-  if(!f.type.startsWith("image/")) return alert("Veuillez déposer une image.");
-  readFileToDataURL(f).then((data)=>{
-    photoDataUrl = data;
-    $("#modalPhoto").src = data;
-  });
+  if (!f) return;
+  if (!f.type.startsWith("image/")) return alert("Veuillez déposer une image.");
+
+  try {
+    const data = await readFileToDataURL(f);
+    // AMÉLIORATION Performance : Compresser l'image avant de la stocker
+    const compressedData = await compressImage(data);
+    photoDataUrl = compressedData;
+    $("#modalPhoto").src = compressedData;
+  } catch (err) {
+    console.error("Erreur lors de la compression de l'image:", err);
+    alert("Une erreur est survenue lors du traitement de l'image.");
+  }
 }
 
 $("#modalClose").addEventListener("click",()=>modal.close());
@@ -122,6 +207,11 @@ grid.addEventListener('click', (e)=>{
   if(!p) return;
 
   if(e.target.classList.contains("card-del")){
+    // AMÉLIORATION UX : Confirmation avant suppression
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) {
+      return;
+    }
+    
     // one-click delete with undo
     deletedStack.push({ person: p, index: PEOPLE.findIndex(x=>x.id===id) });
     PEOPLE = PEOPLE.filter(x=>x.id!==id);
@@ -216,6 +306,7 @@ $("#importFile").addEventListener("change", async (e)=>{
   const data = JSON.parse(txt);
   if(Array.isArray(data)){
     PEOPLE = data.map(p=> ({...p, id: p.id || crypto.randomUUID()}));
+    sortPeople(); // Tri après import
     savePeople(); renderGrid();
   }
 });
@@ -256,7 +347,10 @@ $("#saveBtn").addEventListener("click", ()=>{
   }
   const idx = PEOPLE.findIndex(x=>x.id===p.id);
   if(idx>=0) PEOPLE[idx]=p; else PEOPLE.push(p);
-  PEOPLE.sort((a,b)=> (a.lastName||'').localeCompare(b.lastName||'') || (a.firstName||'').localeCompare(b.firstName||''));
+  
+  // MISE À JOUR : Utilise la nouvelle fonction de tri
+  sortPeople();
+  
   savePeople(); renderGrid();
   modal.close();
 });
@@ -272,6 +366,7 @@ undoBtn.addEventListener("click", ()=>{
   const last = deletedStack.pop();
   if(!last) return;
   PEOPLE.splice(last.index, 0, last.person);
+  // Pas besoin de re-trier, on le remet à sa place exacte
   savePeople(); renderGrid();
   toast.classList.add("hidden");
 });
@@ -293,11 +388,32 @@ async function loadPeople(){
       const byId = new Map((PEOPLE||[]).map(p=>[p.id,p]));
       remote.forEach(p=>byId.set(p.id||crypto.randomUUID(), {...p, id:p.id||crypto.randomUUID()}));
       PEOPLE = Array.from(byId.values());
-      PEOPLE.sort((a,b)=> (a.lastName||'').localeCompare(b.lastName||'') || (a.firstName||'').localeCompare(b.firstName||''));
+      
+      // MISE À JOUR : Utilise la nouvelle fonction de tri
+      sortPeople();
       savePeople();
     }
   }catch{}
   renderGrid();
 }
 
+// NOUVEAU : Listeners pour les boutons de tri
+sortButtons.lastName.addEventListener("click", () => {
+  currentSortKey = "lastName";
+  sortButtons.lastName.classList.add("active");
+  sortButtons.firstName.classList.remove("active");
+  sortPeople();
+  renderGrid();
+});
+
+sortButtons.firstName.addEventListener("click", () => {
+  currentSortKey = "firstName";
+  sortButtons.firstName.classList.add("active");
+  sortButtons.lastName.classList.remove("active");
+  sortPeople();
+  renderGrid();
+});
+
+
+// Init
 loadPeople();

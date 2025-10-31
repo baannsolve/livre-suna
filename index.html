@@ -41,7 +41,14 @@
     </header>
 
     <main id="main" tabindex="-1">
-      <div id="stats" class="stats" aria-live="polite">0 / 0 personnes</div>
+      <div class="toolbar">
+        <div id="stats" class="stats" aria-live="polite">0 / 0 personnes</div>
+        <div class="sort-buttons">
+          <span>Trier par :</span>
+          <button id="sortLastNameBtn" class="sort-btn active" data-sort-key="lastName">Nom (A-Z)</button>
+          <button id="sortFirstNameBtn" class="sort-btn" data-sort-key="firstName">Prénom (A-Z)</button>
+        </div>
+      </div>
 
       <section id="grid" class="grid" role="list" aria-label="Personnes"></section>
 
