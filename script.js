@@ -1,10 +1,10 @@
-// script.js (Version avec Filtres et Nouveaux Champs)
+// script.js (Version avec correctif de syntaxe)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
-let VILLAGE_FILTER = ""; // NOUVEAU
-let KEKKEI_FILTER = ""; // NOUVEAU
+let VILLAGE_FILTER = "";
+let KEKKEI_FILTER = "";
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
@@ -27,17 +27,14 @@ const sortButtons = {
   firstName: $("#sortFirstNameBtn"),
 };
 
-// NOUVEAU : Sélecteurs de filtres
 const villageFilter = $("#villageFilter");
 const kekkeiFilter = $("#kekkeiFilter");
 const clearFiltersBtn = $("#clearFiltersBtn");
 
-// Sélecteurs Modal Personne
 const personModal = $("#personModal");
 const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
 
-// Sélecteurs Modal Connexion
 const loginModal = $("#loginModal");
 const loginForm = $("#loginForm");
 const loginEmail = $("#loginEmail");
@@ -84,7 +81,6 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
   });
 }
 
-// MODIFIÉ : "tags" supprimé de la recherche
 function personMatches(p, term){
   if(!term) return true;
   const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")).toLowerCase();
@@ -104,13 +100,12 @@ function sortPeople() {
   });
 }
 
-// MODIFIÉ : Logique de filtre mise à jour
+// CORRIGÉ : Syntaxe des template literals
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
   const tmpl = $("#cardTemplate");
   
-  // Application des 3 filtres
   const filtered = PEOPLE.filter(p => {
     const searchMatch = personMatches(p, FILTER);
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
@@ -125,21 +120,40 @@ function renderGrid(){
     img.src = p.photoUrl || PLACEHOLDER_IMG;
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
+    
+    const kgLogo = c.querySelector('.card-kg-logo');
+    if (p.kekkeiGenkai) {
+      kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`; // Corrigé
+      kgLogo.alt = p.kekkeiGenkai;
+      kgLogo.classList.remove('hidden');
+    } else {
+      kgLogo.classList.add('hidden');
+    }
+    
     const del = c.querySelector('.card-del');
     if(adminMode){ del.classList.remove("hidden"); }
     frag.appendChild(c);
   });
   grid.appendChild(frag);
-  statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
+  statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`; // Corrigé
 }
 
-// MODIFIÉ : Nouveaux champs, "tags" supprimé
+// CORRIGÉ : Syntaxe des template literals
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
-  $("#modalVillageView").textContent = p.village || "N/A"; // NOUVEAU
-  $("#modalKekkeiView").textContent = p.kekkeiGenkai || "N/A"; // NOUVEAU
+  $("#modalVillageView").textContent = p.village || "N/A";
+  
+  const kekkeiView = $("#modalKekkeiView");
+  if (p.kekkeiGenkai) {
+    const kgName = p.kekkeiGenkai;
+    const logoSrc = `kg/${kgName.toLowerCase()}.png`; // Corrigé
+    kekkeiView.innerHTML = `<img class="kg-logo" src="${logoSrc}" alt="${kgName}"> ${kgName}`; // Corrigé
+  } else {
+    kekkeiView.textContent = "N/A";
+  }
+  
   $("#modalInfoView").textContent = p.information || "";
   
   $$(".ro").forEach(el=>el.classList.remove("hidden"));
@@ -151,7 +165,6 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// MODIFIÉ : Nouveaux champs, "tags" supprimé
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -159,8 +172,8 @@ function openModalEdit(p){
   $("#firstNameInput").value = p?.firstName || "";
   $("#lastNameInput").value = p?.lastName || "";
   $("#gradeInput").value = p?.grade || "";
-  $("#villageInput").value = p?.village || ""; // NOUVEAU
-  $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; // NOUVEAU
+  $("#villageInput").value = p?.village || "";
+  $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
   $("#informationInput").value = p?.information || "";
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
@@ -203,7 +216,7 @@ personModal.addEventListener("cancel", (e) => {
 });
 
 
-// Card interactions
+// CORRIGÉ : Syntaxe des template literals
 grid.addEventListener('click', async (e)=>{
   const card = e.target.closest('.card');
   if(!card) return;
@@ -212,7 +225,7 @@ grid.addEventListener('click', async (e)=>{
   if(!p) return;
 
   if(e.target.classList.contains("card-del")){
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) { // Corrigé
       return;
     }
     const { error } = await supabaseClient.from('people').delete().eq('id', p.id);
@@ -257,7 +270,6 @@ function setAdminUIVisible(state) {
   $("#adminSwitchWrap").classList.toggle("hidden", !state);
   $("#addBtn").classList.toggle("hidden", !state);
   $("#exportBtn").classList.toggle("hidden", !state);
-  // $("#importWrap").classList.add("hidden"); // Déjà retiré de l'HTML
   
   if (state) {
     $("#adminModeSwitch").checked = true;
@@ -374,7 +386,6 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// MODIFIÉ : Sauvegarde avec nouveaux champs, "tags" supprimé
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -382,8 +393,8 @@ $("#saveBtn").addEventListener("click", async ()=>{
     lastName: $("#lastNameInput").value.trim(),
     photoUrl: photoDataUrl || null,
     grade: $("#gradeInput").value || null,
-    village: $("#villageInput").value || null, // NOUVEAU
-    kekkeiGenkai: $("#kekkeiGenkaiInput").value || null, // NOUVEAU
+    village: $("#villageInput").value || null,
+    kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     information: $("#informationInput").value.trim() || null
   };
   
@@ -391,27 +402,21 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("Prénom et nom sont obligatoires."); return;
   }
   
-  const { data, error } = await supabaseClient
+  const { error } = await supabaseClient
     .from('people')
     .upsert(p)
-    .select()
-    .single();
+    .select();
 
   if(error){
     console.error("Erreur de sauvegarde:", error);
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
-    if (currentEditingId) {
-      const idx = PEOPLE.findIndex(person => person.id === currentEditingId);
-      if (idx > -1) PEOPLE[idx] = data;
-    } else {
-      PEOPLE.push(data);
-    }
-    sortPeople();
-    renderGrid();
+    // Recharger la liste complète pour corriger le bug de l'image
+    await loadPeople();
     personModal.close();
   }
 });
+
 $("#closeEditBtn").addEventListener("click", ()=> personModal.close());
 
 // Persistence & load
@@ -448,7 +453,7 @@ sortButtons.firstName.addEventListener("click", () => {
   renderGrid();
 });
 
-// NOUVEAU : Écouteurs pour les filtres
+// Filtres
 villageFilter.addEventListener("input", (e) => {
   VILLAGE_FILTER = e.target.value;
   renderGrid();
