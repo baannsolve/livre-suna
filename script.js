@@ -1,4 +1,4 @@
-// script.js (Version avec bug de sauvegarde corrigé et texte KG supprimé)
+// script.js (Version avec bug de N/A et logo rogné corrigés)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -148,6 +148,7 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
+// MODIFIÉ : Logique du "N/A" corrigée
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -162,9 +163,9 @@ function openModalReadOnly(p){
     villageView.textContent = "N/A";
   }
 
-  // MODIFIÉ : Texte du KG supprimé
+  // Logique d'affichage du logo KG
+  const kekkeiBox = personModal.querySelector(".info-box-kg"); // La boîte entière
   const kekkeiContent = $("#modalKekkeiContent");
-  const kekkeiFallback = $("#modalKekkeiFallback");
   
   if (p.kekkeiGenkai) {
     const kgName = p.kekkeiGenkai;
@@ -172,13 +173,11 @@ function openModalReadOnly(p){
     
     $("#modalKekkeiLogo").src = logoSrc;
     $("#modalKekkeiLogo").alt = kgName;
-    // La ligne de texte a été supprimée
     
     kekkeiContent.classList.remove("hidden");
-    kekkeiFallback.classList.add("hidden");
+    kekkeiBox.classList.remove("hidden"); // Affiche la boîte
   } else {
-    kekkeiContent.classList.add("hidden");
-    kekkeiFallback.classList.remove("hidden");
+    kekkeiBox.classList.add("hidden"); // Cache toute la boîte
   }
   
   $("#modalInfoView").textContent = p.information || "";
@@ -413,7 +412,6 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// CORRIGÉ : Bug de l'image (rétablissement de loadPeople)
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 

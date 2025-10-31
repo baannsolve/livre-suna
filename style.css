@@ -95,6 +95,7 @@ body{
   display: block;
 }
 
+/* Logo KG (coin supérieur gauche) */
 .card-kg-logo {
   position: absolute;
   top: 0.75rem;
@@ -110,6 +111,7 @@ body{
   border: 1px solid var(--border);
 }
 
+/* Logo Village (coin supérieur droit) */
 .card-village-logo {
   position: absolute;
   top: 0.75rem;
@@ -229,19 +231,20 @@ body{
   line-height: 1.6;
 }
 
+/* MODIFIÉ : Logo Village (plus petit pour ne pas être rogné) */
 .village-logo {
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   vertical-align: middle;
-  margin-right: 0.75em;
-  outline: 1px solid rgba(255, 255, 255, 0.5);
+  margin-right: 0.5em;
+  outline: 1px solid rgba(255, 255, 255, 0.4);
   outline-offset: -1px;
   border-radius: 50%;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
-/* MODIFIÉ : Boîte KG pour le modal */
+/* MODIFIÉ : Boîte KG (plus de "N/A" visible) */
 .info-box-kg {
   background: var(--elev);
   border: 1px solid var(--border);
@@ -256,8 +259,7 @@ body{
   margin-bottom: 0.75rem;
   text-align: left;
 }
-/* Centre le logo et le fallback "N/A" */
-.info-box-kg div, .info-box-kg span {
+.info-box-kg div {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -268,12 +270,7 @@ body{
   height: 80px;
   object-fit: contain;
 }
-.info-box-kg span#modalKekkeiFallback {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-/* Fin des modifications */
+/* Le span "N/A" est géré par la classe .hidden en JS */
 
 
 .ed{
