@@ -1,4 +1,4 @@
-// script.js (Version avec logos Village et design KG corrigé)
+// script.js (Version avec bug de sauvegarde corrigé et texte KG supprimé)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -100,7 +100,6 @@ function sortPeople() {
   });
 }
 
-// MODIFIÉ : Ajout de la logique pour le logo Village
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -131,7 +130,7 @@ function renderGrid(){
       kgLogo.classList.add('hidden');
     }
 
-    // NOUVEAU : Logique du logo Village
+    // Logique du logo Village
     const villageLogo = c.querySelector('.card-village-logo');
     if (p.village) {
       villageLogo.src = `villages/${p.village.toLowerCase()}.png`;
@@ -149,13 +148,11 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFIÉ : Logique du logo Village et nouveau design KG
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
   
-  // NOUVEAU : Logique d'affichage du logo Village
   const villageView = $("#modalVillageView");
   if (p.village) {
     const villageName = p.village;
@@ -165,7 +162,7 @@ function openModalReadOnly(p){
     villageView.textContent = "N/A";
   }
 
-  // NOUVEAU : Logique d'affichage du logo KG (nouveau design)
+  // MODIFIÉ : Texte du KG supprimé
   const kekkeiContent = $("#modalKekkeiContent");
   const kekkeiFallback = $("#modalKekkeiFallback");
   
@@ -175,13 +172,13 @@ function openModalReadOnly(p){
     
     $("#modalKekkeiLogo").src = logoSrc;
     $("#modalKekkeiLogo").alt = kgName;
-    $("#modalKekkeiName").textContent = kgName;
+    // La ligne de texte a été supprimée
     
-    kekkeiContent.classList.remove("hidden"); // Affiche la boîte logo+texte
-    kekkeiFallback.classList.add("hidden"); // Cache le "N/A"
+    kekkeiContent.classList.remove("hidden");
+    kekkeiFallback.classList.add("hidden");
   } else {
-    kekkeiContent.classList.add("hidden"); // Cache la boîte logo+texte
-    kekkeiFallback.classList.remove("hidden"); // Affiche "N/A"
+    kekkeiContent.classList.add("hidden");
+    kekkeiFallback.classList.remove("hidden");
   }
   
   $("#modalInfoView").textContent = p.information || "";
@@ -416,6 +413,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
+// CORRIGÉ : Bug de l'image (rétablissement de loadPeople)
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 

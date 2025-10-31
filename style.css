@@ -95,7 +95,6 @@ body{
   display: block;
 }
 
-/* Logo KG (coin supérieur gauche) */
 .card-kg-logo {
   position: absolute;
   top: 0.75rem;
@@ -111,11 +110,10 @@ body{
   border: 1px solid var(--border);
 }
 
-/* MODIFIÉ : Logo Village (coin supérieur droit) */
 .card-village-logo {
   position: absolute;
   top: 0.75rem;
-  right: 0.75rem; /* Coin opposé */
+  right: 0.75rem;
   width: 44px;
   height: 44px;
   background: rgba(12, 18, 28, 0.7);
@@ -125,10 +123,9 @@ body{
   z-index: 1;
   backdrop-filter: blur(3px);
   border: 1px solid var(--border);
-  /* NOUVEAU : Bordure et ombre pour faire ressortir */
-  outline: 1px solid rgba(255, 255, 255, 0.5); /* Bordure blanche semi-transparente */
-  outline-offset: -1px; /* Pour que la bordure reste dans le cercle */
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7)); /* Ombre blanche */
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -1px;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
 }
 
 .card-content {
@@ -232,21 +229,19 @@ body{
   line-height: 1.6;
 }
 
-/* MODIFIÉ : Logo Village dans le modal */
 .village-logo {
   width: 36px;
   height: 36px;
   object-fit: contain;
   vertical-align: middle;
   margin-right: 0.75em;
-  /* NOUVEAU : Bordure et ombre pour faire ressortir */
-  outline: 1px solid rgba(255, 255, 255, 0.5); /* Bordure blanche semi-transparente */
-  outline-offset: -1px; /* Pour que la bordure reste dans le cercle */
-  border-radius: 50%; /* Pour la bordure */
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7)); /* Ombre blanche */
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -1px;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
 }
 
-/* MODIFIÉ : Boîte KG pour le modal (plus de texte) */
+/* MODIFIÉ : Boîte KG pour le modal */
 .info-box-kg {
   background: var(--elev);
   border: 1px solid var(--border);
@@ -259,26 +254,26 @@ body{
   color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
-  text-align: left; /* Aligné à gauche */
+  text-align: left;
 }
-/* Centre le logo */
-.info-box-kg div {
+/* Centre le logo et le fallback "N/A" */
+.info-box-kg div, .info-box-kg span {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem; /* Réduit le gap si besoin, mais 0.5 rem est bien */
+  gap: 0.5rem;
 }
 .kg-logo-large {
-  width: 80px; /* Logo large */
+  width: 80px;
   height: 80px;
   object-fit: contain;
 }
-/* #modalKekkeiName a été supprimé, donc ce style n'est plus nécessaire */
-/* .info-box-kg span {
+.info-box-kg span#modalKekkeiFallback {
   font-size: 1.1rem;
   font-weight: 600;
-} */
-/* Fin des modifications de styles de modal */
+  color: var(--muted);
+}
+/* Fin des modifications */
 
 
 .ed{
