@@ -95,7 +95,6 @@ body{
   display: block;
 }
 
-/* Logo KG (coin supérieur gauche) */
 .card-kg-logo {
   position: absolute;
   top: 0.75rem;
@@ -111,18 +110,16 @@ body{
   border: 1px solid var(--border);
 }
 
-/* MODIFIÉ : Logo Village (styles de cercle retirés) */
 .card-village-logo {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
   width: 44px;
   height: 44px;
-  /* background, border-radius, outline, etc. ont été retirés */
-  padding: 0; /* Pas de padding pour ne pas réduire l'image */
-  object-fit: contain; /* Assure que l'image entière est visible */
+  padding: 0;
+  object-fit: contain;
   z-index: 1;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)); /* Ombre portée pour la visibilité */
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
 }
 
 .card-content {
@@ -232,7 +229,6 @@ body{
   object-fit: contain;
   vertical-align: middle;
   margin-right: 0.75em;
-  /* Les styles de cercle sont retirés */
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
@@ -418,3 +414,24 @@ textarea.ed {
 }
 
 .hidden{display:none}
+
+/* NOUVEAU : Styles pour le statut "Décédé" */
+.card--deceased .card-img {
+  filter: grayscale(100%) brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
+.card--deceased .card-name {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+#modalPhoto.deceased {
+  filter: grayscale(100%) brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
+#modalNameView.deceased {
+  text-decoration: line-through;
+  opacity: 0.7;
+}

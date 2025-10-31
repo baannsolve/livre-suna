@@ -1,4 +1,4 @@
-// script.js (Version avec bug de N/A et logo rogné corrigés)
+// script.js (Version avec statut "En vie" / "Mort")
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -34,6 +34,7 @@ const clearFiltersBtn = $("#clearFiltersBtn");
 const personModal = $("#personModal");
 const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
+const statusInput = $("#statusInput");
 
 const loginModal = $("#loginModal");
 const loginForm = $("#loginForm");
@@ -100,6 +101,7 @@ function sortPeople() {
   });
 }
 
+// MODIFIÉ : Vérifie p.status === 'Mort'
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -120,7 +122,6 @@ function renderGrid(){
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     
-    // Logique du logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
     if (p.kekkeiGenkai) {
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
@@ -130,7 +131,6 @@ function renderGrid(){
       kgLogo.classList.add('hidden');
     }
 
-    // Logique du logo Village
     const villageLogo = c.querySelector('.card-village-logo');
     if (p.village) {
       villageLogo.src = `villages/${p.village.toLowerCase()}.png`;
@@ -138,6 +138,13 @@ function renderGrid(){
       villageLogo.classList.remove('hidden');
     } else {
       villageLogo.classList.add('hidden');
+    }
+    
+    // NOUVEAU : Logique du statut (décédé)
+    if (p.status === 'Mort') { // MODIFIÉ
+      c.classList.add('card--deceased');
+    } else {
+      c.classList.remove('card--deceased');
     }
     
     const del = c.querySelector('.card-del');
@@ -148,7 +155,7 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFIÉ : Logique du "N/A" corrigée
+// MODIFIÉ : Vérifie p.status === 'Mort'
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -163,8 +170,7 @@ function openModalReadOnly(p){
     villageView.textContent = "N/A";
   }
 
-  // Logique d'affichage du logo KG
-  const kekkeiBox = personModal.querySelector(".info-box-kg"); // La boîte entière
+  const kekkeiBox = personModal.querySelector(".info-box-kg");
   const kekkeiContent = $("#modalKekkeiContent");
   
   if (p.kekkeiGenkai) {
@@ -175,9 +181,18 @@ function openModalReadOnly(p){
     $("#modalKekkeiLogo").alt = kgName;
     
     kekkeiContent.classList.remove("hidden");
-    kekkeiBox.classList.remove("hidden"); // Affiche la boîte
+    kekkeiBox.classList.remove("hidden");
   } else {
-    kekkeiBox.classList.add("hidden"); // Cache toute la boîte
+    kekkeiBox.classList.add("hidden");
+  }
+
+  // NOUVEAU : Logique du statut (décédé)
+  if (p.status === 'Mort') { // MODIFIÉ
+    $("#modalPhoto").classList.add('deceased');
+    $("#modalNameView").classList.add('deceased');
+  } else {
+    $("#modalPhoto").classList.remove('deceased');
+    $("#modalNameView").classList.remove('deceased');
   }
   
   $("#modalInfoView").textContent = p.information || "";
@@ -191,6 +206,7 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
+// MODIFIÉ : Défaut à "En vie"
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -201,6 +217,7 @@ function openModalEdit(p){
   $("#villageInput").value = p?.village || "";
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
   $("#informationInput").value = p?.information || "";
+  $("#statusInput").value = p?.status || "En vie"; // MODIFIÉ
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -412,6 +429,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
+// MODIFIÉ : Utilise la valeur du statut (ex: "En vie")
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -421,7 +439,8 @@ $("#saveBtn").addEventListener("click", async ()=>{
     grade: $("#gradeInput").value || null,
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
-    information: $("#informationInput").value.trim() || null
+    information: $("#informationInput").value.trim() || null,
+    status: $("#statusInput").value || "En vie" // MODIFIÉ
   };
   
   if(!p.firstName || !p.lastName){
@@ -437,7 +456,6 @@ $("#saveBtn").addEventListener("click", async ()=>{
     console.error("Erreur de sauvegarde:", error);
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
-    // Recharger TOUTE la liste.
     await loadPeople();
     personModal.close();
   }
