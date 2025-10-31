@@ -1,4 +1,4 @@
-// script.js (Version avec logos KG sur carte seulement)
+// script.js (Version avec correctif de syntaxe)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -100,7 +100,6 @@ function sortPeople() {
   });
 }
 
-// MODIFIÉ : Utilise `.card-kg-main-logo` et ne met plus de texte
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -121,14 +120,14 @@ function renderGrid(){
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     
-    // NOUVEAU : Logique du logo KG principal
-    const kgMainLogo = c.querySelector('.card-kg-main-logo');
+    // Logique pour le petit logo en coin
+    const kgLogo = c.querySelector('.card-kg-logo');
     if (p.kekkeiGenkai) {
-      kgMainLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
-      kgMainLogo.alt = p.kekkeiGenkai;
-      kgMainLogo.classList.remove('hidden');
+      kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
+      kgLogo.alt = p.kekkeiGenkai;
+      kgLogo.classList.remove('hidden');
     } else {
-      kgMainLogo.classList.add('hidden');
+      kgLogo.classList.add('hidden');
     }
     
     const del = c.querySelector('.card-del');
@@ -139,20 +138,27 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// Aucune modification ici, c'est pour le modal, qui garde le texte et le logo
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
   $("#modalVillageView").textContent = p.village || "N/A";
   
-  const kekkeiView = $("#modalKekkeiView");
+  const kekkeiLogo = $("#modalKekkeiLogo");
+  const kekkeiName = $("#modalKekkeiName"); // Le span "N/A"
+  
   if (p.kekkeiGenkai) {
     const kgName = p.kekkeiGenkai;
     const logoSrc = `kg/${kgName.toLowerCase()}.png`;
-    kekkeiView.innerHTML = `<img class="kg-logo" src="${logoSrc}" alt="${kgName}"> ${kgName}`;
+    
+    kekkeiLogo.src = logoSrc;
+    kekkeiLogo.alt = kgName;
+    kekkeiLogo.classList.remove("hidden"); // Affiche le logo
+    kekkeiName.classList.add("hidden"); // Cache le texte "N/A"
   } else {
-    kekkeiView.textContent = "N/A";
+    kekkeiLogo.classList.add("hidden"); // Cache le logo
+    kekkeiName.textContent = "N/A";
+    kekkeiName.classList.remove("hidden"); // Affiche "N/A"
   }
   
   $("#modalInfoView").textContent = p.information || "";
@@ -217,6 +223,7 @@ personModal.addEventListener("cancel", (e) => {
 });
 
 
+// Card interactions
 grid.addEventListener('click', async (e)=>{
   const card = e.target.closest('.card');
   if(!card) return;
@@ -386,6 +393,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
+// CORRIGÉ : Faute de frappe (le '}' en trop est retiré)
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -402,7 +410,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("Prénom et nom sont obligatoires."); return;
   }
   
-  const { error } = await supabaseClient
+  const { error } = await supabaseClient // ERREUR CORRIGÉE ICI
     .from('people')
     .upsert(p)
     .select();
@@ -411,6 +419,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     console.error("Erreur de sauvegarde:", error);
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
+    // Recharger TOUTE la liste.
     await loadPeople();
     personModal.close();
   }

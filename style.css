@@ -95,27 +95,7 @@ body{
   display: block;
 }
 
-/* NOUVEAU/MODIFIÉ : Logo KG principal sur la carte */
-.card-kg-main-logo {
-  position: absolute;
-  bottom: 0; /* Position en bas */
-  left: 0;
-  right: 0;
-  margin: auto; /* Centré horizontalement */
-  width: 80px; /* Plus grand */
-  height: 80px; /* Plus grand */
-  background: rgba(12, 18, 28, 0.7);
-  border-radius: 50%;
-  padding: 12px; /* Ajusté */
-  object-fit: contain;
-  z-index: 1;
-  backdrop-filter: blur(3px);
-  border: 1px solid var(--border);
-  transform: translateY(50%); /* Pour qu'il chevauche la bordure */
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.2); /* Ombre pour le faire ressortir */
-}
-
-/* Ancienne classe non utilisée directement mais gardée pour référence
+/* CORRIGÉ : Retour au petit logo en coin */
 .card-kg-logo {
   position: absolute;
   top: 0.75rem;
@@ -130,13 +110,11 @@ body{
   backdrop-filter: blur(3px);
   border: 1px solid var(--border);
 }
-*/
 
 .card-content {
   padding: 1rem;
   border-top: 1px solid var(--border);
-  padding-top: 2.5rem; /* Espace pour le logo qui chevauche */
-  text-align: center;
+  text-align: left; /* Rétablir l'alignement */
 }
 
 .card-name {
@@ -210,7 +188,7 @@ body{
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: 1fr 1fr; /* 2 colonnes */
   gap: 0.5rem;
   margin: 0.75rem 0;
 }
@@ -221,8 +199,6 @@ body{
   border-radius: 8px;
   font-size: 0.9rem;
   border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
 }
 .info-grid p strong {
   color: var(--muted);
@@ -234,13 +210,31 @@ body{
   line-height: 1.6;
 }
 
-.kg-logo {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  vertical-align: middle;
-  margin-right: 0.75em;
+/* NOUVEAU : Boîte pour le logo KG dans le modal */
+.info-box-kg {
+  background: var(--elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
 }
+.info-box-kg strong {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+.kg-logo-large {
+  width: 100px; /* Logo large */
+  height: 100px;
+  object-fit: contain;
+}
+.info-box-kg span {
+  font-size: 1.1rem;
+}
+/* Fin des nouveaux styles de modal */
+
 
 .ed{
   display:block;
@@ -259,12 +253,6 @@ body{
 
 .admin-row{display:flex;gap:.5rem;margin-top:.75rem}
 .ghost{background:transparent;border:1px solid var(--border);color:#fff;border-radius:.6rem;padding:.5rem .8rem;cursor:pointer}
-
-.fab{position:fixed;right:1rem;bottom:1rem;border:none;border-radius:50%;background:var(--primary);color:#fff;font-size:1.3rem;padding:.85rem 1rem;cursor:pointer;box-shadow:0 8px 24px rgba(51,102,255,.35)}
-.fab:hover{filter:brightness(1.08)}
-
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:var(--elev);border:1px solid var(--border);padding:.6rem .9rem;border-radius:.75rem;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.link{background:none;border:none;color:var(--ring);cursor:pointer;text-decoration:underline;padding:0;margin-left:.5rem}
 
 .toolbar {
   display: flex;
