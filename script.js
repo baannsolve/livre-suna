@@ -1,4 +1,4 @@
-// script.js (Version avec correctif de syntaxe)
+// script.js (Version avec logos KG sur carte seulement)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -100,7 +100,7 @@ function sortPeople() {
   });
 }
 
-// CORRIGÉ : Syntaxe des template literals
+// MODIFIÉ : Utilise `.card-kg-main-logo` et ne met plus de texte
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -121,13 +121,14 @@ function renderGrid(){
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     
-    const kgLogo = c.querySelector('.card-kg-logo');
+    // NOUVEAU : Logique du logo KG principal
+    const kgMainLogo = c.querySelector('.card-kg-main-logo');
     if (p.kekkeiGenkai) {
-      kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`; // Corrigé
-      kgLogo.alt = p.kekkeiGenkai;
-      kgLogo.classList.remove('hidden');
+      kgMainLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
+      kgMainLogo.alt = p.kekkeiGenkai;
+      kgMainLogo.classList.remove('hidden');
     } else {
-      kgLogo.classList.add('hidden');
+      kgMainLogo.classList.add('hidden');
     }
     
     const del = c.querySelector('.card-del');
@@ -135,10 +136,10 @@ function renderGrid(){
     frag.appendChild(c);
   });
   grid.appendChild(frag);
-  statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`; // Corrigé
+  statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// CORRIGÉ : Syntaxe des template literals
+// Aucune modification ici, c'est pour le modal, qui garde le texte et le logo
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -148,8 +149,8 @@ function openModalReadOnly(p){
   const kekkeiView = $("#modalKekkeiView");
   if (p.kekkeiGenkai) {
     const kgName = p.kekkeiGenkai;
-    const logoSrc = `kg/${kgName.toLowerCase()}.png`; // Corrigé
-    kekkeiView.innerHTML = `<img class="kg-logo" src="${logoSrc}" alt="${kgName}"> ${kgName}`; // Corrigé
+    const logoSrc = `kg/${kgName.toLowerCase()}.png`;
+    kekkeiView.innerHTML = `<img class="kg-logo" src="${logoSrc}" alt="${kgName}"> ${kgName}`;
   } else {
     kekkeiView.textContent = "N/A";
   }
@@ -216,7 +217,6 @@ personModal.addEventListener("cancel", (e) => {
 });
 
 
-// CORRIGÉ : Syntaxe des template literals
 grid.addEventListener('click', async (e)=>{
   const card = e.target.closest('.card');
   if(!card) return;
@@ -225,7 +225,7 @@ grid.addEventListener('click', async (e)=>{
   if(!p) return;
 
   if(e.target.classList.contains("card-del")){
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) { // Corrigé
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${p.firstName} ${p.lastName} ?`)) {
       return;
     }
     const { error } = await supabaseClient.from('people').delete().eq('id', p.id);
@@ -411,7 +411,6 @@ $("#saveBtn").addEventListener("click", async ()=>{
     console.error("Erreur de sauvegarde:", error);
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
-    // Recharger la liste complète pour corriger le bug de l'image
     await loadPeople();
     personModal.close();
   }

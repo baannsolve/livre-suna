@@ -95,25 +95,48 @@ body{
   display: block;
 }
 
-/* MODIFIÉ : Logo KG sur la carte (plus grand) */
+/* NOUVEAU/MODIFIÉ : Logo KG principal sur la carte */
+.card-kg-main-logo {
+  position: absolute;
+  bottom: 0; /* Position en bas */
+  left: 0;
+  right: 0;
+  margin: auto; /* Centré horizontalement */
+  width: 80px; /* Plus grand */
+  height: 80px; /* Plus grand */
+  background: rgba(12, 18, 28, 0.7);
+  border-radius: 50%;
+  padding: 12px; /* Ajusté */
+  object-fit: contain;
+  z-index: 1;
+  backdrop-filter: blur(3px);
+  border: 1px solid var(--border);
+  transform: translateY(50%); /* Pour qu'il chevauche la bordure */
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.2); /* Ombre pour le faire ressortir */
+}
+
+/* Ancienne classe non utilisée directement mais gardée pour référence
 .card-kg-logo {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
-  width: 44px; /* Augmenté */
-  height: 44px; /* Augmenté */
+  width: 44px;
+  height: 44px;
   background: rgba(12, 18, 28, 0.7);
   border-radius: 50%;
-  padding: 6px; /* Ajusté */
+  padding: 6px;
   object-fit: contain;
   z-index: 1;
   backdrop-filter: blur(3px);
   border: 1px solid var(--border);
 }
+*/
 
 .card-content {
   padding: 1rem;
   border-top: 1px solid var(--border);
+  padding-top: 2.5rem; /* Espace pour le logo qui chevauche */
+  text-align: center;
 }
 
 .card-name {
@@ -211,13 +234,12 @@ body{
   line-height: 1.6;
 }
 
-/* MODIFIÉ : Logo KG dans le modal (plus grand) */
 .kg-logo {
-  width: 36px; /* Augmenté */
-  height: 36px; /* Augmenté */
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   vertical-align: middle;
-  margin-right: 0.75em; /* Espace ajusté */
+  margin-right: 0.75em;
 }
 
 .ed{
