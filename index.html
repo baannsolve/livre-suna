@@ -74,6 +74,25 @@
               <option value="Inkuton">Inkuton</option>
               <option value="Jinton">Jinton</option>
             </select>
+            <select id="clanFilter" class="filter-select" aria-label="Filtrer par Clan">
+              <option value="">Tous les clans</option>
+              <option value="Uchiha">Uchiha</option>
+              <option value="Senju">Senju</option>
+              <option value="Aburame">Aburame</option>
+              <option value="Hyuga">Hyuga</option>
+              <option value="Ensho">Ensho</option>
+              <option value="Jishaku">Jishaku</option>
+              <option value="Mugen">Mugen</option>
+              <option value="Ayatsuri">Ayatsuri</option>
+              <option value="Kaguya">Kaguya</option>
+              <option value="Raimei">Raimei</option>
+              <option value="Salamandre">Salamandre</option>
+              <option value="Fuma">Fuma</option>
+              <option value="Hoshigaki">Hoshigaki</option>
+              <option value="Hozuki">Hozuki</option>
+              <option value="Yokushin">Yokushin</option>
+              <option value="Karatachi">Karatachi</option>
+            </select>
             <button id="clearFiltersBtn" class="icon-btn" title="Effacer les filtres">✕</button>
           </div>
           <div class="sort-buttons">
@@ -92,6 +111,7 @@
             <img class="card-img" alt="" loading="lazy" />
             <img class="card-kg-logo hidden" alt="" src="" />
             <img class="card-village-logo hidden" alt="" src="" />
+            <span class="card-status-badge hidden">Décédé(e)</span>
           </div>
           <div class="card-content">
             <h3 class="card-name"></h3>
@@ -138,6 +158,7 @@
           <div class="info-grid ro">
             <p><strong>Grade:</strong> <span id="modalGradeView"></span></p>
             <p><strong>Village:</strong> <span id="modalVillageView"></span></p>
+            <p><strong>Clan:</strong> <span id="modalClanView"></span></p>
           </div>
           <div class="info-box-kg ro">
             <strong>Kekkei Genkai:</strong>
@@ -195,12 +216,32 @@
             <option value="Inkuton">Inkuton</option>
             <option value="Jinton">Jinton</option>
           </select>
+          
+          <select id="clanInput" class="ed hidden">
+            <option value="">-- Sélectionner un clan --</option>
+            <option value="Uchiha">Uchiha</option>
+            <option value="Senju">Senju</option>
+            <option value="Aburame">Aburame</option>
+            <option value="Hyuga">Hyuga</option>
+            <option value="Ensho">Ensho</option>
+            <option value="Jishaku">Jishaku</option>
+            <option value="Mugen">Mugen</option>
+            <option value="Ayatsuri">Ayatsuri</option>
+            <option value="Kaguya">Kaguya</option>
+            <option value="Raimei">Raimei</option>
+            <option value="Salamandre">Salamandre</option>
+            <option value="Fuma">Fuma</option>
+            <option value="Hoshigaki">Hoshigaki</option>
+            <option value="Hozuki">Hozuki</option>
+            <option value="Yokushin">Yokushin</option>
+            <option value="Karatachi">Karatachi</option>
+          </select>
 
           <textarea id="informationInput" class="ed hidden" placeholder="Information"></textarea>
           
           <select id="statusInput" class="ed hidden">
-            <option value="En vie">En vie</option>
-            <option value="Mort">Mort</option>
+            <option value="alive">En vie</option>
+            <option value="deceased">Décédé</option>
           </select>
           
           <div class="admin-row hidden" id="editActions">

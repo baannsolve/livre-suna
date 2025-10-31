@@ -1,10 +1,11 @@
-// script.js (Version avec statut "En vie" / "Mort")
+// script.js (Version avec Clan et correctifs)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
 let VILLAGE_FILTER = "";
 let KEKKEI_FILTER = "";
+let CLAN_FILTER = ""; // NOUVEAU
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
@@ -29,6 +30,7 @@ const sortButtons = {
 
 const villageFilter = $("#villageFilter");
 const kekkeiFilter = $("#kekkeiFilter");
+const clanFilter = $("#clanFilter"); // NOUVEAU
 const clearFiltersBtn = $("#clearFiltersBtn");
 
 const personModal = $("#personModal");
@@ -82,9 +84,10 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
   });
 }
 
+// MODIFIÉ : "clan" ajouté à la recherche
 function personMatches(p, term){
   if(!term) return true;
-  const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")).toLowerCase();
+  const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")+" "+(p.clan||"")).toLowerCase();
   return hay.includes(term.toLowerCase());
 }
 
@@ -101,7 +104,7 @@ function sortPeople() {
   });
 }
 
-// MODIFIÉ : Vérifie p.status === 'Mort'
+// MODIFIÉ : Logique de filtre mise à jour
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -111,7 +114,8 @@ function renderGrid(){
     const searchMatch = personMatches(p, FILTER);
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
     const kekkeiMatch = !KEKKEI_FILTER || p.kekkeiGenkai === KEKKEI_FILTER;
-    return searchMatch && villageMatch && kekkeiMatch;
+    const clanMatch = !CLAN_FILTER || p.clan === CLAN_FILTER; // NOUVEAU
+    return searchMatch && villageMatch && kekkeiMatch && clanMatch;
   });
   
   filtered.forEach(p=>{
@@ -122,6 +126,7 @@ function renderGrid(){
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     
+    // Logique du logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
     if (p.kekkeiGenkai) {
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
@@ -131,6 +136,7 @@ function renderGrid(){
       kgLogo.classList.add('hidden');
     }
 
+    // Logique du logo Village
     const villageLogo = c.querySelector('.card-village-logo');
     if (p.village) {
       villageLogo.src = `villages/${p.village.toLowerCase()}.png`;
@@ -140,11 +146,14 @@ function renderGrid(){
       villageLogo.classList.add('hidden');
     }
     
-    // NOUVEAU : Logique du statut (décédé)
-    if (p.status === 'Mort') { // MODIFIÉ
+    // Gère le statut décédé
+    const statusBadge = c.querySelector('.card-status-badge');
+    if (p.status === 'deceased') {
       c.classList.add('card--deceased');
+      statusBadge.classList.remove('hidden');
     } else {
       c.classList.remove('card--deceased');
+      statusBadge.classList.add('hidden');
     }
     
     const del = c.querySelector('.card-del');
@@ -155,11 +164,12 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFIÉ : Vérifie p.status === 'Mort'
+// MODIFIÉ : Nouveaux champs
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
+  $("#modalClanView").textContent = p.clan || "N/A"; // NOUVEAU
   
   const villageView = $("#modalVillageView");
   if (p.village) {
@@ -183,11 +193,12 @@ function openModalReadOnly(p){
     kekkeiContent.classList.remove("hidden");
     kekkeiBox.classList.remove("hidden");
   } else {
+    kekkeiContent.classList.add("hidden");
     kekkeiBox.classList.add("hidden");
   }
-
-  // NOUVEAU : Logique du statut (décédé)
-  if (p.status === 'Mort') { // MODIFIÉ
+  
+  // Gère le statut décédé dans le modal
+  if (p.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
     $("#modalNameView").classList.add('deceased');
   } else {
@@ -206,7 +217,7 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// MODIFIÉ : Défaut à "En vie"
+// MODIFIÉ : Nouveaux champs
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -216,8 +227,9 @@ function openModalEdit(p){
   $("#gradeInput").value = p?.grade || "";
   $("#villageInput").value = p?.village || "";
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
+  $("#clanInput").value = p?.clan || ""; // NOUVEAU
   $("#informationInput").value = p?.information || "";
-  $("#statusInput").value = p?.status || "En vie"; // MODIFIÉ
+  $("#statusInput").value = p?.status || "alive";
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -429,7 +441,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// MODIFIÉ : Utilise la valeur du statut (ex: "En vie")
+// MODIFIÉ : Sauvegarde avec champ "clan"
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -439,8 +451,9 @@ $("#saveBtn").addEventListener("click", async ()=>{
     grade: $("#gradeInput").value || null,
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
+    clan: $("#clanInput").value || null, // NOUVEAU
     information: $("#informationInput").value.trim() || null,
-    status: $("#statusInput").value || "En vie" // MODIFIÉ
+    status: $("#statusInput").value
   };
   
   if(!p.firstName || !p.lastName){
@@ -508,11 +521,19 @@ kekkeiFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
+// NOUVEAU : Écouteur pour filtre clan
+clanFilter.addEventListener("input", (e) => {
+  CLAN_FILTER = e.target.value;
+  renderGrid();
+});
+
 clearFiltersBtn.addEventListener("click", () => {
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
+  CLAN_FILTER = ""; // NOUVEAU
   villageFilter.value = "";
   kekkeiFilter.value = "";
+  clanFilter.value = ""; // NOUVEAU
   renderGrid();
 });
 
