@@ -213,7 +213,7 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// CORRIGÉ : Gère le 'null' pour tous les champs ENUM
+// CORRIGÉ : Gère le 'null' (en mettant "") pour tous les champs ENUM
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -225,7 +225,7 @@ function openModalEdit(p){
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").value = p?.information || "";
-  $("#statusInput").value = p?.status || ""; // Gère 'null' ou 'alive' ou 'deceased'
+  $("#statusInput").value = p?.status || ""; // Gère 'null'
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -462,7 +462,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     .select();
 
   if(error){
-    // CORRIGÉ : Affiche le message d'erreur réel
+    // MODIFIÉ : Affiche le message d'erreur réel
     console.error("Erreur de sauvegarde:", error.message);
     alert(`La sauvegarde a échoué: ${error.message}`);
   } else {
