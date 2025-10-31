@@ -1,4 +1,4 @@
-// script.js (Version avec correctif structurel)
+// script.js (Version avec correctif de sauvegarde et de structure)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -216,7 +216,9 @@ grid.addEventListener('click', async (e)=>{
       console.error("Erreur de suppression:", error);
       alert("La suppression a échoué.");
     } else {
-      loadPeople(); 
+      // Supprimer localement et re-rendre (plus rapide)
+      PEOPLE = PEOPLE.filter(person => person.id !== p.id);
+      renderGrid();
     }
     return;
   }
@@ -373,7 +375,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// Save / Cancel
+// --- FONCTION DE SAUVEGARDE (CORRIGÉE) ---
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -389,19 +391,35 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("Prénom et nom sont obligatoires."); return;
   }
   
+  // 1. Sauvegarder dans Supabase ET demander la ligne en retour
   const { data, error } = await supabaseClient
     .from('people')
     .upsert(p)
-    .select();
+    .select()
+    .single(); // On attend un seul objet en retour
 
   if(error){
     console.error("Erreur de sauvegarde:", error);
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
-    await loadPeople();
+    // 2. Mettre à jour la liste LOCALE (au lieu de tout recharger)
+    if (currentEditingId) {
+      // C'était une MODIFICATION
+      const idx = PEOPLE.findIndex(person => person.id === currentEditingId);
+      if (idx > -1) PEOPLE[idx] = data; // Remplacer l'ancien objet
+    } else {
+      // C'était un AJOUT
+      PEOPLE.push(data); // Ajouter le nouvel objet
+    }
+    
+    // 3. Re-trier et re-rendre
+    sortPeople();
+    renderGrid();
     personModal.close();
   }
 });
+// --- FIN FONCTION DE SAUVEGARDE ---
+
 $("#closeEditBtn").addEventListener("click", ()=> personModal.close());
 
 // Persistence & load
