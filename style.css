@@ -111,7 +111,7 @@ body{
   border: 1px solid var(--border);
 }
 
-/* NOUVEAU : Logo Village (coin supérieur droit) */
+/* MODIFIÉ : Logo Village (coin supérieur droit) */
 .card-village-logo {
   position: absolute;
   top: 0.75rem;
@@ -125,6 +125,10 @@ body{
   z-index: 1;
   backdrop-filter: blur(3px);
   border: 1px solid var(--border);
+  /* NOUVEAU : Bordure et ombre pour faire ressortir */
+  outline: 1px solid rgba(255, 255, 255, 0.5); /* Bordure blanche semi-transparente */
+  outline-offset: -1px; /* Pour que la bordure reste dans le cercle */
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7)); /* Ombre blanche */
 }
 
 .card-content {
@@ -228,16 +232,21 @@ body{
   line-height: 1.6;
 }
 
-/* NOUVEAU : Logo Village dans le modal */
+/* MODIFIÉ : Logo Village dans le modal */
 .village-logo {
   width: 36px;
   height: 36px;
   object-fit: contain;
   vertical-align: middle;
   margin-right: 0.75em;
+  /* NOUVEAU : Bordure et ombre pour faire ressortir */
+  outline: 1px solid rgba(255, 255, 255, 0.5); /* Bordure blanche semi-transparente */
+  outline-offset: -1px; /* Pour que la bordure reste dans le cercle */
+  border-radius: 50%; /* Pour la bordure */
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7)); /* Ombre blanche */
 }
 
-/* MODIFIÉ : Boîte KG pour le modal */
+/* MODIFIÉ : Boîte KG pour le modal (plus de texte) */
 .info-box-kg {
   background: var(--elev);
   border: 1px solid var(--border);
@@ -252,23 +261,24 @@ body{
   margin-bottom: 0.75rem;
   text-align: left; /* Aligné à gauche */
 }
-/* Centre le logo et le texte en dessous */
+/* Centre le logo */
 .info-box-kg div {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.5rem; /* Réduit le gap si besoin, mais 0.5 rem est bien */
 }
 .kg-logo-large {
   width: 80px; /* Logo large */
   height: 80px;
   object-fit: contain;
 }
-.info-box-kg span {
+/* #modalKekkeiName a été supprimé, donc ce style n'est plus nécessaire */
+/* .info-box-kg span {
   font-size: 1.1rem;
   font-weight: 600;
-}
-/* Fin des nouveaux styles de modal */
+} */
+/* Fin des modifications de styles de modal */
 
 
 .ed{
