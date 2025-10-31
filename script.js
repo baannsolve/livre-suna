@@ -1,4 +1,4 @@
-// script.js (Version avec correctif du bug d'affichage)
+// script.js (Version avec correctif structurel)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -117,7 +117,8 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFICATION : Correction du bug d'affichage
+// --- LOGIQUE D'OUVERTURE MODALE CORRIGÉE ---
+
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -129,21 +130,19 @@ function openModalReadOnly(p){
     const span = document.createElement("span");
     span.className = "tag"; span.textContent = t; tags.appendChild(span);
   });
+  
+  // Afficher/Cacher les bons champs
   $$(".ro").forEach(el=>el.classList.remove("hidden"));
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
-
-  // --- CORRECTION DU BUG ---
-  $("#dropZone").classList.remove("hidden"); // On AFFICHE la dropzone (qui contient l'image)
-  dropZone.querySelector(".dz-hint").classList.add("hidden"); // MAIS on CACHE le message d'aide
-  $("#dropZone").style.pointerEvents = "none"; // Et on désactive le clic/glisser
-  // --- FIN CORRECTION ---
+  
+  // Cacher la zone de dépôt (on veut voir que l'image)
+  dropZone.classList.add("hidden"); 
 
   personModal.showModal();
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// MODIFICATION : Logique pour le mode édition
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -153,19 +152,20 @@ function openModalEdit(p){
   $("#gradeInput").value = p?.grade || "";
   $("#informationInput").value = p?.information || "";
   $("#tagsInput").value = (p?.tags||[]).join(", ");
+  
+  // Afficher/Cacher les bons champs
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
   $("#editActions").classList.remove("hidden");
   
-  // --- Logique d'affichage pour l'édition ---
-  $("#dropZone").classList.remove("hidden"); // On AFFICHE la dropzone
-  dropZone.querySelector(".dz-hint").classList.remove("hidden"); // On AFFICHE le message d'aide
-  $("#dropZone").style.pointerEvents = "auto"; // On ACTIVE le clic/glisser
-  // --- FIN Logique ---
+  // Afficher la zone de dépôt (par-dessus l'image)
+  dropZone.classList.remove("hidden");
 
   personModal.showModal();
   requestAnimationFrame(() => $("#firstNameInput").focus());
 }
+// --- FIN LOGIQUE MODALE ---
+
 
 function readFileToDataURL(file){
   return new Promise((resolve,reject)=>{
@@ -184,7 +184,7 @@ async function handleFiles(files) {
     const data = await readFileToDataURL(f);
     const compressedData = await compressImage(data);
     photoDataUrl = compressedData;
-    $("#modalPhoto").src = compressedData;
+    $("#modalPhoto").src = compressedData; // Met à jour l'image en arrière-plan
   } catch (err)
  {
     console.error("Erreur compression image:", err);

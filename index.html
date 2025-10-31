@@ -54,8 +54,10 @@
 
       <template id="cardTemplate">
         <article class="card" role="listitem" tabindex="0">
-          <img class="card-img" alt="" loading="lazy" />
-          <div class="card-overlay">
+          <div class="card-img-wrapper">
+            <img class="card-img" alt="" loading="lazy" />
+          </div>
+          <div class="card-content">
             <h3 class="card-name"></h3>
           </div>
           <button class="card-del hidden" title="Supprimer">🗑️</button>
@@ -84,16 +86,17 @@
     <dialog id="personModal" class="modal" aria-label="Détails de la personne">
       <button class="modal-close" id="modalClose" type="button" aria-label="Fermer">✕</button>
       <div class="modal-body">
+        
         <div class="photo-col">
-          <div id="dropZone" class="dropzone" aria-label="Glissez-déposez une image ou cliquez pour choisir">
-            <img id="modalPhoto" alt="Photo" />
+          <img id="modalPhoto" alt="Photo" />
+          
+          <div id="dropZone" class="dropzone hidden" aria-label="Glissez-déposez une image ou cliquez pour choisir">
             <div class="dz-hint">
               <p>Glissez-déposez une image<br>ou <span class="underline">cliquez</span> — vous pouvez aussi <span class="underline"><strong>coller</strong></span> (Ctrl/Cmd+V)</p>
             </div>
-            <input id="photoFile" type="file" accept="image/*" hidden>
           </div>
+          <input id="photoFile" type="file" accept="image/*" hidden>
         </div>
-
         <div class="modal-info">
           <h2 id="modalNameView" class="ro"></h2>
           <p class="muted ro">
