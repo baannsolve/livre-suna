@@ -1,8 +1,10 @@
-// script.js (Version avec correctif de sauvegarde et de structure)
+// script.js (Version avec Filtres et Nouveaux Champs)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
+let VILLAGE_FILTER = ""; // NOUVEAU
+let KEKKEI_FILTER = ""; // NOUVEAU
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
@@ -24,6 +26,11 @@ const sortButtons = {
   lastName: $("#sortLastNameBtn"),
   firstName: $("#sortFirstNameBtn"),
 };
+
+// NOUVEAU : Sélecteurs de filtres
+const villageFilter = $("#villageFilter");
+const kekkeiFilter = $("#kekkeiFilter");
+const clearFiltersBtn = $("#clearFiltersBtn");
 
 // Sélecteurs Modal Personne
 const personModal = $("#personModal");
@@ -77,9 +84,10 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
   });
 }
 
+// MODIFIÉ : "tags" supprimé de la recherche
 function personMatches(p, term){
   if(!term) return true;
-  const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
+  const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")).toLowerCase();
   return hay.includes(term.toLowerCase());
 }
 
@@ -96,11 +104,19 @@ function sortPeople() {
   });
 }
 
+// MODIFIÉ : Logique de filtre mise à jour
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
   const tmpl = $("#cardTemplate");
-  const filtered = PEOPLE.filter(p=>personMatches(p,FILTER));
+  
+  // Application des 3 filtres
+  const filtered = PEOPLE.filter(p => {
+    const searchMatch = personMatches(p, FILTER);
+    const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
+    const kekkeiMatch = !KEKKEI_FILTER || p.kekkeiGenkai === KEKKEI_FILTER;
+    return searchMatch && villageMatch && kekkeiMatch;
+  });
   
   filtered.forEach(p=>{
     const c = tmpl.content.firstElementChild.cloneNode(true);
@@ -117,32 +133,25 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// --- LOGIQUE D'OUVERTURE MODALE CORRIGÉE ---
-
+// MODIFIÉ : Nouveaux champs, "tags" supprimé
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
+  $("#modalVillageView").textContent = p.village || "N/A"; // NOUVEAU
+  $("#modalKekkeiView").textContent = p.kekkeiGenkai || "N/A"; // NOUVEAU
   $("#modalInfoView").textContent = p.information || "";
-  const tags = $("#modalTags");
-  tags.innerHTML = "";
-  (p.tags||[]).forEach(t=>{
-    const span = document.createElement("span");
-    span.className = "tag"; span.textContent = t; tags.appendChild(span);
-  });
   
-  // Afficher/Cacher les bons champs
   $$(".ro").forEach(el=>el.classList.remove("hidden"));
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
-  
-  // Cacher la zone de dépôt (on veut voir que l'image)
   dropZone.classList.add("hidden"); 
 
   personModal.showModal();
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
+// MODIFIÉ : Nouveaux champs, "tags" supprimé
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -150,22 +159,18 @@ function openModalEdit(p){
   $("#firstNameInput").value = p?.firstName || "";
   $("#lastNameInput").value = p?.lastName || "";
   $("#gradeInput").value = p?.grade || "";
+  $("#villageInput").value = p?.village || ""; // NOUVEAU
+  $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; // NOUVEAU
   $("#informationInput").value = p?.information || "";
-  $("#tagsInput").value = (p?.tags||[]).join(", ");
   
-  // Afficher/Cacher les bons champs
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
   $("#editActions").classList.remove("hidden");
-  
-  // Afficher la zone de dépôt (par-dessus l'image)
   dropZone.classList.remove("hidden");
 
   personModal.showModal();
   requestAnimationFrame(() => $("#firstNameInput").focus());
 }
-// --- FIN LOGIQUE MODALE ---
-
 
 function readFileToDataURL(file){
   return new Promise((resolve,reject)=>{
@@ -184,9 +189,8 @@ async function handleFiles(files) {
     const data = await readFileToDataURL(f);
     const compressedData = await compressImage(data);
     photoDataUrl = compressedData;
-    $("#modalPhoto").src = compressedData; // Met à jour l'image en arrière-plan
-  } catch (err)
- {
+    $("#modalPhoto").src = compressedData;
+  } catch (err) {
     console.error("Erreur compression image:", err);
     alert("Erreur lors du traitement de l'image.");
   }
@@ -216,7 +220,6 @@ grid.addEventListener('click', async (e)=>{
       console.error("Erreur de suppression:", error);
       alert("La suppression a échoué.");
     } else {
-      // Supprimer localement et re-rendre (plus rapide)
       PEOPLE = PEOPLE.filter(person => person.id !== p.id);
       renderGrid();
     }
@@ -254,7 +257,7 @@ function setAdminUIVisible(state) {
   $("#adminSwitchWrap").classList.toggle("hidden", !state);
   $("#addBtn").classList.toggle("hidden", !state);
   $("#exportBtn").classList.toggle("hidden", !state);
-  $("#importWrap").classList.add("hidden");
+  // $("#importWrap").classList.add("hidden"); // Déjà retiré de l'HTML
   
   if (state) {
     $("#adminModeSwitch").checked = true;
@@ -339,7 +342,7 @@ async function checkSession() {
 // --- FIN AUTHENTIFICATION ---
 
 
-// Add / Export / Import
+// Add / Export
 $("#addBtn").addEventListener("click", ()=>{
   openModalEdit(null); // create new
 });
@@ -349,10 +352,6 @@ $("#exportBtn").addEventListener("click", ()=>{
   a.href = URL.createObjectURL(blob);
   a.download = "people.json";
   a.click();
-});
-$("#importFile").addEventListener("change", (e)=>{
-  alert("L'importation de JSON est désactivée avec Supabase.");
-  e.target.value = null;
 });
 
 // Dropzone & file
@@ -375,7 +374,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// --- FONCTION DE SAUVEGARDE (CORRIGÉE) ---
+// MODIFIÉ : Sauvegarde avec nouveaux champs, "tags" supprimé
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -383,43 +382,36 @@ $("#saveBtn").addEventListener("click", async ()=>{
     lastName: $("#lastNameInput").value.trim(),
     photoUrl: photoDataUrl || null,
     grade: $("#gradeInput").value || null,
-    information: $("#informationInput").value.trim() || null,
-    tags: $("#tagsInput").value.split(",").map(t=>t.trim()).filter(Boolean)
+    village: $("#villageInput").value || null, // NOUVEAU
+    kekkeiGenkai: $("#kekkeiGenkaiInput").value || null, // NOUVEAU
+    information: $("#informationInput").value.trim() || null
   };
   
   if(!p.firstName || !p.lastName){
     alert("Prénom et nom sont obligatoires."); return;
   }
   
-  // 1. Sauvegarder dans Supabase ET demander la ligne en retour
   const { data, error } = await supabaseClient
     .from('people')
     .upsert(p)
     .select()
-    .single(); // On attend un seul objet en retour
+    .single();
 
   if(error){
     console.error("Erreur de sauvegarde:", error);
     alert("La sauvegarde a échoué. Vérifiez la console (F12).");
   } else {
-    // 2. Mettre à jour la liste LOCALE (au lieu de tout recharger)
     if (currentEditingId) {
-      // C'était une MODIFICATION
       const idx = PEOPLE.findIndex(person => person.id === currentEditingId);
-      if (idx > -1) PEOPLE[idx] = data; // Remplacer l'ancien objet
+      if (idx > -1) PEOPLE[idx] = data;
     } else {
-      // C'était un AJOUT
-      PEOPLE.push(data); // Ajouter le nouvel objet
+      PEOPLE.push(data);
     }
-    
-    // 3. Re-trier et re-rendre
     sortPeople();
     renderGrid();
     personModal.close();
   }
 });
-// --- FIN FONCTION DE SAUVEGARDE ---
-
 $("#closeEditBtn").addEventListener("click", ()=> personModal.close());
 
 // Persistence & load
@@ -456,10 +448,30 @@ sortButtons.firstName.addEventListener("click", () => {
   renderGrid();
 });
 
+// NOUVEAU : Écouteurs pour les filtres
+villageFilter.addEventListener("input", (e) => {
+  VILLAGE_FILTER = e.target.value;
+  renderGrid();
+});
+
+kekkeiFilter.addEventListener("input", (e) => {
+  KEKKEI_FILTER = e.target.value;
+  renderGrid();
+});
+
+clearFiltersBtn.addEventListener("click", () => {
+  VILLAGE_FILTER = "";
+  KEKKEI_FILTER = "";
+  villageFilter.value = "";
+  kekkeiFilter.value = "";
+  renderGrid();
+});
+
+
 // Init
 async function init() {
   await loadPeople();
-  await checkSession(); // Vérifie si l'admin est déjà connecté
+  await checkSession();
 }
 
 init();

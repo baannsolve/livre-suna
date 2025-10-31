@@ -60,7 +60,6 @@ body{
   padding:clamp(1rem,2.5vw,1.5rem);max-width:1200px;margin:0 auto 4rem;
 }
 
-/* --- NOUVEAU DESIGN DE LA CARTE (FINAL) --- */
 .card {
   position: relative;
   overflow: hidden;
@@ -81,10 +80,10 @@ body{
 
 .card-img-wrapper {
   width: 100%;
-  padding-top: 100%; /* Ratio 1:1 pour l'image */
+  padding-top: 100%; /* Ratio 1:1 */
   position: relative;
   overflow: hidden;
-  background-color: var(--panel); /* Fond pour les images en chargement */
+  background-color: var(--panel);
 }
 .card-img {
   position: absolute;
@@ -111,8 +110,6 @@ body{
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* --- FIN DU NOUVEAU DESIGN DE CARTE --- */
-
 
 .card-del{position:absolute;top:.5rem;right:.5rem;border:none;border-radius:999px;background:var(--danger);color:#fff;padding:.35rem .5rem;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35); z-index: 2;}
 .card-del:hover{filter:brightness(1.05)}
@@ -121,12 +118,10 @@ body{
 .modal::backdrop{background:rgba(0,0,0,.6)}
 .modal-body{display:flex;flex-wrap:wrap;gap:1rem;padding:1rem}
 
-
-/* --- SECTION MODIFIÉE : COLONNE PHOTO --- */
 .photo-col{
   flex:1 1 320px;
   min-width:280px;
-  position: relative; /* Indispensable pour la surcouche */
+  position: relative;
   min-height: 260px;
 }
 
@@ -142,7 +137,7 @@ body{
 }
 
 .dropzone{
-  position: absolute; /* Se place par-dessus l'image */
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -153,7 +148,6 @@ body{
   justify-content: center;
   overflow: hidden;
   cursor: pointer;
-  /* La classe .hidden (depuis JS) gère l'affichage */
 }
 .dropzone.dragover{border-color:var(--ring);box-shadow:0 0 0 3px rgba(122,162,255,.25) inset}
 
@@ -167,8 +161,6 @@ body{
   opacity: 1;
   pointer-events: none;
 }
-/* --- FIN DE LA SECTION MODIFIÉE --- */
-
 
 .modal-info{flex:2 1 360px;min-width:280px}
 .muted{color:var(--muted)}
@@ -184,14 +176,9 @@ body{
   border-radius:.6rem;
   color:#fff;
 }
-
 .modal-info > .ed {
   margin-bottom: 0.75rem;
 }
-.modal-info > label.ed {
-  margin-bottom: 0.75rem;
-}
-
 
 .tags{display:flex;flex-wrap:wrap;gap:.4rem; margin-top: 0.5rem;}
 .tags .tag{background:var(--elev);border-radius:8px;padding:.2rem .6rem;font-size:.85rem}
@@ -216,6 +203,34 @@ body{
   padding: 0 clamp(1rem, 2.5vw, 1.5rem);
   margin: 1rem auto 0;
   max-width: 1200px;
+}
+
+/* NOUVEAU : Conteneur pour tous les contrôles */
+.controls-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+
+.filter-select {
+  background: var(--elev);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: .6rem;
+  padding: .4rem .7rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.filter-select:hover {
+  color: var(--text);
+  border-color: var(--muted);
 }
 
 .sort-buttons {
@@ -291,31 +306,29 @@ textarea.ed {
   display: block;
 }
 
-/* --- SECTION CORRIGÉE : MODAL CONNEXION --- */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Un seul 'gap' propre pour espacer tous les éléments */
+  gap: 1rem;
 }
 
 .login-form h2 {
   margin-top: 0;
   text-align: center;
-  margin-bottom: 0; /* Le gap s'en occupe */
+  margin-bottom: 0;
 }
 
 .login-form label {
   font-size: 0.9rem;
   color: var(--muted);
-  margin-top: 0; /* Le gap s'en occupe */
-  margin-bottom: -0.5rem; /* Rapproche le label de son champ */
+  margin-top: 0;
+  margin-bottom: -0.5rem;
 }
 
 .login-error {
   font-size: 0.9rem;
   color: var(--danger);
-  margin: 0; /* Le gap s'en occupe */
+  margin: 0;
 }
-/* --- FIN SECTION CORRIGÉE --- */
 
 .hidden{display:none}

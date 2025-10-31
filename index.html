@@ -33,20 +33,54 @@
           </label>
           <button id="addBtn" class="icon-btn hidden" type="button" aria-label="Ajouter une fiche">＋</button>
           <button id="exportBtn" class="icon-btn hidden" type="button" aria-label="Exporter JSON">📤</button>
-          <label id="importWrap" class="file-label hidden" title="Importer JSON">📥
-            <input type="file" id="importFile" accept="application/json" hidden>
-          </label>
-        </div>
+          </div>
       </div>
     </header>
 
     <main id="main" tabindex="-1">
       <div class="toolbar">
         <div id="stats" class="stats" aria-live="polite">0 / 0 personnes</div>
-        <div class="sort-buttons">
-          <span>Trier par :</span>
-          <button id="sortLastNameBtn" class="sort-btn active" data-sort-key="lastName">Nom (A-Z)</button>
-          <button id="sortFirstNameBtn" class="sort-btn" data-sort-key="firstName">Prénom (A-Z)</button>
+        
+        <div class="controls-group">
+          <div class="filter-group">
+            <select id="villageFilter" class="filter-select" aria-label="Filtrer par village">
+              <option value="">Tous les villages</option>
+              <option value="Suna">Suna</option>
+              <option value="Konoha">Konoha</option>
+              <option value="Kiri">Kiri</option>
+              <option value="Iwa">Iwa</option>
+              <option value="Kumo">Kumo</option>
+              <option value="Nukenin">Nukenin</option>
+              <option value="Oto">Oto</option>
+              <option value="Samourai">Samourai</option>
+              <option value="Ame">Ame</option>
+              <option value="Kusa">Kusa</option>
+              <option value="Taki">Taki</option>
+            </select>
+            <select id="kekkeiFilter" class="filter-select" aria-label="Filtrer par Kekkei Genkai">
+              <option value="">Tous les Kekkei</option>
+              <option value="Meiton">Meiton</option>
+              <option value="Deiton">Deiton</option>
+              <option value="Taiton">Taiton</option>
+              <option value="Futton">Futton</option>
+              <option value="Bakuton">Bakuton</option>
+              <option value="Hyoton">Hyoton</option>
+              <option value="Yoton">Yoton</option>
+              <option value="Shakuton">Shakuton</option>
+              <option value="Jiton">Jiton</option>
+              <option value="Kaminari">Kaminari</option>
+              <option value="Kami">Kami</option>
+              <option value="Shoton">Shoton</option>
+              <option value="Inkuton">Inkuton</option>
+              <option value="Jinton">Jinton</option>
+            </select>
+            <button id="clearFiltersBtn" class="icon-btn" title="Effacer les filtres">✕</button>
+          </div>
+          <div class="sort-buttons">
+            <span>Trier :</span>
+            <button id="sortLastNameBtn" class="sort-btn active" data-sort-key="lastName">Nom</button>
+            <button id="sortFirstNameBtn" class="sort-btn" data-sort-key="firstName">Prénom</button>
+          </div>
         </div>
       </div>
 
@@ -89,7 +123,6 @@
         
         <div class="photo-col">
           <img id="modalPhoto" alt="Photo" />
-          
           <div id="dropZone" class="dropzone hidden" aria-label="Glissez-déposez une image ou cliquez pour choisir">
             <div class="dz-hint">
               <p>Glissez-déposez une image<br>ou <span class="underline">cliquez</span> — vous pouvez aussi <span class="underline"><strong>coller</strong></span> (Ctrl/Cmd+V)</p>
@@ -97,18 +130,17 @@
           </div>
           <input id="photoFile" type="file" accept="image/*" hidden>
         </div>
+
         <div class="modal-info">
           <h2 id="modalNameView" class="ro"></h2>
-          <p class="muted ro">
-            <strong>Grade:</strong> <span id="modalGradeView"></span>
-          </p>
+          <p class="muted ro"><strong>Grade:</strong> <span id="modalGradeView"></span></p>
+          <p class="muted ro"><strong>Village:</strong> <span id="modalVillageView"></span></p>
+          <p class="muted ro"><strong>Kekkei Genkai:</strong> <span id="modalKekkeiView"></span></p>
           <p id="modalInfoView" class="ro"></p>
-          <div id="modalTags" class="tags ro"></div>
-
+          
           <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
           <input id="lastNameInput" class="ed hidden" placeholder="Nom">
           
-          <label class="ed hidden" for="gradeInput">Grade :</label>
           <select id="gradeInput" class="ed hidden">
             <option value="">-- Sélectionner un grade --</option>
             <option value="Genin">Genin</option>
@@ -122,8 +154,40 @@
             <option value="Kage">Kage</option>
           </select>
 
+          <select id="villageInput" class="ed hidden">
+            <option value="">-- Sélectionner un village --</option>
+            <option value="Suna">Suna</option>
+            <option value="Konoha">Konoha</option>
+            <option value="Kiri">Kiri</option>
+            <option value="Iwa">Iwa</option>
+            <option value="Kumo">Kumo</option>
+            <option value="Nukenin">Nukenin</option>
+            <option value="Oto">Oto</option>
+            <option value="Samourai">Samourai</option>
+            <option value="Ame">Ame</option>
+            <option value="Kusa">Kusa</option>
+            <option value="Taki">Taki</option>
+          </select>
+
+          <select id="kekkeiGenkaiInput" class="ed hidden">
+            <option value="">-- Sélectionner un Kekkei Genkai --</option>
+            <option value="Meiton">Meiton</option>
+            <option value="Deiton">Deiton</option>
+            <option value="Taiton">Taiton</option>
+            <option value="Futton">Futton</option>
+            <option value="Bakuton">Bakuton</option>
+            <option value="Hyoton">Hyoton</option>
+            <option value="Yoton">Yoton</option>
+            <option value="Shakuton">Shakuton</option>
+            <option value="Jiton">Jiton</option>
+            <option value="Kaminari">Kaminari</option>
+            <option value="Kami">Kami</option>
+            <option value="Shoton">Shoton</option>
+            <option value="Inkuton">Inkuton</option>
+            <option value="Jinton">Jinton</option>
+          </select>
+
           <textarea id="informationInput" class="ed hidden" placeholder="Information"></textarea>
-          <input id="tagsInput" class="ed hidden" placeholder="Tags séparés par des virgules">
           
           <div class="admin-row hidden" id="editActions">
             <button id="saveBtn" class="icon-btn">💾 Enregistrer</button>
