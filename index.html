@@ -91,6 +91,7 @@
           <div class="card-img-wrapper">
             <img class="card-img" alt="" loading="lazy" />
             <img class="card-kg-logo hidden" alt="" src="" />
+            <img class="card-village-logo hidden" alt="" src="" />
           </div>
           <div class="card-content">
             <h3 class="card-name"></h3>
@@ -140,8 +141,11 @@
           </div>
           <div class="info-box-kg ro">
             <strong>Kekkei Genkai:</strong>
-            <img id="modalKekkeiLogo" class="kg-logo-large hidden" src="" alt="" />
-            <span id="modalKekkeiName" class="hidden">N/A</span>
+            <div id="modalKekkeiContent" class="hidden">
+              <img id="modalKekkeiLogo" class="kg-logo-large" src="" alt="" />
+              <span id="modalKekkeiName"></span>
+            </div>
+            <span id="modalKekkeiFallback">N/A</span>
           </div>
           <p id="modalInfoView" class="ro"></p>
           

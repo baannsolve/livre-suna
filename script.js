@@ -1,4 +1,4 @@
-// script.js (Version avec correctif de syntaxe)
+// script.js (Version avec logos Village et design KG corrigé)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -100,6 +100,7 @@ function sortPeople() {
   });
 }
 
+// MODIFIÉ : Ajout de la logique pour le logo Village
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -120,7 +121,7 @@ function renderGrid(){
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     
-    // Logique pour le petit logo en coin
+    // Logique du logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
     if (p.kekkeiGenkai) {
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
@@ -128,6 +129,16 @@ function renderGrid(){
       kgLogo.classList.remove('hidden');
     } else {
       kgLogo.classList.add('hidden');
+    }
+
+    // NOUVEAU : Logique du logo Village
+    const villageLogo = c.querySelector('.card-village-logo');
+    if (p.village) {
+      villageLogo.src = `villages/${p.village.toLowerCase()}.png`;
+      villageLogo.alt = p.village;
+      villageLogo.classList.remove('hidden');
+    } else {
+      villageLogo.classList.add('hidden');
     }
     
     const del = c.querySelector('.card-del');
@@ -138,27 +149,39 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
+// MODIFIÉ : Logique du logo Village et nouveau design KG
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
-  $("#modalVillageView").textContent = p.village || "N/A";
   
-  const kekkeiLogo = $("#modalKekkeiLogo");
-  const kekkeiName = $("#modalKekkeiName"); // Le span "N/A"
+  // NOUVEAU : Logique d'affichage du logo Village
+  const villageView = $("#modalVillageView");
+  if (p.village) {
+    const villageName = p.village;
+    const logoSrc = `villages/${villageName.toLowerCase()}.png`;
+    villageView.innerHTML = `<img class="village-logo" src="${logoSrc}" alt="${villageName}"> ${villageName}`;
+  } else {
+    villageView.textContent = "N/A";
+  }
+
+  // NOUVEAU : Logique d'affichage du logo KG (nouveau design)
+  const kekkeiContent = $("#modalKekkeiContent");
+  const kekkeiFallback = $("#modalKekkeiFallback");
   
   if (p.kekkeiGenkai) {
     const kgName = p.kekkeiGenkai;
     const logoSrc = `kg/${kgName.toLowerCase()}.png`;
     
-    kekkeiLogo.src = logoSrc;
-    kekkeiLogo.alt = kgName;
-    kekkeiLogo.classList.remove("hidden"); // Affiche le logo
-    kekkeiName.classList.add("hidden"); // Cache le texte "N/A"
+    $("#modalKekkeiLogo").src = logoSrc;
+    $("#modalKekkeiLogo").alt = kgName;
+    $("#modalKekkeiName").textContent = kgName;
+    
+    kekkeiContent.classList.remove("hidden"); // Affiche la boîte logo+texte
+    kekkeiFallback.classList.add("hidden"); // Cache le "N/A"
   } else {
-    kekkeiLogo.classList.add("hidden"); // Cache le logo
-    kekkeiName.textContent = "N/A";
-    kekkeiName.classList.remove("hidden"); // Affiche "N/A"
+    kekkeiContent.classList.add("hidden"); // Cache la boîte logo+texte
+    kekkeiFallback.classList.remove("hidden"); // Affiche "N/A"
   }
   
   $("#modalInfoView").textContent = p.information || "";
@@ -393,7 +416,6 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// CORRIGÉ : Faute de frappe (le '}' en trop est retiré)
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -410,7 +432,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("Prénom et nom sont obligatoires."); return;
   }
   
-  const { error } = await supabaseClient // ERREUR CORRIGÉE ICI
+  const { error } = await supabaseClient
     .from('people')
     .upsert(p)
     .select();
