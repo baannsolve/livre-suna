@@ -1,11 +1,11 @@
-// script.js (Version avec Clan et correctifs)
+// script.js (Version avec correctif de sauvegarde ENUM)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
 let VILLAGE_FILTER = "";
 let KEKKEI_FILTER = "";
-let CLAN_FILTER = ""; // NOUVEAU
+let CLAN_FILTER = "";
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
@@ -30,7 +30,7 @@ const sortButtons = {
 
 const villageFilter = $("#villageFilter");
 const kekkeiFilter = $("#kekkeiFilter");
-const clanFilter = $("#clanFilter"); // NOUVEAU
+const clanFilter = $("#clanFilter");
 const clearFiltersBtn = $("#clearFiltersBtn");
 
 const personModal = $("#personModal");
@@ -84,7 +84,6 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
   });
 }
 
-// MODIFIÉ : "clan" ajouté à la recherche
 function personMatches(p, term){
   if(!term) return true;
   const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")+" "+(p.clan||"")).toLowerCase();
@@ -104,7 +103,6 @@ function sortPeople() {
   });
 }
 
-// MODIFIÉ : Logique de filtre mise à jour
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -114,7 +112,7 @@ function renderGrid(){
     const searchMatch = personMatches(p, FILTER);
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
     const kekkeiMatch = !KEKKEI_FILTER || p.kekkeiGenkai === KEKKEI_FILTER;
-    const clanMatch = !CLAN_FILTER || p.clan === CLAN_FILTER; // NOUVEAU
+    const clanMatch = !CLAN_FILTER || p.clan === CLAN_FILTER;
     return searchMatch && villageMatch && kekkeiMatch && clanMatch;
   });
   
@@ -164,12 +162,11 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFIÉ : Nouveaux champs
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   $("#modalGradeView").textContent = p.grade || "N/A";
-  $("#modalClanView").textContent = p.clan || "N/A"; // NOUVEAU
+  $("#modalClanView").textContent = p.clan || "N/A";
   
   const villageView = $("#modalVillageView");
   if (p.village) {
@@ -197,7 +194,6 @@ function openModalReadOnly(p){
     kekkeiBox.classList.add("hidden");
   }
   
-  // Gère le statut décédé dans le modal
   if (p.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
     $("#modalNameView").classList.add('deceased');
@@ -217,7 +213,7 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// MODIFIÉ : Nouveaux champs
+// CORRIGÉ : Gère le 'null' pour tous les champs ENUM
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -227,9 +223,9 @@ function openModalEdit(p){
   $("#gradeInput").value = p?.grade || "";
   $("#villageInput").value = p?.village || "";
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
-  $("#clanInput").value = p?.clan || ""; // NOUVEAU
+  $("#clanInput").value = p?.clan || "";
   $("#informationInput").value = p?.information || "";
-  $("#statusInput").value = p?.status || "alive";
+  $("#statusInput").value = p?.status || ""; // Gère 'null' ou 'alive' ou 'deceased'
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -285,7 +281,7 @@ grid.addEventListener('click', async (e)=>{
     }
     const { error } = await supabaseClient.from('people').delete().eq('id', p.id);
     if (error) {
-      console.error("Erreur de suppression:", error);
+      console.error("Erreur de suppression:", error.message);
       alert("La suppression a échoué.");
     } else {
       PEOPLE = PEOPLE.filter(person => person.id !== p.id);
@@ -441,7 +437,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// MODIFIÉ : Sauvegarde avec champ "clan"
+// CORRIGÉ : Tous les champs ENUM envoient 'null' au lieu de '""'
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -451,9 +447,9 @@ $("#saveBtn").addEventListener("click", async ()=>{
     grade: $("#gradeInput").value || null,
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
-    clan: $("#clanInput").value || null, // NOUVEAU
+    clan: $("#clanInput").value || null,
     information: $("#informationInput").value.trim() || null,
-    status: $("#statusInput").value
+    status: $("#statusInput").value || null
   };
   
   if(!p.firstName || !p.lastName){
@@ -466,8 +462,9 @@ $("#saveBtn").addEventListener("click", async ()=>{
     .select();
 
   if(error){
-    console.error("Erreur de sauvegarde:", error);
-    alert("La sauvegarde a échoué. Vérifiez la console (F12).");
+    // CORRIGÉ : Affiche le message d'erreur réel
+    console.error("Erreur de sauvegarde:", error.message);
+    alert(`La sauvegarde a échoué: ${error.message}`);
   } else {
     await loadPeople();
     personModal.close();
@@ -483,7 +480,7 @@ async function loadPeople(){
     .select('*');
 
   if(error) {
-    console.error("Erreur de chargement:", error);
+    console.error("Erreur de chargement:", error.message);
     alert("Impossible de charger les données. Vérifiez la console (F12).");
     return;
   }
@@ -521,7 +518,6 @@ kekkeiFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
-// NOUVEAU : Écouteur pour filtre clan
 clanFilter.addEventListener("input", (e) => {
   CLAN_FILTER = e.target.value;
   renderGrid();
@@ -530,10 +526,10 @@ clanFilter.addEventListener("input", (e) => {
 clearFiltersBtn.addEventListener("click", () => {
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
-  CLAN_FILTER = ""; // NOUVEAU
+  CLAN_FILTER = "";
   villageFilter.value = "";
   kekkeiFilter.value = "";
-  clanFilter.value = ""; // NOUVEAU
+  clanFilter.value = "";
   renderGrid();
 });
 
