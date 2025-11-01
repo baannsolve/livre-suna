@@ -374,18 +374,30 @@ body{
 .admin-row{display:flex;gap:.5rem;margin-top:.75rem}
 .ghost{background:transparent;border:1px solid var(--border);color:#fff;border-radius:.6rem;padding:.5rem .8rem;cursor:pointer}
 
+/* MODIFIÉ : Styles de la barre d'outils */
 .toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Sépare le groupe de gauche et le groupe de droite */
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Permet aux groupes de passer à la ligne sur petit écran */
   gap: 1rem;
   padding: 0 clamp(1rem, 2.5vw, 1.5rem);
   margin: 1rem auto 0;
   max-width: 1200px;
 }
 
+/* SUPPRIMÉ : Ancien .controls-group */
+/*
 .controls-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+*/
+
+/* AJOUTÉ : Nouveau groupe pour stats + filtres */
+.controls-group-left {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -419,6 +431,8 @@ body{
   gap: .5rem;
   font-size: 0.9rem;
   color: var(--muted);
+  /* S'assure que le groupe de tri reste à droite s'il passe à la ligne */
+  margin-left: auto; 
 }
 
 .sort-btn {
@@ -442,6 +456,8 @@ body{
   border-color: var(--primary);
   box-shadow: 0 0 0 1px var(--primary);
 }
+/* FIN DES MODIFICATIONS DE LA TOOLBAR */
+
 
 select.ed { 
   background-image: linear-gradient(45deg, transparent 50%, #8b97a6 50%), linear-gradient(135deg, #8b97a6 50%, transparent 50%);
@@ -549,7 +565,7 @@ select.ed {
 .hidden{display:none}
 
 
-/* AJOUTÉ : Styles pour les onglets de villages */
+/* Styles pour les onglets de villages */
 .village-tabs {
   display: flex;
   gap: 0.5rem;
@@ -598,4 +614,3 @@ select.ed {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px var(--ring);
 }
-/* FIN DES AJOUTS CSS */

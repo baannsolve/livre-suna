@@ -55,9 +55,9 @@
       </nav>
       
       <div class="toolbar">
-        <div id="stats" class="stats" aria-live="polite">0 / 0 personnes</div>
         
-        <div class="controls-group">
+        <div class="controls-group-left">
+          <div id="stats" class="stats" aria-live="polite">0 / 0 personnes</div>
           <div class="filter-group">
             <select id="kekkeiFilter" class="filter-select" aria-label="Filtrer par Kekkei Genkai">
               <option value="">Tous les Kekkei</option>
@@ -98,14 +98,14 @@
             </select>
             <button id="clearFiltersBtn" class="icon-btn" title="Effacer les filtres">✕</button>
           </div>
-          <div class="sort-buttons">
-            <span>Trier :</span>
-            <button id="sortLastNameBtn" class="sort-btn active" data-sort-key="lastName">Nom</button>
-            <button id="sortFirstNameBtn" class="sort-btn" data-sort-key="firstName">Prénom</button>
-          </div>
         </div>
-      </div>
 
+        <div class="sort-buttons">
+          <button id="sortLastNameBtn" class="sort-btn active" data-sort-key="lastName">Nom</button>
+          <button id="sortFirstNameBtn" class="sort-btn" data-sort-key="firstName">Prénom</button>
+        </div>
+
+      </div>
       <section id="grid" class="grid" role="list" aria-label="Personnes"></section>
 
       <template id="cardTemplate">
