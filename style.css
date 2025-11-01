@@ -124,6 +124,34 @@ body{
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
 }
 
+/* NOUVEAU: Conteneur Natures (coin inférieur gauche) */
+.card-natures-wrapper {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.25rem; /* Petit écart entre les logos */
+  background: rgba(12, 18, 28, 0.7);
+  border-radius: 999px; /* Forme de pilule */
+  padding: 4px 6px;
+  backdrop-filter: blur(3px);
+  border: 1px solid var(--border);
+}
+
+.card-natures-wrapper img {
+  width: 24px; /* Plus petit pour la carte */
+  height: 24px;
+  object-fit: contain;
+}
+
+/* NOUVEAU: Logo Nature dans le modal */
+.nature-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
 .card-content {
   padding: 1rem;
   border-top: 1px solid var(--border);
@@ -613,8 +641,8 @@ select.ed {
   flex-wrap: wrap;
   gap: 0.5rem 0.75rem;
   justify-content: center;
-  font-weight: 600;
-  font-size: 1.1rem;
+  /* font-weight: 600; */ /* MODIFIÉ */
+  /* font-size: 1.1rem; */ /* MODIFIÉ */
 }
 
 .ed-checkbox-group {

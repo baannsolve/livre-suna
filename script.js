@@ -282,6 +282,23 @@ function renderGrid(){
       c.classList.remove('card--deceased');
       statusBadge.classList.add('hidden');
     }
+
+    // NOUVEL AJOUT: Logos Nature sur la carte
+    const natureWrapper = c.querySelector('.card-natures-wrapper');
+    natureWrapper.innerHTML = ""; // Vider au cas où
+    if (p.chakraNatures && p.chakraNatures.length > 0) {
+      p.chakraNatures.forEach(nature => {
+        const img = document.createElement("img");
+        img.src = `natures/${nature.toLowerCase()}.png`;
+        img.alt = nature;
+        img.title = nature;
+        natureWrapper.appendChild(img);
+      });
+      natureWrapper.classList.remove('hidden');
+    } else {
+      natureWrapper.classList.add('hidden');
+    }
+    // FIN DU NOUVEL AJOUT
     
     const del = c.querySelector('.card-del');
     if(adminMode){ del.classList.remove("hidden"); }
@@ -371,11 +388,18 @@ function openModalReadOnly(p){
   const natureBox = $("#natureInfo");
   modalNatureView.innerHTML = ""; 
   if (p.chakraNatures && p.chakraNatures.length > 0) {
+    
+    // MODIFICATION DE CETTE BOUCLE
     p.chakraNatures.forEach(nature => {
-      const span = document.createElement("span");
-      span.textContent = nature;
-      modalNatureView.appendChild(span);
+      const img = document.createElement("img"); // Crée une image
+      img.src = `natures/${nature.toLowerCase()}.png`; // Définit la source
+      img.alt = nature;
+      img.title = nature; // Ajoute un titre pour le survol
+      img.classList.add("nature-logo"); // Ajoute la classe de style
+      modalNatureView.appendChild(img); // Ajoute l'image au conteneur
     });
+    // FIN DE LA MODIFICATION
+
     natureBox.classList.remove("hidden");
   } else {
     natureBox.classList.add("hidden");
