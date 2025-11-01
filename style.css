@@ -236,7 +236,6 @@ body{
 
 .info-grid {
   display: grid;
-  /* --- 1. ÉLARGISSEMENT DES BOÎTES --- */
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.5rem;
   margin: 0.75rem 0;
@@ -257,18 +256,14 @@ body{
   flex-shrink: 0;
 }
 
-/* --- 2. CORRECTION DE LA GESTION DU TEXTE --- */
 .info-grid p > span {
   flex-shrink: 1;
   min-width: 0;
   text-align: right;
-  
-  /* C'est ça qui empêche de couper les mots */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* --- FIN DES CORRECTIONS --- */
 
 .info-bio.ro {
   margin-top: 0.5rem;
@@ -304,7 +299,7 @@ body{
 
 /* Logo Kage dans le modal */
 .kage-logo-modal {
-  width: 48px; /* Un peu plus grand que sur la carte */
+  width: 48px; 
   height: 48px;
   object-fit: contain;
   flex-shrink: 0;
@@ -374,29 +369,19 @@ body{
 .admin-row{display:flex;gap:.5rem;margin-top:.75rem}
 .ghost{background:transparent;border:1px solid var(--border);color:#fff;border-radius:.6rem;padding:.5rem .8rem;cursor:pointer}
 
-/* MODIFIÉ : Styles de la barre d'outils */
+/* Styles de la barre d'outils */
 .toolbar {
   display: flex;
-  justify-content: space-between; /* Sépare le groupe de gauche et le groupe de droite */
+  justify-content: space-between; 
   align-items: center;
-  flex-wrap: wrap; /* Permet aux groupes de passer à la ligne sur petit écran */
+  flex-wrap: wrap; 
   gap: 1rem;
   padding: 0 clamp(1rem, 2.5vw, 1.5rem);
   margin: 1rem auto 0;
   max-width: 1200px;
 }
 
-/* SUPPRIMÉ : Ancien .controls-group */
-/*
-.controls-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
-}
-*/
-
-/* AJOUTÉ : Nouveau groupe pour stats + filtres */
+/* Nouveau groupe pour stats + filtres */
 .controls-group-left {
   display: flex;
   flex-wrap: wrap;
@@ -431,7 +416,6 @@ body{
   gap: .5rem;
   font-size: 0.9rem;
   color: var(--muted);
-  /* S'assure que le groupe de tri reste à droite s'il passe à la ligne */
   margin-left: auto; 
 }
 
@@ -456,7 +440,6 @@ body{
   border-color: var(--primary);
   box-shadow: 0 0 0 1px var(--primary);
 }
-/* FIN DES MODIFICATIONS DE LA TOOLBAR */
 
 
 select.ed { 
@@ -571,13 +554,12 @@ select.ed {
   gap: 0.5rem;
   padding: 0.75rem clamp(1rem, 2.5vw, 1.5rem);
   max-width: 1200px;
-  margin: 1rem auto -1rem; /* Monte pour se coller au toolbar */
-  overflow-x: auto; /* Permet de scroller horizontalement sur mobile */
+  margin: 1rem auto -1rem; 
+  overflow-x: auto; 
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin; /* Pour Firefox */
+  scrollbar-width: thin; 
 }
 
-/* Cache la barre de scroll visuellement mais la garde fonctionnelle */
 .village-tabs::-webkit-scrollbar {
   height: 4px;
 }
@@ -597,10 +579,10 @@ select.ed {
   border: 1px solid var(--border);
   background: var(--elev);
   color: var(--muted);
-  border-radius: 999px; /* Forme de pilule */
+  border-radius: 999px; 
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap; /* Empêche le texte de passer à la ligne */
+  white-space: nowrap; 
 }
 
 .village-tab:hover {
@@ -613,4 +595,66 @@ select.ed {
   background: var(--primary);
   border-color: var(--primary);
   box-shadow: 0 0 0 2px var(--ring);
+}
+
+
+/* AJOUT : Styles pour les Natures de Chakra */
+.info-box-natures {
+  background: var(--elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+.info-box-natures strong {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+#modalNatureView {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.ed-checkbox-group {
+  background: var(--elev);
+  border: 1px solid var(--border);
+  border-radius: .6rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.ed-checkbox-group > label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.checkbox-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+.checkbox-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+.checkbox-options input {
+  accent-color: var(--primary);
+  width: 1.1rem;
+  height: 1.1rem;
+}
+.checkbox-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  opacity: 0.8;
+  margin: 0.75rem 0 0;
+  text-align: center;
 }

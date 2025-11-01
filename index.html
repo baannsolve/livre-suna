@@ -97,6 +97,15 @@
               <option value="Karatachi">Karatachi</option>
             </select>
             
+            <select id="natureFilter" class="filter-select" aria-label="Filtrer par nature de chakra">
+              <option value="">Toutes les natures</option>
+              <option value="Katon">Katon</option>
+              <option value="Suiton">Suiton</option>
+              <option value="Raiton">Raiton</option>
+              <option value="Doton">Doton</option>
+              <option value="Futon">Futon</option>
+            </select>
+
             <select id="statusFilter" class="filter-select" aria-label="Filtrer par statut">
               <option value="">Statut (Tous)</option>
               <option value="alive" selected>En vie</option>
@@ -185,6 +194,13 @@
               <span id="modalKekkeiView" class="kg-name-view"></span> 
             </div>
           </div>
+          
+          <div id="natureInfo" class="info-box-natures ro hidden">
+            <strong>Natures de Chakra:</strong>
+            <div id="modalNatureView">
+              </div>
+          </div>
+
           <div id="modalInfoView" class="ro info-bio hidden"></div>
           
           <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
@@ -255,6 +271,18 @@
             <option value="Yokushin">Yokushin</option>
             <option value="Karatachi">Karatachi</option>
           </select>
+
+          <div id="natureInput" class="ed ed-checkbox-group hidden">
+            <label>Natures de Chakra :</label>
+            <div class="checkbox-options">
+              <label><input type="checkbox" name="chakraNatures" value="Katon"> Katon</label>
+              <label><input type="checkbox" name="chakraNatures" value="Futon"> Futon</label>
+              <label><input type="checkbox" name="chakraNatures" value="Raiton"> Raiton</label>
+              <label><input type="checkbox" name="chakraNatures" value="Doton"> Doton</label>
+              <label><input type="checkbox" name="chakraNatures" value="Suiton"> Suiton</label>
+            </div>
+            <p class="checkbox-hint">Maximum 2 natures.</p>
+          </div>
 
           <div id="informationInput" class="ed ed-textarea hidden" 
                contenteditable="true" 

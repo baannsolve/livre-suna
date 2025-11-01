@@ -3,13 +3,14 @@
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
-let VILLAGE_FILTER = "Suna"; // MODIFIÉ : Défaut "Suna"
+let VILLAGE_FILTER = "Suna"; 
 let KEKKEI_FILTER = "";
 let CLAN_FILTER = "";
-let STATUS_FILTER = "alive"; // MODIFIÉ : Défaut "alive"
+let STATUS_FILTER = "alive"; 
+let NATURE_FILTER = ""; // AJOUT : Variable pour le filtre de nature
 let isAdmin = false;
 let adminMode = false;
-let currentSortKey = "firstName"; // MODIFIÉ : Défaut "firstName"
+let currentSortKey = "firstName"; 
 
 const PLACEHOLDER_IMG = "https://placehold.co/600x600/0c121c/8b97a6?text=Photo";
 
@@ -29,18 +30,21 @@ const sortButtons = {
   firstName: $("#sortFirstNameBtn"),
 };
 
-// Sélecteur pour le conteneur des onglets
 const villageTabsContainer = $(".village-tabs"); 
-
 const kekkeiFilter = $("#kekkeiFilter");
 const clanFilter = $("#clanFilter");
 const statusFilter = $("#statusFilter"); 
+const natureFilter = $("#natureFilter"); // AJOUT : Sélecteur pour le filtre de nature
 const clearFiltersBtn = $("#clearFiltersBtn");
 
 const personModal = $("#personModal");
 const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
 const statusInput = $("#statusInput");
+
+// AJOUT : Sélecteurs pour les Natures de Chakra
+const modalNatureView = $("#modalNatureView"); // Conteneur d'affichage (lecture)
+const natureInput = $("#natureInput"); // Conteneur des cases à cocher (édition)
 
 const loginModal = $("#loginModal");
 const loginForm = $("#loginForm");
@@ -131,7 +135,7 @@ function getKageImage(village) {
     case 'iwa':
       return 'tsuchikage.png';
     default:
-      return null; // Pas d'image pour les autres villages
+      return null; 
   }
 }
 
@@ -145,18 +149,13 @@ function personMatches(p, term){
 function sortPeople() {
   PEOPLE.sort((a, b) => {
     // 1. Priorité au statut (en vie vs décédé)
-    // Une personne est considérée "en vie" si son statut N'EST PAS 'deceased'
     const aAlive = a.status !== 'deceased';
     const bAlive = b.status !== 'deceased';
 
-    if (aAlive && !bAlive) {
-      return -1; // a (en vie) passe avant b (décédé)
-    }
-    if (!aAlive && bAlive) {
-      return 1; // a (décédé) passe après b (en vie)
-    }
+    if (aAlive && !bAlive) return -1; 
+    if (!aAlive && bAlive) return 1; 
 
-    // 2. Si statuts identiques (les 2 en vie ou les 2 décédés), trier par nom
+    // 2. Si statuts identiques, trier par nom
     const aFirst = (a.firstName || '').toLowerCase();
     const bFirst = (b.firstName || '').toLowerCase();
     const aLast = (a.lastName || '').toLowerCase();
@@ -165,7 +164,6 @@ function sortPeople() {
     if (currentSortKey === 'firstName') {
       return aFirst.localeCompare(bFirst) || aLast.localeCompare(bLast);
     }
-    // Par défaut (ou si currentSortKey === 'lastName')
     return aLast.localeCompare(bLast) || aFirst.localeCompare(bFirst);
   });
 }
@@ -180,31 +178,23 @@ function renderGrid(){
     const searchMatch = personMatches(p, FILTER);
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
     
-    // --- Logique de filtre pour gérer "Aucun" (IS_NULL) ---
     let kekkeiMatch = true;
-    if (KEKKEI_FILTER === "IS_NULL") {
-      kekkeiMatch = !p.kekkeiGenkai; // Vrai si p.kekkeiGenkai est null ou ""
-    } else if (KEKKEI_FILTER) { // Vrai si un filtre autre que "Tous" est
-      kekkeiMatch = p.kekkeiGenkai === KEKKEI_FILTER;
-    }
+    if (KEKKEI_FILTER === "IS_NULL") kekkeiMatch = !p.kekkeiGenkai;
+    else if (KEKKEI_FILTER) kekkeiMatch = p.kekkeiGenkai === KEKKEI_FILTER;
 
     let clanMatch = true;
-    if (CLAN_FILTER === "IS_NULL") {
-      clanMatch = !p.clan; // Vrai si p.clan est null ou ""
-    } else if (CLAN_FILTER) {
-      clanMatch = p.clan === CLAN_FILTER;
-    }
-    // --- FIN DE LA CORRECTION ---
+    if (CLAN_FILTER === "IS_NULL") clanMatch = !p.clan;
+    else if (CLAN_FILTER) clanMatch = p.clan === CLAN_FILTER;
 
-    // Logique de filtre pour le statut
     let statusMatch = true;
-    if (STATUS_FILTER === 'alive') {
-      statusMatch = p.status !== 'deceased'; // 'alive' ou 'null'
-    } else if (STATUS_FILTER === 'deceased') {
-      statusMatch = p.status === 'deceased';
-    }
+    if (STATUS_FILTER === 'alive') statusMatch = p.status !== 'deceased';
+    else if (STATUS_FILTER === 'deceased') statusMatch = p.status === 'deceased';
 
-    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch; 
+    // AJOUT : Logique de filtre pour les natures
+    // Vérifie si p.chakraNatures (l'array) inclut la nature filtrée
+    const natureMatch = !NATURE_FILTER || (p.chakraNatures && p.chakraNatures.includes(NATURE_FILTER));
+
+    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch && natureMatch; // MODIFIÉ
   });
   
   filtered.forEach(p=>{
@@ -215,7 +205,7 @@ function renderGrid(){
     img.alt = `${p.firstName} ${p.lastName}`;
     c.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
     
-    // Logique du logo KG
+    // Logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
     if (p.kekkeiGenkai && p.kekkeiGenkai !== 'Aucun') { 
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
@@ -225,7 +215,7 @@ function renderGrid(){
       kgLogo.classList.add('hidden');
     }
 
-    // Logique du logo Village
+    // Logo Village
     const villageLogo = c.querySelector('.card-village-logo');
     if (p.village) {
       villageLogo.src = `villages/${p.village.toLowerCase()}.png`;
@@ -235,7 +225,7 @@ function renderGrid(){
       villageLogo.classList.add('hidden');
     }
     
-    // Logique du logo de Rang
+    // Logo Rang
     const rankLogo = c.querySelector('.card-rank-logo');
     const rankImg = getRankImage(p.grade);
     if (rankImg) {
@@ -246,7 +236,7 @@ function renderGrid(){
       rankLogo.classList.add('hidden');
     }
     
-    // Logique du logo Kage (chapeau)
+    // Logo Kage
     const kageLogo = c.querySelector('.card-kage-logo');
     if (p.grade === 'Kage') {
       const kageImg = getKageImage(p.village); 
@@ -261,7 +251,7 @@ function renderGrid(){
       kageLogo.classList.add('hidden'); 
     }
 
-    // Gère le statut décédé
+    // Statut décédé
     const statusBadge = c.querySelector('.card-status-badge');
     if (p.status === 'deceased') {
       c.classList.add('card--deceased');
@@ -279,12 +269,11 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// CORRIGÉ : Logique de masquage des champs N/A
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   
-  // Logique Kage (chapeau) pour le modal
+  // Logo Kage
   const kageLogoModal = $("#modalKageLogoView");
   if (p.grade === 'Kage') {
     const kageImg = getKageImage(p.village);
@@ -317,7 +306,7 @@ function openModalReadOnly(p){
     gradeInfo.classList.add("hidden");
   }
 
-  // Logique "Clan"
+  // Clan
   const clanInfo = $("#clanInfo");
   $("#modalClanView").textContent = p.clan || "Aucun"; 
   clanInfo.classList.remove("hidden"); 
@@ -329,20 +318,17 @@ function openModalReadOnly(p){
   if (p.village) {
     const villageName = p.village;
     const logoSrc = `villages/${villageName.toLowerCase()}.png`;
-    
     villageLogo.src = logoSrc; 
     villageLogo.alt = villageName; 
     villageLogo.classList.remove("hidden"); 
-    
     $("#modalVillageView").textContent = villageName; 
-    
     villageInfo.classList.remove("hidden"); 
   } else {
     villageLogo.classList.add("hidden"); 
     villageInfo.classList.add("hidden"); 
   }
 
-  // Logique "Kekkei Genkai"
+  // Kekkei Genkai
   const kekkeiBox = $("#kekkeiInfo");
   const kekkeiLogo = $("#modalKekkeiLogo");
   const kekkeiView = $("#modalKekkeiView"); 
@@ -359,6 +345,20 @@ function openModalReadOnly(p){
   }
   kekkeiBox.classList.remove("hidden"); 
   
+  // AJOUT : Affichage des Natures de Chakra
+  const natureBox = $("#natureInfo");
+  modalNatureView.innerHTML = ""; // Vider l'ancien contenu
+  if (p.chakraNatures && p.chakraNatures.length > 0) {
+    p.chakraNatures.forEach(nature => {
+      const span = document.createElement("span");
+      span.textContent = nature;
+      modalNatureView.appendChild(span);
+    });
+    natureBox.classList.remove("hidden");
+  } else {
+    natureBox.classList.add("hidden");
+  }
+
   // Statut
   if (p.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
@@ -371,7 +371,7 @@ function openModalReadOnly(p){
   // Information
   const infoView = $("#modalInfoView");
   if (p.information) {
-    infoView.innerHTML = p.information; // Utilise innerHTML
+    infoView.innerHTML = p.information; 
     infoView.classList.remove("hidden");
   } else {
     infoView.classList.add("hidden");
@@ -388,7 +388,6 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// CORRIGÉ : Gère le 'null' (en mettant "") pour tous les champs ENUM
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -399,8 +398,20 @@ function openModalEdit(p){
   $("#villageInput").value = p?.village || "";
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; 
   $("#clanInput").value = p?.clan || "";
-  $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
-  $("#statusInput").value = p?.status || ""; // Gère 'null'
+  
+  // AJOUT : Logique pour cocher les cases des natures
+  // 1. Décocher tout
+  $$("#natureInput input[type='checkbox']").forEach(cb => cb.checked = false);
+  // 2. Cocher celles de la personne
+  if (p?.chakraNatures) {
+    p.chakraNatures.forEach(nature => {
+      const cb = $(`#natureInput input[value="${nature}"]`);
+      if (cb) cb.checked = true;
+    });
+  }
+
+  $("#informationInput").innerHTML = p?.information || ""; 
+  $("#statusInput").value = p?.status || ""; 
   
   if (p?.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
@@ -449,7 +460,6 @@ personModal.addEventListener("cancel", (e) => {
   e.preventDefault();
 });
 
-// --- FIX #3 : Réinitialisation de la modale à la fermeture ---
 personModal.addEventListener("close", () => {
   currentEditingId = null;
   photoDataUrl = null;
@@ -629,8 +639,11 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// --- FIX #4 : CORRECTION BUG RAFRAÎCHISSEMENT (STALE DATA) ---
+
 $("#saveBtn").addEventListener("click", async ()=>{
+  // AJOUT : Lire les cases à cocher des natures
+  const selectedNatures = $$("#natureInput input:checked").map(cb => cb.value);
+
   const p = {
     id: currentEditingId || undefined, 
     firstName: $("#firstNameInput").value.trim(),
@@ -640,6 +653,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
+    chakraNatures: selectedNatures.length > 0 ? selectedNatures : null, // AJOUT
     information: $("#informationInput").innerHTML.trim() || null,
     status: $("#statusInput").value || null
   };
@@ -744,18 +758,25 @@ statusFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
+// AJOUT : Écouteur pour le filtre de nature
+natureFilter.addEventListener("input", (e) => {
+  NATURE_FILTER = e.target.value;
+  renderGrid();
+});
+
 // MODIFIÉ : Mettre à jour le bouton d'effacement
 clearFiltersBtn.addEventListener("click", () => {
-  // NOTE : On réinitialise à "zéro" (tout), pas aux nouveaux défauts.
-  // C'est le comportement attendu d'un bouton "effacer".
+  // Réinitialise tout à "zéro"
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
   CLAN_FILTER = "";
   STATUS_FILTER = ""; 
+  NATURE_FILTER = ""; // AJOUT
   
   kekkeiFilter.value = "";
   clanFilter.value = "";
   statusFilter.value = ""; 
+  natureFilter.value = ""; // AJOUT
   
   // Réinitialiser les onglets de village
   const oldActive = villageTabsContainer.querySelector(".active");
@@ -768,14 +789,22 @@ clearFiltersBtn.addEventListener("click", () => {
 });
 
 
+// AJOUT : Logique pour limiter les cases à cocher à 2
+natureInput.addEventListener('change', (e) => {
+  if (e.target.type !== 'checkbox') return; // S'assurer que c'est bien une case
+
+  const checkedCount = $$("#natureInput input:checked").length;
+  if (checkedCount > 2) {
+    alert("Vous ne pouvez sélectionner que 2 natures de chakra au maximum.");
+    e.target.checked = false; // Annuler la coche
+  }
+});
+
+
 // Init
 async function init() {
   await loadPeople();
   await checkSession();
-  
-  // NOTE : Pas besoin de code JS supplémentaire ici,
-  // car 'index.html' définit l'état visuel
-  // et 'script.js' (variables globales) définit l'état logique.
 }
 
 init();
