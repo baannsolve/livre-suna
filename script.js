@@ -137,8 +137,23 @@ function renderGrid(){
   const filtered = PEOPLE.filter(p => {
     const searchMatch = personMatches(p, FILTER);
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
-    const kekkeiMatch = !KEKKEI_FILTER || p.kekkeiGenkai === KEKKEI_FILTER;
-    const clanMatch = !CLAN_FILTER || p.clan === CLAN_FILTER;
+    
+    // --- CORRIGÉ : Logique de filtre pour gérer "Aucun" (IS_NULL) ---
+    let kekkeiMatch = true;
+    if (KEKKEI_FILTER === "IS_NULL") {
+      kekkeiMatch = !p.kekkeiGenkai; // Vrai si p.kekkeiGenkai est null ou ""
+    } else if (KEKKEI_FILTER) { // Vrai si un filtre autre que "Tous" est
+      kekkeiMatch = p.kekkeiGenkai === KEKKEI_FILTER;
+    }
+
+    let clanMatch = true;
+    if (CLAN_FILTER === "IS_NULL") {
+      clanMatch = !p.clan; // Vrai si p.clan est null ou ""
+    } else if (CLAN_FILTER) {
+      clanMatch = p.clan === CLAN_FILTER;
+    }
+    // --- FIN DE LA CORRECTION ---
+
     return searchMatch && villageMatch && kekkeiMatch && clanMatch;
   });
   
@@ -152,7 +167,7 @@ function renderGrid(){
     
     // Logique du logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
-    // MODIFIÉ : N'affiche pas le logo si c'est "Aucun"
+    // On n'affiche pas le logo si c'est "Aucun" (logique inchangée)
     if (p.kekkeiGenkai && p.kekkeiGenkai !== 'Aucun') { 
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
       kgLogo.alt = p.kekkeiGenkai;
@@ -223,50 +238,47 @@ function openModalReadOnly(p){
     gradeInfo.classList.add("hidden");
   }
 
-  // MODIFIÉ : Logique "Clan"
+  // Logique "Clan" (Inchangée, elle était correcte)
   const clanInfo = $("#clanInfo");
-  // Affiche "Aucun" si p.clan est null ou vide
   $("#modalClanView").textContent = p.clan || "Aucun"; 
-  clanInfo.classList.remove("hidden"); // Affiche TOUJOURS la ligne
+  clanInfo.classList.remove("hidden"); 
 
   
   // Village -- FIX #1 : CORRECTION ALIGNEMENT LOGO
   const villageInfo = $("#villageInfo");
-  const villageLogo = $("#modalVillageLogo"); // On sélectionne la nouvelle balise img
+  const villageLogo = $("#modalVillageLogo"); 
   if (p.village) {
     const villageName = p.village;
     const logoSrc = `villages/${villageName.toLowerCase()}.png`;
     
-    villageLogo.src = logoSrc; // On définit la source de l'image
-    villageLogo.alt = villageName; // On définit le alt
-    villageLogo.classList.remove("hidden"); // On affiche l'image
+    villageLogo.src = logoSrc; 
+    villageLogo.alt = villageName; 
+    villageLogo.classList.remove("hidden"); 
     
-    $("#modalVillageView").textContent = villageName; // On met le nom dans le span
+    $("#modalVillageView").textContent = villageName; 
     
-    villageInfo.classList.remove("hidden"); // On affiche toute la ligne
+    villageInfo.classList.remove("hidden"); 
   } else {
-    villageLogo.classList.add("hidden"); // On masque l'image
-    villageInfo.classList.add("hidden"); // On masque toute la ligne
+    villageLogo.classList.add("hidden"); 
+    villageInfo.classList.add("hidden"); 
   }
 
-  // MODIFIÉ : Logique "Kekkei Genkai"
+  // Logique "Kekkei Genkai" (Inchangée, elle était correcte)
   const kekkeiBox = $("#kekkeiInfo");
   const kekkeiLogo = $("#modalKekkeiLogo");
-  const kekkeiView = $("#modalKekkeiView"); // Notre nouveau span
-  const kgName = p.kekkeiGenkai || "Aucun"; // Définit "Aucun" si null ou vide
+  const kekkeiView = $("#modalKekkeiView"); 
+  const kgName = p.kekkeiGenkai || "Aucun"; 
 
   if (kgName && kgName !== 'Aucun') {
-    // Il y a un KG, on affiche le logo et le nom
     kekkeiLogo.src = `kg/${kgName.toLowerCase()}.png`;
     kekkeiLogo.alt = kgName;
     kekkeiLogo.classList.remove("hidden");
     kekkeiView.textContent = kgName;
   } else {
-    // C'est "Aucun", on cache le logo et on affiche "Aucun"
     kekkeiLogo.classList.add("hidden");
     kekkeiView.textContent = "Aucun";
   }
-  kekkeiBox.classList.remove("hidden"); // Affiche TOUJOURS le bloc
+  kekkeiBox.classList.remove("hidden"); 
   
   // Statut
   if (p.status === 'deceased') {
@@ -290,13 +302,8 @@ function openModalReadOnly(p){
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden"); 
 
-  // --- FIX #2 : CORRECTION BUG AFFICHAGE CHAMPS VIDES ---
-  // On affiche le nom et la grille d'info (Grade/Village/Clan)
   $("#modalNameView").classList.remove("hidden");
   $(".info-grid.ro").classList.remove("hidden");
-  
-  // Les autres .ro (#kekkeiInfo et #modalInfoView) sont déjà gérés
-  // par leur propre logique if/else plus haut dans la fonction
   
   personModal.showModal();
   requestAnimationFrame(() => $("#modalClose").focus());
@@ -311,13 +318,13 @@ function openModalEdit(p){
   $("#lastNameInput").value = p?.lastName || "";
   $("#gradeInput").value = p?.grade || "";
   $("#villageInput").value = p?.village || "";
-  // CI-DESSOUS : Gère "Aucun" si c'est la valeur, ou "" si c'est null
+  // CI-DESSOUS : Si p.clan est null, il mettra ""
+  // ce qui sélectionnera notre option <option value="">Aucun</option>
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; 
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
   $("#statusInput").value = p?.status || ""; // Gère 'null'
   
-  // --- FIX #3 : Gère l'affichage du statut en mode édition ---
   if (p?.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
     $("#modalNameView").classList.add('deceased');
@@ -367,11 +374,8 @@ personModal.addEventListener("cancel", (e) => {
 
 // --- FIX #3 : Réinitialisation de la modale à la fermeture ---
 personModal.addEventListener("close", () => {
-  // Réinitialiser l'état pour éviter les fuites de données entre les sessions
   currentEditingId = null;
   photoDataUrl = null;
-  
-  // Réinitialiser les classes de statut (sera ré-appliqué à l'ouverture)
   $("#modalPhoto").classList.remove('deceased');
   $("#modalNameView").classList.remove('deceased');
 });
@@ -556,7 +560,8 @@ $("#saveBtn").addEventListener("click", async ()=>{
     photoUrl: photoDataUrl || null,
     grade: $("#gradeInput").value || null,
     village: $("#villageInput").value || null,
-    // CI-DESSOUS : Enregistre "Aucun" si sélectionné, ou null si "---"
+    // CI-DESSOUS : Si la valeur est "" (notre option "Aucun"), 
+    // || null la transformera en NULL pour la BDD.
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
     information: $("#informationInput").innerHTML.trim() || null,
