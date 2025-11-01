@@ -233,6 +233,17 @@ body{
   margin-right: 0.5em;
   flex-shrink: 0;
 }
+
+/* --- CORRECTION AJOUTÉE ICI --- */
+.info-grid p > span {
+  flex-shrink: 1; /* Autorise cet élément à rétrécir */
+  min-width: 0;     /* Correction CLÉ : autorise à rétrécir sous sa taille de base */
+  overflow-wrap: break-word; /* Coupe les mots longs pour qu'ils aillent à la ligne */
+  word-break: break-word;  /* Alternative pour la coupe de mot */
+  text-align: right; /* Aligne le texte à droite de la boîte, plus propre */
+}
+/* --- FIN DE LA CORRECTION --- */
+
 .info-bio.ro {
   margin-top: 0.5rem;
   line-height: 1.6;
