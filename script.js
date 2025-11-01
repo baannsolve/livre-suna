@@ -207,10 +207,10 @@ function openModalReadOnly(p){
     $("#modalKekkeiLogo").alt = kgName;
     
     kekkeiContent.classList.remove("hidden");
-    kekkeiBox.classList.remove("hidden");
+    kekkeiBox.classList.remove("hidden"); // Affiche la boîte
   } else {
     kekkeiContent.classList.add("hidden");
-    kekkeiBox.classList.add("hidden");
+    kekkeiBox.classList.add("hidden"); // Cache toute la boîte
   }
   
   // Statut
