@@ -1,4 +1,4 @@
-// script.js (Version avec éditeur de texte et correctif ENUM)
+// script.js (Version avec masquage des champs N/A et correctif ENUM)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -84,7 +84,7 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
   });
 }
 
-// NOUVELLE FONCTION : Traduit le grade en image de rang
+// Fonction pour traduire le grade en image de rang
 function getRankImage(grade) {
   if (!grade) return null;
   const g = grade.toLowerCase();
@@ -271,7 +271,7 @@ function openModalReadOnly(p){
   // Information
   const infoView = $("#modalInfoView");
   if (p.information) {
-    infoView.innerHTML = p.information; // MODIFIÉ : Utilise innerHTML
+    infoView.innerHTML = p.information; // Utilise innerHTML
     infoView.classList.remove("hidden");
   } else {
     infoView.classList.add("hidden");
@@ -286,6 +286,7 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
+// CORRIGÉ : Gère le 'null' (en mettant "") pour tous les champs ENUM
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -296,8 +297,8 @@ function openModalEdit(p){
   $("#villageInput").value = p?.village || "";
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
   $("#clanInput").value = p?.clan || "";
-  $("#informationInput").innerHTML = p?.information || ""; // MODIFIÉ : Utilise innerHTML
-  $("#statusInput").value = p?.status || "";
+  $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
+  $("#statusInput").value = p?.status || ""; // Gère 'null'
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -520,7 +521,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
-    information: $("#informationInput").innerHTML.trim() || null, // MODIFIÉ : Utilise innerHTML
+    information: $("#informationInput").innerHTML.trim() || null,
     status: $("#statusInput").value || null
   };
   

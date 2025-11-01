@@ -146,7 +146,7 @@ body{
   flex-grow: 1;
 }
 
-/* Logo de Rang sur la carte */
+/* Logo de Rang sur la carte (plus grand) */
 .card-rank-logo {
   width: 44px;
   height: 44px;
@@ -233,36 +233,18 @@ body{
   margin-right: 0.5em;
   flex-shrink: 0;
 }
-
-/* MODIFIÉ : Changement de #modalInfoView.ro en .info-bio */
 .info-bio.ro {
   margin-top: 0.5rem;
   line-height: 1.6;
-  white-space: pre-wrap; /* Garde les sauts de ligne simples */
-  word-wrap: break-word; /* Coupe les longs mots */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
-/* NOUVEAU : Gère le HTML (gras, listes) de la bio */
-.info-bio.ro p {
-  margin: 0 0 1em 0;
-}
-.info-bio.ro p:last-child {
-  margin-bottom: 0;
-}
-.info-bio.ro strong {
-  color: var(--text);
-  font-weight: 600;
-}
-.info-bio.ro em {
-  color: var(--ring);
-  font-style: italic;
-}
-.info-bio.ro ul, .info-bio.ro ol {
-  padding-left: 1.5rem;
-  margin: 0.5rem 0;
-}
-.info-bio.ro li {
-  margin-bottom: 0.25rem;
-}
+.info-bio.ro p { margin: 0 0 1em 0; }
+.info-bio.ro p:last-child { margin-bottom: 0; }
+.info-bio.ro strong { color: var(--text); font-weight: 600; }
+.info-bio.ro em { color: var(--ring); font-style: italic; }
+.info-bio.ro ul, .info-bio.ro ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+.info-bio.ro li { margin-bottom: 0.25rem; }
 
 
 /* Logo de Rang dans le modal */
@@ -323,7 +305,6 @@ body{
   margin-bottom: 0.75rem;
 }
 
-/* NOUVEAU : Style pour l'éditeur de texte */
 .ed-textarea {
   min-height: 120px;
   resize: vertical;
@@ -334,7 +315,6 @@ body{
   margin-bottom: 0.75rem;
   cursor: text;
 }
-/* NOUVEAU : Faux placeholder pour le div éditable */
 .ed-textarea:empty:before {
   content: attr(placeholder);
   color: var(--muted);
@@ -428,7 +408,6 @@ select.ed {
   padding-right: 2.5rem;
 }
 
-/* Style de 'textarea' supprimé car il est remplacé */
 
 .modal-close {
   position: absolute;
