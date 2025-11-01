@@ -7,7 +7,7 @@ let VILLAGE_FILTER = "Suna";
 let KEKKEI_FILTER = "";
 let CLAN_FILTER = "";
 let STATUS_FILTER = "alive"; 
-let NATURE_FILTER = ""; // AJOUT : Variable pour le filtre de nature
+let NATURE_FILTER = ""; 
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "firstName"; 
@@ -34,7 +34,7 @@ const villageTabsContainer = $(".village-tabs");
 const kekkeiFilter = $("#kekkeiFilter");
 const clanFilter = $("#clanFilter");
 const statusFilter = $("#statusFilter"); 
-const natureFilter = $("#natureFilter"); // AJOUT : Sélecteur pour le filtre de nature
+const natureFilter = $("#natureFilter"); 
 const clearFiltersBtn = $("#clearFiltersBtn");
 
 const personModal = $("#personModal");
@@ -42,9 +42,8 @@ const dropZone = $("#dropZone");
 const photoFile = $("#photoFile");
 const statusInput = $("#statusInput");
 
-// AJOUT : Sélecteurs pour les Natures de Chakra
-const modalNatureView = $("#modalNatureView"); // Conteneur d'affichage (lecture)
-const natureInput = $("#natureInput"); // Conteneur des cases à cocher (édition)
+const modalNatureView = $("#modalNatureView"); 
+const natureInput = $("#natureInput"); 
 
 const loginModal = $("#loginModal");
 const loginForm = $("#loginForm");
@@ -145,17 +144,41 @@ function personMatches(p, term){
   return hay.includes(term.toLowerCase());
 }
 
-// Ajout du tri par statut (en vie / décédé)
+// AJOUT : Fonction d'aide pour donner une valeur numérique aux rangs
+function getRankSortValue(grade) {
+  if (!grade) return 0;
+  const g = grade.toLowerCase();
+  switch (g) {
+    case 'kage': return 6; // SS
+    case 'jonin':
+    case 'commandant jonin': return 5; // S
+    case 'chunin confirmé':
+    case 'tokubetsu jonin': return 4; // A
+    case 'tokubetsu chunin':
+    case 'chunin': return 3; // B
+    case 'genin confirmé': return 2; // C
+    case 'genin': return 1; // D
+    default: return 0;
+  }
+}
+
+// MODIFIÉ : Ajout du tri par Rang en priorité
 function sortPeople() {
   PEOPLE.sort((a, b) => {
-    // 1. Priorité au statut (en vie vs décédé)
+    // --- Sort Criterion 1: Rank (SS -> D) ---
+    const aRank = getRankSortValue(a.grade);
+    const bRank = getRankSortValue(b.grade);
+    if (aRank !== bRank) {
+      return bRank - aRank; // bRank - aRank pour un tri descendant (SS premier)
+    }
+
+    // --- Sort Criterion 2: Status (En vie -> Décédé) ---
     const aAlive = a.status !== 'deceased';
     const bAlive = b.status !== 'deceased';
+    if (aAlive && !bAlive) return -1;
+    if (!aAlive && bAlive) return 1;
 
-    if (aAlive && !bAlive) return -1; 
-    if (!aAlive && bAlive) return 1; 
-
-    // 2. Si statuts identiques, trier par nom
+    // --- Sort Criterion 3: Name (selon currentSortKey) ---
     const aFirst = (a.firstName || '').toLowerCase();
     const bFirst = (b.firstName || '').toLowerCase();
     const aLast = (a.lastName || '').toLowerCase();
@@ -164,6 +187,7 @@ function sortPeople() {
     if (currentSortKey === 'firstName') {
       return aFirst.localeCompare(bFirst) || aLast.localeCompare(bLast);
     }
+    // Par défaut (ou si currentSortKey === 'lastName')
     return aLast.localeCompare(bLast) || aFirst.localeCompare(bFirst);
   });
 }
@@ -190,11 +214,9 @@ function renderGrid(){
     if (STATUS_FILTER === 'alive') statusMatch = p.status !== 'deceased';
     else if (STATUS_FILTER === 'deceased') statusMatch = p.status === 'deceased';
 
-    // AJOUT : Logique de filtre pour les natures
-    // Vérifie si p.chakraNatures (l'array) inclut la nature filtrée
     const natureMatch = !NATURE_FILTER || (p.chakraNatures && p.chakraNatures.includes(NATURE_FILTER));
 
-    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch && natureMatch; // MODIFIÉ
+    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch && natureMatch; 
   });
   
   filtered.forEach(p=>{
@@ -345,9 +367,9 @@ function openModalReadOnly(p){
   }
   kekkeiBox.classList.remove("hidden"); 
   
-  // AJOUT : Affichage des Natures de Chakra
+  // Affichage des Natures de Chakra
   const natureBox = $("#natureInfo");
-  modalNatureView.innerHTML = ""; // Vider l'ancien contenu
+  modalNatureView.innerHTML = ""; 
   if (p.chakraNatures && p.chakraNatures.length > 0) {
     p.chakraNatures.forEach(nature => {
       const span = document.createElement("span");
@@ -399,10 +421,8 @@ function openModalEdit(p){
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; 
   $("#clanInput").value = p?.clan || "";
   
-  // AJOUT : Logique pour cocher les cases des natures
-  // 1. Décocher tout
+  // Logique pour cocher les cases des natures
   $$("#natureInput input[type='checkbox']").forEach(cb => cb.checked = false);
-  // 2. Cocher celles de la personne
   if (p?.chakraNatures) {
     p.chakraNatures.forEach(nature => {
       const cb = $(`#natureInput input[value="${nature}"]`);
@@ -641,7 +661,6 @@ document.addEventListener("paste", (e)=>{
 
 
 $("#saveBtn").addEventListener("click", async ()=>{
-  // AJOUT : Lire les cases à cocher des natures
   const selectedNatures = $$("#natureInput input:checked").map(cb => cb.value);
 
   const p = {
@@ -653,7 +672,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
-    chakraNatures: selectedNatures.length > 0 ? selectedNatures : null, // AJOUT
+    chakraNatures: selectedNatures.length > 0 ? selectedNatures : null, 
     information: $("#informationInput").innerHTML.trim() || null,
     status: $("#statusInput").value || null
   };
@@ -758,25 +777,25 @@ statusFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
-// AJOUT : Écouteur pour le filtre de nature
+// Écouteur pour le filtre de nature
 natureFilter.addEventListener("input", (e) => {
   NATURE_FILTER = e.target.value;
   renderGrid();
 });
 
-// MODIFIÉ : Mettre à jour le bouton d'effacement
+// Mettre à jour le bouton d'effacement
 clearFiltersBtn.addEventListener("click", () => {
   // Réinitialise tout à "zéro"
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
   CLAN_FILTER = "";
   STATUS_FILTER = ""; 
-  NATURE_FILTER = ""; // AJOUT
+  NATURE_FILTER = ""; 
   
   kekkeiFilter.value = "";
   clanFilter.value = "";
   statusFilter.value = ""; 
-  natureFilter.value = ""; // AJOUT
+  natureFilter.value = ""; 
   
   // Réinitialiser les onglets de village
   const oldActive = villageTabsContainer.querySelector(".active");
@@ -789,14 +808,14 @@ clearFiltersBtn.addEventListener("click", () => {
 });
 
 
-// AJOUT : Logique pour limiter les cases à cocher à 2
+// Logique pour limiter les cases à cocher à 2
 natureInput.addEventListener('change', (e) => {
-  if (e.target.type !== 'checkbox') return; // S'assurer que c'est bien une case
+  if (e.target.type !== 'checkbox') return; 
 
   const checkedCount = $$("#natureInput input:checked").length;
   if (checkedCount > 2) {
     alert("Vous ne pouvez sélectionner que 2 natures de chakra au maximum.");
-    e.target.checked = false; // Annuler la coche
+    e.target.checked = false; 
   }
 });
 

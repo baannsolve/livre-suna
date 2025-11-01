@@ -341,10 +341,6 @@ body{
   border-radius:.6rem;
   color:#fff;
 }
-/* MODIFIÉ : Marge retirée, gérée par les conteneurs */
-.modal-info > .ed {
-  /* margin-bottom: 0.75rem; */ /* RETIRÉ */
-}
 
 .ed-textarea {
   min-height: 120px;
