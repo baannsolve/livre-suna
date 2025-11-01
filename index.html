@@ -156,17 +156,17 @@
         <div class="modal-info">
           <h2 id="modalNameView" class="ro"></h2>
           <div class="info-grid ro">
-            <p id="gradeInfo"><strong>Grade:</strong> <span id="modalGradeView"></span></p>
-            <p id="villageInfo"><strong>Village:</strong> <span id="modalVillageView"></span></p>
-            <p id="clanInfo"><strong>Clan:</strong> <span id="modalClanView"></span></p>
+            <p id="gradeInfo" class="hidden"><strong>Grade:</strong> <span id="modalGradeView"></span></p>
+            <p id="villageInfo" class="hidden"><strong>Village:</strong> <span id="modalVillageView"></span></p>
+            <p id="clanInfo" class="hidden"><strong>Clan:</strong> <span id="modalClanView"></span></p>
           </div>
-          <div class="info-box-kg ro">
+          <div id="kekkeiInfo" class="info-box-kg ro hidden">
             <strong>Kekkei Genkai:</strong>
-            <div id="modalKekkeiContent" class="hidden">
+            <div id="modalKekkeiContent">
               <img id="modalKekkeiLogo" class="kg-logo-large" src="" alt="" />
             </div>
           </div>
-          <p id="modalInfoView" class="ro"></p>
+          <p id="modalInfoView" class="ro hidden"></p>
           
           <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
           <input id="lastNameInput" class="ed hidden" placeholder="Nom">
