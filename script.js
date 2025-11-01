@@ -1,4 +1,4 @@
-// script.js (Version avec Rangs sur la carte + correctif ENUM)
+// script.js (Version avec éditeur de texte et correctif ENUM)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -129,7 +129,6 @@ function sortPeople() {
   });
 }
 
-// MODIFIÉ : Ajout du logo de Rang sur la carte
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -171,7 +170,7 @@ function renderGrid(){
       villageLogo.classList.add('hidden');
     }
     
-    // NOUVEAU : Logique du logo de Rang
+    // Logique du logo de Rang
     const rankLogo = c.querySelector('.card-rank-logo');
     const rankImg = getRankImage(p.grade);
     if (rankImg) {
@@ -200,7 +199,7 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// MODIFIÉ : Ajout de la logique pour le logo de Rang
+// CORRIGÉ : Logique de masquage des champs N/A
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
@@ -244,7 +243,7 @@ function openModalReadOnly(p){
   }
 
   // Kekkei Genkai
-  const kekkeiBox = personModal.querySelector(".info-box-kg");
+  const kekkeiBox = $("#kekkeiInfo");
   const kekkeiContent = $("#modalKekkeiContent");
   if (p.kekkeiGenkai) {
     const kgName = p.kekkeiGenkai;
@@ -272,7 +271,7 @@ function openModalReadOnly(p){
   // Information
   const infoView = $("#modalInfoView");
   if (p.information) {
-    infoView.textContent = p.information;
+    infoView.innerHTML = p.information; // MODIFIÉ : Utilise innerHTML
     infoView.classList.remove("hidden");
   } else {
     infoView.classList.add("hidden");
@@ -287,7 +286,6 @@ function openModalReadOnly(p){
   requestAnimationFrame(() => $("#modalClose").focus());
 }
 
-// CORRIGÉ : Gère le 'null' (en mettant "") pour tous les champs ENUM
 function openModalEdit(p){
   currentEditingId = p?.id || null;
   photoDataUrl = p?.photoUrl || null;
@@ -298,8 +296,8 @@ function openModalEdit(p){
   $("#villageInput").value = p?.village || "";
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
   $("#clanInput").value = p?.clan || "";
-  $("#informationInput").value = p?.information || "";
-  $("#statusInput").value = p?.status || ""; // Gère 'null'
+  $("#informationInput").innerHTML = p?.information || ""; // MODIFIÉ : Utilise innerHTML
+  $("#statusInput").value = p?.status || "";
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -522,7 +520,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     village: $("#villageInput").value || null,
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
-    information: $("#informationInput").value.trim() || null,
+    information: $("#informationInput").innerHTML.trim() || null, // MODIFIÉ : Utilise innerHTML
     status: $("#statusInput").value || null
   };
   

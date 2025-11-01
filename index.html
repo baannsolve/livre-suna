@@ -115,7 +115,6 @@
           </div>
           <div class="card-content">
             <h3 class="card-name"></h3>
-            <img class="card-rank-logo hidden" alt="Rang" src="" />
           </div>
           <button class="card-del hidden" title="Supprimer">🗑️</button>
         </article>
@@ -157,7 +156,7 @@
         <div class="modal-info">
           <h2 id="modalNameView" class="ro"></h2>
           <div class="info-grid ro">
-            <p id="gradeInfo" class="hidden"><strong>Grade:</strong> <img id="modalGradeLogo" class="grade-logo hidden" src="" alt=""> <span id="modalGradeView"></span></p>
+            <p id="gradeInfo" class="hidden"><strong>Grade:</strong> <span id="modalGradeView"></span></p>
             <p id="villageInfo" class="hidden"><strong>Village:</strong> <span id="modalVillageView"></span></p>
             <p id="clanInfo" class="hidden"><strong>Clan:</strong> <span id="modalClanView"></span></p>
           </div>
@@ -167,7 +166,7 @@
               <img id="modalKekkeiLogo" class="kg-logo-large" src="" alt="" />
             </div>
           </div>
-          <p id="modalInfoView" class="ro hidden"></p>
+          <div id="modalInfoView" class="ro info-bio hidden"></div>
           
           <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
           <input id="lastNameInput" class="ed hidden" placeholder="Nom">
@@ -238,7 +237,11 @@
             <option value="Karatachi">Karatachi</option>
           </select>
 
-          <textarea id="informationInput" class="ed hidden" placeholder="Information"></textarea>
+          <div id="informationInput" class="ed ed-textarea hidden" 
+               contenteditable="true" 
+               role="textbox" 
+               aria-multiline="true"
+               placeholder="Information (utilisez Ctrl+B pour gras, Ctrl+I pour italique)"></div>
           
           <select id="statusInput" class="ed hidden">
             <option value="">-- Sélectionner un statut --</option>

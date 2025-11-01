@@ -124,7 +124,6 @@ body{
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
 }
 
-/* MODIFIÉ : .card-content pour aligner le nom et le rang */
 .card-content {
   padding: 1rem;
   border-top: 1px solid var(--border);
@@ -144,15 +143,15 @@ body{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-grow: 1; /* Le nom prend l'espace */
+  flex-grow: 1;
 }
 
-/* NOUVEAU : Logo de Rang sur la carte */
+/* Logo de Rang sur la carte */
 .card-rank-logo {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
-  flex-shrink: 0; /* Empêche le logo de rétrécir */
+  flex-shrink: 0;
 }
 
 .card-del{position:absolute;top:.5rem;right:.5rem;border:none;border-radius:999px;background:var(--danger);color:#fff;padding:.35rem .5rem;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35); z-index: 2;}
@@ -234,12 +233,39 @@ body{
   margin-right: 0.5em;
   flex-shrink: 0;
 }
-#modalInfoView.ro {
+
+/* MODIFIÉ : Changement de #modalInfoView.ro en .info-bio */
+.info-bio.ro {
   margin-top: 0.5rem;
   line-height: 1.6;
+  white-space: pre-wrap; /* Garde les sauts de ligne simples */
+  word-wrap: break-word; /* Coupe les longs mots */
+}
+/* NOUVEAU : Gère le HTML (gras, listes) de la bio */
+.info-bio.ro p {
+  margin: 0 0 1em 0;
+}
+.info-bio.ro p:last-child {
+  margin-bottom: 0;
+}
+.info-bio.ro strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.info-bio.ro em {
+  color: var(--ring);
+  font-style: italic;
+}
+.info-bio.ro ul, .info-bio.ro ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.info-bio.ro li {
+  margin-bottom: 0.25rem;
 }
 
-/* NOUVEAU : Logo de Rang dans le modal */
+
+/* Logo de Rang dans le modal */
 .grade-logo {
   width: 32px;
   height: 32px;
@@ -296,6 +322,26 @@ body{
 .modal-info > .ed {
   margin-bottom: 0.75rem;
 }
+
+/* NOUVEAU : Style pour l'éditeur de texte */
+.ed-textarea {
+  min-height: 120px;
+  resize: vertical;
+  overflow: auto;
+  line-height: 1.6;
+  font-family: inherit;
+  font-size: inherit;
+  margin-bottom: 0.75rem;
+  cursor: text;
+}
+/* NOUVEAU : Faux placeholder pour le div éditable */
+.ed-textarea:empty:before {
+  content: attr(placeholder);
+  color: var(--muted);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 
 .underline{text-decoration:underline}
 
@@ -382,13 +428,7 @@ select.ed {
   padding-right: 2.5rem;
 }
 
-textarea.ed {
-  min-height: 120px;
-  resize: vertical;
-  font-family: inherit;
-  font-size: inherit;
-  margin-bottom: 0.75rem;
-}
+/* Style de 'textarea' supprimé car il est remplacé */
 
 .modal-close {
   position: absolute;
