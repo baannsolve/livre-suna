@@ -314,6 +314,15 @@ function openModalEdit(p){
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
   $("#statusInput").value = p?.status || ""; // Gère 'null'
+
+  // Gère l'affichage du statut
+  if (p?.status === 'deceased') {
+    $("#modalPhoto").classList.add('deceased');
+    $("#modalNameView").classList.add('deceased');
+  } else {
+    $("#modalPhoto").classList.remove('deceased');
+    $("#modalNameView").classList.remove('deceased');
+  }
   
   $$(".ro").forEach(el=>el.classList.add("hidden"));
   $$(".ed").forEach(el=>el.classList.remove("hidden"));
@@ -352,6 +361,16 @@ async function handleFiles(files) {
 $("#modalClose").addEventListener("click",()=>personModal.close());
 personModal.addEventListener("cancel", (e) => {
   e.preventDefault();
+});
+
+personModal.addEventListener("close", () => {
+  // Réinitialiser l'état pour éviter les fuites de données entre les sessions
+  currentEditingId = null;
+  photoDataUrl = null;
+  
+  // Réinitialiser les classes de statut (sera ré-appliqué à l'ouverture)
+  $("#modalPhoto").classList.remove('deceased');
+  $("#modalNameView").classList.remove('deceased');
 });
 
 
