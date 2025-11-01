@@ -152,7 +152,8 @@ function renderGrid(){
     
     // Logique du logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
-    if (p.kekkeiGenkai) {
+    // MODIFIÉ : N'affiche pas le logo si c'est "Aucun"
+    if (p.kekkeiGenkai && p.kekkeiGenkai !== 'Aucun') { 
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
       kgLogo.alt = p.kekkeiGenkai;
       kgLogo.classList.remove('hidden');
@@ -222,14 +223,12 @@ function openModalReadOnly(p){
     gradeInfo.classList.add("hidden");
   }
 
-  // Clan
+  // MODIFIÉ : Logique "Clan"
   const clanInfo = $("#clanInfo");
-  if (p.clan) {
-    $("#modalClanView").textContent = p.clan;
-    clanInfo.classList.remove("hidden");
-  } else {
-    clanInfo.classList.add("hidden");
-  }
+  // Affiche "Aucun" si p.clan est null ou vide
+  $("#modalClanView").textContent = p.clan || "Aucun"; 
+  clanInfo.classList.remove("hidden"); // Affiche TOUJOURS la ligne
+
   
   // Village -- FIX #1 : CORRECTION ALIGNEMENT LOGO
   const villageInfo = $("#villageInfo");
@@ -250,22 +249,24 @@ function openModalReadOnly(p){
     villageInfo.classList.add("hidden"); // On masque toute la ligne
   }
 
-  // Kekkei Genkai
+  // MODIFIÉ : Logique "Kekkei Genkai"
   const kekkeiBox = $("#kekkeiInfo");
-  const kekkeiContent = $("#modalKekkeiContent");
-  if (p.kekkeiGenkai) {
-    const kgName = p.kekkeiGenkai;
-    const logoSrc = `kg/${kgName.toLowerCase()}.png`;
-    
-    $("#modalKekkeiLogo").src = logoSrc;
-    $("#modalKekkeiLogo").alt = kgName;
-    
-    kekkeiContent.classList.remove("hidden");
-    kekkeiBox.classList.remove("hidden");
+  const kekkeiLogo = $("#modalKekkeiLogo");
+  const kekkeiView = $("#modalKekkeiView"); // Notre nouveau span
+  const kgName = p.kekkeiGenkai || "Aucun"; // Définit "Aucun" si null ou vide
+
+  if (kgName && kgName !== 'Aucun') {
+    // Il y a un KG, on affiche le logo et le nom
+    kekkeiLogo.src = `kg/${kgName.toLowerCase()}.png`;
+    kekkeiLogo.alt = kgName;
+    kekkeiLogo.classList.remove("hidden");
+    kekkeiView.textContent = kgName;
   } else {
-    kekkeiContent.classList.add("hidden");
-    kekkeiBox.classList.add("hidden");
+    // C'est "Aucun", on cache le logo et on affiche "Aucun"
+    kekkeiLogo.classList.add("hidden");
+    kekkeiView.textContent = "Aucun";
   }
+  kekkeiBox.classList.remove("hidden"); // Affiche TOUJOURS le bloc
   
   // Statut
   if (p.status === 'deceased') {
@@ -310,7 +311,8 @@ function openModalEdit(p){
   $("#lastNameInput").value = p?.lastName || "";
   $("#gradeInput").value = p?.grade || "";
   $("#villageInput").value = p?.village || "";
-  $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || "";
+  // CI-DESSOUS : Gère "Aucun" si c'est la valeur, ou "" si c'est null
+  $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; 
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
   $("#statusInput").value = p?.status || ""; // Gère 'null'
@@ -554,6 +556,7 @@ $("#saveBtn").addEventListener("click", async ()=>{
     photoUrl: photoDataUrl || null,
     grade: $("#gradeInput").value || null,
     village: $("#villageInput").value || null,
+    // CI-DESSOUS : Enregistre "Aucun" si sélectionné, ou null si "---"
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
     information: $("#informationInput").innerHTML.trim() || null,
