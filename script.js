@@ -3,13 +3,13 @@
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
 let FILTER = "";
-let VILLAGE_FILTER = "";
+let VILLAGE_FILTER = "Suna"; // MODIFIÉ : Défaut "Suna"
 let KEKKEI_FILTER = "";
 let CLAN_FILTER = "";
-let STATUS_FILTER = ""; // AJOUT : Variable pour le filtre de statut
+let STATUS_FILTER = "alive"; // MODIFIÉ : Défaut "alive"
 let isAdmin = false;
 let adminMode = false;
-let currentSortKey = "lastName";
+let currentSortKey = "firstName"; // MODIFIÉ : Défaut "firstName"
 
 const PLACEHOLDER_IMG = "https://placehold.co/600x600/0c121c/8b97a6?text=Photo";
 
@@ -34,7 +34,7 @@ const villageTabsContainer = $(".village-tabs");
 
 const kekkeiFilter = $("#kekkeiFilter");
 const clanFilter = $("#clanFilter");
-const statusFilter = $("#statusFilter"); // AJOUT : Sélecteur pour le filtre de statut
+const statusFilter = $("#statusFilter"); 
 const clearFiltersBtn = $("#clearFiltersBtn");
 
 const personModal = $("#personModal");
@@ -196,16 +196,15 @@ function renderGrid(){
     }
     // --- FIN DE LA CORRECTION ---
 
-    // AJOUT : Logique de filtre pour le statut
+    // Logique de filtre pour le statut
     let statusMatch = true;
     if (STATUS_FILTER === 'alive') {
       statusMatch = p.status !== 'deceased'; // 'alive' ou 'null'
     } else if (STATUS_FILTER === 'deceased') {
       statusMatch = p.status === 'deceased';
     }
-    // FIN AJOUT
 
-    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch; // MODIFIÉ
+    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch; 
   });
   
   filtered.forEach(p=>{
@@ -739,7 +738,7 @@ clanFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
-// AJOUT : Écouteur pour le filtre de statut
+// Écouteur pour le filtre de statut
 statusFilter.addEventListener("input", (e) => {
   STATUS_FILTER = e.target.value;
   renderGrid();
@@ -747,14 +746,16 @@ statusFilter.addEventListener("input", (e) => {
 
 // MODIFIÉ : Mettre à jour le bouton d'effacement
 clearFiltersBtn.addEventListener("click", () => {
+  // NOTE : On réinitialise à "zéro" (tout), pas aux nouveaux défauts.
+  // C'est le comportement attendu d'un bouton "effacer".
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
   CLAN_FILTER = "";
-  STATUS_FILTER = ""; // AJOUT
+  STATUS_FILTER = ""; 
   
   kekkeiFilter.value = "";
   clanFilter.value = "";
-  statusFilter.value = ""; // AJOUT
+  statusFilter.value = ""; 
   
   // Réinitialiser les onglets de village
   const oldActive = villageTabsContainer.querySelector(".active");
@@ -771,6 +772,10 @@ clearFiltersBtn.addEventListener("click", () => {
 async function init() {
   await loadPeople();
   await checkSession();
+  
+  // NOTE : Pas besoin de code JS supplémentaire ici,
+  // car 'index.html' définit l'état visuel
+  // et 'script.js' (variables globales) définit l'état logique.
 }
 
 init();
