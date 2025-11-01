@@ -231,15 +231,23 @@ function openModalReadOnly(p){
     clanInfo.classList.add("hidden");
   }
   
-  // Village
+// Village
   const villageInfo = $("#villageInfo");
+  const villageLogo = $("#modalVillageLogo"); // On sélectionne la nouvelle balise img
   if (p.village) {
     const villageName = p.village;
     const logoSrc = `villages/${villageName.toLowerCase()}.png`;
-    $("#modalVillageView").innerHTML = `<img class="village-logo" src="${logoSrc}" alt="${villageName}"> ${villageName}`;
-    villageInfo.classList.remove("hidden");
+    
+    villageLogo.src = logoSrc; // On définit la source de l'image
+    villageLogo.alt = villageName; // On définit le alt
+    villageLogo.classList.remove("hidden"); // On affiche l'image
+    
+    $("#modalVillageView").textContent = villageName; // On met le nom dans le span
+    
+    villageInfo.classList.remove("hidden"); // On affiche toute la ligne
   } else {
-    villageInfo.classList.add("hidden");
+    villageLogo.classList.add("hidden"); // On masque l'image
+    villageInfo.classList.add("hidden"); // On masque toute la ligne
   }
 
   // Kekkei Genkai
