@@ -142,18 +142,35 @@ function personMatches(p, term){
   return hay.includes(term.toLowerCase());
 }
 
+// MODIFIÉ : Ajout du tri par statut (en vie / décédé)
 function sortPeople() {
   PEOPLE.sort((a, b) => {
+    // 1. Priorité au statut (en vie vs décédé)
+    // Une personne est considérée "en vie" si son statut N'EST PAS 'deceased'
+    const aAlive = a.status !== 'deceased';
+    const bAlive = b.status !== 'deceased';
+
+    if (aAlive && !bAlive) {
+      return -1; // a (en vie) passe avant b (décédé)
+    }
+    if (!aAlive && bAlive) {
+      return 1; // a (décédé) passe après b (en vie)
+    }
+
+    // 2. Si statuts identiques (les 2 en vie ou les 2 décédés), trier par nom
     const aFirst = (a.firstName || '').toLowerCase();
     const bFirst = (b.firstName || '').toLowerCase();
     const aLast = (a.lastName || '').toLowerCase();
     const bLast = (b.lastName || '').toLowerCase();
+    
     if (currentSortKey === 'firstName') {
       return aFirst.localeCompare(bFirst) || aLast.localeCompare(bLast);
     }
+    // Par défaut (ou si currentSortKey === 'lastName')
     return aLast.localeCompare(bLast) || aFirst.localeCompare(bFirst);
   });
 }
+
 
 function renderGrid(){
   const frag = document.createDocumentFragment();
