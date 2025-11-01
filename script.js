@@ -285,7 +285,7 @@ function openModalReadOnly(p){
     infoView.classList.add("hidden");
   }
   
-  $$(".ro").forEach(el=>el.classList.remove("hidden"));
+  $("#modalNameView").classList.remove("hidden");
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden"); 
