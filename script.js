@@ -1,4 +1,4 @@
-// script.js (Version avec masquage des champs N/A)
+// script.js (Version avec Rangs sur la carte + correctif ENUM)
 
 const CONFIG = window.APP_CONFIG;
 let PEOPLE = [];
@@ -84,6 +84,32 @@ function compressImage(dataUrl, maxWidth = 600, maxHeight = 600, quality = 0.8) 
   });
 }
 
+// NOUVELLE FONCTION : Traduit le grade en image de rang
+function getRankImage(grade) {
+  if (!grade) return null;
+  const g = grade.toLowerCase();
+  
+  switch (g) {
+    case 'genin':
+      return 'rangd.png';
+    case 'genin confirmé':
+      return 'rangc.png';
+    case 'tokubetsu chunin':
+    case 'chunin':
+      return 'rangb.png';
+    case 'chunin confirmé':
+    case 'tokubetsu jonin':
+      return 'ranga.png';
+    case 'jonin':
+    case 'commandant jonin':
+      return 'rangs.png';
+    case 'kage':
+      return 'rangss.png';
+    default:
+      return null;
+  }
+}
+
 function personMatches(p, term){
   if(!term) return true;
   const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")+" "+(p.clan||"")).toLowerCase();
@@ -103,6 +129,7 @@ function sortPeople() {
   });
 }
 
+// MODIFIÉ : Ajout du logo de Rang sur la carte
 function renderGrid(){
   const frag = document.createDocumentFragment();
   grid.innerHTML = "";
@@ -144,6 +171,17 @@ function renderGrid(){
       villageLogo.classList.add('hidden');
     }
     
+    // NOUVEAU : Logique du logo de Rang
+    const rankLogo = c.querySelector('.card-rank-logo');
+    const rankImg = getRankImage(p.grade);
+    if (rankImg) {
+      rankLogo.src = `rangs/${rankImg}`;
+      rankLogo.alt = p.grade;
+      rankLogo.classList.remove('hidden');
+    } else {
+      rankLogo.classList.add('hidden');
+    }
+    
     // Gère le statut décédé
     const statusBadge = c.querySelector('.card-status-badge');
     if (p.status === 'deceased') {
@@ -162,15 +200,24 @@ function renderGrid(){
   statsEl.textContent = `${filtered.length} / ${PEOPLE.length} personnes`;
 }
 
-// CORRIGÉ : Logique de masquage des champs N/A
+// MODIFIÉ : Ajout de la logique pour le logo de Rang
 function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   
   // Grade
   const gradeInfo = $("#gradeInfo");
+  const gradeLogo = $("#modalGradeLogo");
   if (p.grade) {
     $("#modalGradeView").textContent = p.grade;
+    const rankImg = getRankImage(p.grade);
+    if (rankImg) {
+      gradeLogo.src = `rangs/${rankImg}`;
+      gradeLogo.alt = p.grade;
+      gradeLogo.classList.remove("hidden");
+    } else {
+      gradeLogo.classList.add("hidden");
+    }
     gradeInfo.classList.remove("hidden");
   } else {
     gradeInfo.classList.add("hidden");
@@ -207,10 +254,10 @@ function openModalReadOnly(p){
     $("#modalKekkeiLogo").alt = kgName;
     
     kekkeiContent.classList.remove("hidden");
-    kekkeiBox.classList.remove("hidden"); // Affiche la boîte
+    kekkeiBox.classList.remove("hidden");
   } else {
     kekkeiContent.classList.add("hidden");
-    kekkeiBox.classList.add("hidden"); // Cache toute la boîte
+    kekkeiBox.classList.add("hidden");
   }
   
   // Statut
