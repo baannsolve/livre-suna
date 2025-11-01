@@ -116,6 +116,7 @@
           </div>
           <div class="card-content">
             <h3 class="card-name"></h3>
+            <img class="card-kage-logo hidden" alt="Kage" src="" />
             <img class="card-rank-logo hidden" alt="Rang" src="" />
           </div>
           <button class="card-del hidden" title="Supprimer">🗑️</button>
@@ -156,7 +157,12 @@
         </div>
 
         <div class="modal-info">
-          <h2 id="modalNameView" class="ro"></h2>
+          
+          <div class="modal-name-header ro">
+            <h2 id="modalNameView"></h2>
+            <img id="modalKageLogoView" class="kage-logo-modal hidden" src="" alt="Kage">
+          </div>
+          
           <div class="info-grid ro">
             <p id="gradeInfo" class="hidden"><strong>Grade:</strong> <img id="modalGradeLogo" class="grade-logo hidden" src="" alt=""> <span id="modalGradeView"></span></p>
             <p id="villageInfo" class="hidden"><strong>Village:</strong> <img id="modalVillageLogo" class="village-logo hidden" src="" alt=""> <span id="modalVillageView"></span></p>

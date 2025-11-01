@@ -154,6 +154,14 @@ body{
   flex-shrink: 0;
 }
 
+/* AJOUTÉ : Logo de Kage sur la carte */
+.card-kage-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .card-del{position:absolute;top:.5rem;right:.5rem;border:none;border-radius:999px;background:var(--danger);color:#fff;padding:.35rem .5rem;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.35); z-index: 2;}
 .card-del:hover{filter:brightness(1.05)}
 
@@ -211,6 +219,20 @@ body{
 .muted{color:var(--muted)}
 
 .ro{margin:.25rem 0}
+
+/* AJOUTÉ : Conteneur pour le nom et le logo Kage dans le modal */
+.modal-name-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Espace entre le nom et le chapeau */
+  margin: .25rem 0; /* Garde la marge d'origine du h2 */
+}
+
+/* AJOUTÉ : Assure que le h2 ne prend pas toute la place */
+.modal-name-header h2 {
+  margin: 0; /* Annule la marge par défaut du h2 */
+}
+
 
 .info-grid {
   display: grid;
@@ -279,6 +301,15 @@ body{
   margin-right: 0.75em;
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
+
+/* AJOUTÉ : Logo Kage dans le modal */
+.kage-logo-modal {
+  width: 48px; /* Un peu plus grand que sur la carte */
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 
 .info-box-kg {
   background: var(--elev);

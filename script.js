@@ -110,6 +110,27 @@ function getRankImage(grade) {
   }
 }
 
+// AJOUTÉ : Fonction pour traduire le village en image de Kage
+function getKageImage(village) {
+  if (!village) return null;
+  const v = village.toLowerCase();
+  
+  switch (v) {
+    case 'konoha':
+      return 'hokage.png';
+    case 'suna':
+      return 'kazekage.png';
+    case 'kiri':
+      return 'mizukage.png';
+    case 'kumo':
+      return 'raikage.png';
+    case 'iwa':
+      return 'tsuchikage.png';
+    default:
+      return null; // Pas d'image pour les autres villages
+  }
+}
+
 function personMatches(p, term){
   if(!term) return true;
   const hay = (p.firstName+" "+p.lastName+" "+(p.grade||"")+" "+(p.information||"")+" "+(p.clan||"")).toLowerCase();
@@ -197,6 +218,23 @@ function renderGrid(){
       rankLogo.classList.add('hidden');
     }
     
+    // AJOUTÉ : Logique du logo Kage (chapeau)
+    const kageLogo = c.querySelector('.card-kage-logo');
+    if (p.grade === 'Kage') {
+      const kageImg = getKageImage(p.village); // On utilise la nouvelle fonction
+      
+      // Si on a trouvé une image de chapeau pour ce village
+      if (kageImg) {
+        kageLogo.src = `kage/${kageImg}`; // On utilise le dossier 'kage/'
+        kageLogo.alt = p.village;
+        kageLogo.classList.remove('hidden');
+      } else {
+        kageLogo.classList.add('hidden'); // Cache si ce n'est pas un des 5 Kage
+      }
+    } else {
+      kageLogo.classList.add('hidden'); // Cache si le grade n'est pas Kage
+    }
+
     // Gère le statut décédé
     const statusBadge = c.querySelector('.card-status-badge');
     if (p.status === 'deceased') {
@@ -220,6 +258,21 @@ function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   
+  // AJOUTÉ : Logique Kage (chapeau) pour le modal
+  const kageLogoModal = $("#modalKageLogoView");
+  if (p.grade === 'Kage') {
+    const kageImg = getKageImage(p.village);
+    if (kageImg) {
+      kageLogoModal.src = `kage/${kageImg}`;
+      kageLogoModal.alt = p.village;
+      kageLogoModal.classList.remove('hidden');
+    } else {
+      kageLogoModal.classList.add('hidden');
+    }
+  } else {
+    kageLogoModal.classList.add('hidden');
+  }
+
   // Grade
   const gradeInfo = $("#gradeInfo");
   const gradeLogo = $("#modalGradeLogo");
@@ -302,7 +355,8 @@ function openModalReadOnly(p){
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden"); 
 
-  $("#modalNameView").classList.remove("hidden");
+  // MODIFIÉ : On cache/montre le conteneur du nom
+  $(".modal-name-header.ro").classList.remove("hidden");
   $(".info-grid.ro").classList.remove("hidden");
   
   personModal.showModal();
@@ -378,6 +432,9 @@ personModal.addEventListener("close", () => {
   photoDataUrl = null;
   $("#modalPhoto").classList.remove('deceased');
   $("#modalNameView").classList.remove('deceased');
+  
+  // AJOUTÉ : Cacher le logo Kage à la fermeture
+  $("#modalKageLogoView").classList.add("hidden");
 });
 
 
