@@ -214,7 +214,8 @@ body{
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  /* --- 1. ÉLARGISSEMENT DES BOÎTES --- */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.5rem;
   margin: 0.75rem 0;
 }
@@ -234,15 +235,18 @@ body{
   flex-shrink: 0;
 }
 
-/* --- CORRECTION AJOUTÉE ICI --- */
+/* --- 2. CORRECTION DE LA GESTION DU TEXTE --- */
 .info-grid p > span {
-  flex-shrink: 1; /* Autorise cet élément à rétrécir */
-  min-width: 0;     /* Correction CLÉ : autorise à rétrécir sous sa taille de base */
-  overflow-wrap: break-word; /* Coupe les mots longs pour qu'ils aillent à la ligne */
-  word-break: break-word;  /* Alternative pour la coupe de mot */
-  text-align: right; /* Aligne le texte à droite de la boîte, plus propre */
+  flex-shrink: 1;
+  min-width: 0;
+  text-align: right;
+  
+  /* C'est ça qui empêche de couper les mots */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-/* --- FIN DE LA CORRECTION --- */
+/* --- FIN DES CORRECTIONS --- */
 
 .info-bio.ro {
   margin-top: 0.5rem;
