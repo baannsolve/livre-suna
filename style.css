@@ -224,13 +224,12 @@ body{
 .modal-name-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* Espace entre le nom et le chapeau */
-  margin: .25rem 0; /* Garde la marge d'origine du h2 */
+  gap: 0.75rem; 
+  margin: .25rem 0; 
 }
 
-/* Assure que le h2 ne prend pas toute la place */
 .modal-name-header h2 {
-  margin: 0; /* Annule la marge par défaut du h2 */
+  margin: 0; 
 }
 
 
@@ -342,8 +341,9 @@ body{
   border-radius:.6rem;
   color:#fff;
 }
+/* MODIFIÉ : Marge retirée, gérée par les conteneurs */
 .modal-info > .ed {
-  margin-bottom: 0.75rem;
+  /* margin-bottom: 0.75rem; */ /* RETIRÉ */
 }
 
 .ed-textarea {
@@ -353,7 +353,7 @@ body{
   line-height: 1.6;
   font-family: inherit;
   font-size: inherit;
-  margin-bottom: 0.75rem;
+  /* margin-bottom: 0.75rem; */ /* RETIRÉ */
   cursor: text;
 }
 .ed-textarea:empty:before {
@@ -598,7 +598,7 @@ select.ed {
 }
 
 
-/* AJOUT : Styles pour les Natures de Chakra */
+/* Styles pour les Natures de Chakra */
 .info-box-natures {
   background: var(--elev);
   border: 1px solid var(--border);
@@ -626,7 +626,7 @@ select.ed {
   border: 1px solid var(--border);
   border-radius: .6rem;
   padding: 0.75rem 1rem;
-  margin-bottom: 0.75rem;
+  /* margin-bottom: 0.75rem; */ /* RETIRÉ */
 }
 .ed-checkbox-group > label {
   color: var(--muted);
@@ -657,4 +657,46 @@ select.ed {
   opacity: 0.8;
   margin: 0.75rem 0 0;
   text-align: center;
+}
+
+/* AJOUT : Styles pour la grille du formulaire d'édition */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem; /* Espace vertical, Espace horizontal */
+  margin-bottom: 0.75rem; /* Espace avant l'élément suivant */
+}
+
+.form-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* Espace entre le label et l'input */
+}
+
+/* Label pour les champs de la grille */
+.form-cell label.ed {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 600;
+  padding-left: 0.25rem;
+}
+
+/* Label pour le champ "Information" pleine largeur */
+label.form-label-full.ed {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 600;
+  padding-left: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Marge en bas pour les éléments pleine largeur */
+#natureInput.ed,
+#informationInput.ed {
+  margin-bottom: 0.75rem;
+}
+
+/* Placeholder pour la zone de texte 'Information' */
+#informationInput.ed-textarea:empty:before {
+  content: attr(placeholder);
 }

@@ -181,7 +181,6 @@
             <h2 id="modalNameView"></h2>
             <img id="modalKageLogoView" class="kage-logo-modal hidden" src="" alt="Kage">
           </div>
-          
           <div class="info-grid ro">
             <p id="gradeInfo" class="hidden"><strong>Grade:</strong> <img id="modalGradeLogo" class="grade-logo hidden" src="" alt=""> <span id="modalGradeView"></span></p>
             <p id="villageInfo" class="hidden"><strong>Village:</strong> <img id="modalVillageLogo" class="village-logo hidden" src="" alt=""> <span id="modalVillageView"></span></p>
@@ -194,85 +193,109 @@
               <span id="modalKekkeiView" class="kg-name-view"></span> 
             </div>
           </div>
-          
           <div id="natureInfo" class="info-box-natures ro hidden">
             <strong>Natures de Chakra:</strong>
-            <div id="modalNatureView">
-              </div>
+            <div id="modalNatureView"></div>
           </div>
-
           <div id="modalInfoView" class="ro info-bio hidden"></div>
           
-          <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
-          <input id="lastNameInput" class="ed hidden" placeholder="Nom">
-          
-          <select id="gradeInput" class="ed hidden">
-            <option value="">-- Sélectionner un grade --</option>
-            <option value="Genin">Genin</option>
-            <option value="Genin Confirmé">Genin Confirmé</option>
-            <option value="Tokubetsu Chunin">Tokubetsu Chunin</option>
-            <option value="Chunin">Chunin</option>
-            <option value="Chunin Confirmé">Chunin Confirmé</option>
-            <option value="Tokubetsu Jonin">Tokubetsu Jonin</option>
-            <option value="Jonin">Jonin</option>
-            <option value="Commandant Jonin">Commandant Jonin</option>
-            <option value="Kage">Kage</option>
-          </select>
+          <div class="form-grid">
+            <div class="form-cell">
+              <label for="firstNameInput" class="ed hidden">Prénom</label>
+              <input id="firstNameInput" class="ed hidden" placeholder="Prénom">
+            </div>
+            <div class="form-cell">
+              <label for="lastNameInput" class="ed hidden">Nom</label>
+              <input id="lastNameInput" class="ed hidden" placeholder="Nom">
+            </div>
 
-          <select id="villageInput" class="ed hidden">
-            <option value="">-- Sélectionner un village --</option>
-            <option value="Suna">Suna</option>
-            <option value="Konoha">Konoha</option>
-            <option value="Kiri">Kiri</option>
-            <option value="Iwa">Iwa</option>
-            <option value="Kumo">Kumo</option>
-            <option value="Nukenin">Nukenin</option>
-            <option value="Oto">Oto</option>
-            <option value="Samourai">Samourai</option>
-            <option value="Ame">Ame</option>
-            <option value="Kusa">Kusa</option>
-            <option value="Taki">Taki</option>
-          </select>
+            <div class="form-cell">
+              <label for="gradeInput" class="ed hidden">Grade</label>
+              <select id="gradeInput" class="ed hidden">
+                <option value="">-- Sélectionner un grade --</option>
+                <option value="Genin">Genin</option>
+                <option value="Genin Confirmé">Genin Confirmé</option>
+                <option value="Tokubetsu Chunin">Tokubetsu Chunin</option>
+                <option value="Chunin">Chunin</option>
+                <option value="Chunin Confirmé">Chunin Confirmé</option>
+                <option value="Tokubetsu Jonin">Tokubetsu Jonin</option>
+                <option value="Jonin">Jonin</option>
+                <option value="Commandant Jonin">Commandant Jonin</option>
+                <option value="Kage">Kage</option>
+              </select>
+            </div>
+            
+            <div class="form-cell">
+              <label for="villageInput" class="ed hidden">Village</label>
+              <select id="villageInput" class="ed hidden">
+                <option value="">-- Sélectionner un village --</option>
+                <option value="Suna">Suna</option>
+                <option value="Konoha">Konoha</option>
+                <option value="Kiri">Kiri</option>
+                <option value="Iwa">Iwa</option>
+                <option value="Kumo">Kumo</option>
+                <option value="Nukenin">Nukenin</option>
+                <option value="Oto">Oto</option>
+                <option value="Samourai">Samourai</option>
+                <option value="Ame">Ame</option>
+                <option value="Kusa">Kusa</option>
+                <option value="Taki">Taki</option>
+              </select>
+            </div>
 
-          <select id="kekkeiGenkaiInput" class="ed hidden">
-            <option value="">Aucun</option>
-            <option value="Meiton">Meiton</option>
-            <option value="Deiton">Deiton</option>
-            <option value="Taiton">Taiton</option>
-            <option value="Futton">Futton</option>
-            <option value="Bakuton">Bakuton</option>
-            <option value="Hyoton">Hyoton</option>
-            <option value="Yoton">Yoton</option>
-            <option value="Shakuton">Shakuton</option>
-            <option value="Jiton">Jiton</option>
-            <option value="Kaminari">Kaminari</option>
-            <option value="Kami">Kami</option>
-            <option value="Shoton">Shoton</option>
-            <option value="Inkuton">Inkuton</option>
-            <option value="Jinton">Jinton</option>
-          </select>
-          
-          <select id="clanInput" class="ed hidden">
-            <option value="">Aucun</option>
-            <option value="Uchiha">Uchiha</option>
-            <option value="Senju">Senju</option>
-            <option value="Aburame">Aburame</option>
-            <option value="Hyuga">Hyuga</option>
-            <option value="Ensho">Ensho</option>
-            <option value="Jishaku">Jishaku</option>
-            <option value="Mugen">Mugen</option>
-            <option value="Ayatsuri">Ayatsuri</option>
-            <option value="Kaguya">Kaguya</option>
-            <option value="Raimei">Raimei</option>
-            <option value="Salamandre">Salamandre</option>
-            <option value="Fuma">Fuma</option>
-            <option value="Hoshigaki">Hoshigaki</option>
-            <option value="Hozuki">Hozuki</option>
-            <option value="Yokushin">Yokushin</option>
-            <option value="Karatachi">Karatachi</option>
-          </select>
-
-          <div id="natureInput" class="ed ed-checkbox-group hidden">
+            <div class="form-cell">
+              <label for="kekkeiGenkaiInput" class="ed hidden">Kekkei Genkai</label>
+              <select id="kekkeiGenkaiInput" class="ed hidden">
+                <option value="">Aucun</option>
+                <option value="Meiton">Meiton</option>
+                <option value="Deiton">Deiton</option>
+                <option value="Taiton">Taiton</option>
+                <option value="Futton">Futton</option>
+                <option value="Bakuton">Bakuton</option>
+                <option value="Hyoton">Hyoton</option>
+                <option value="Yoton">Yoton</option>
+                <option value="Shakuton">Shakuton</option>
+                <option value="Jiton">Jiton</option>
+                <option value="Kaminari">Kaminari</option>
+                <option value="Kami">Kami</option>
+                <option value="Shoton">Shoton</option>
+                <option value="Inkuton">Inkuton</option>
+                <option value="Jinton">Jinton</option>
+              </select>
+            </div>
+            
+            <div class="form-cell">
+              <label for="clanInput" class="ed hidden">Clan</label>
+              <select id="clanInput" class="ed hidden">
+                <option value="">Aucun</option>
+                <option value="Uchiha">Uchiha</option>
+                <option value="Senju">Senju</option>
+                <option value="Aburame">Aburame</option>
+                <option value="Hyuga">Hyuga</option>
+                <option value="Ensho">Ensho</option>
+                <option value="Jishaku">Jishaku</option>
+                <option value="Mugen">Mugen</option>
+                <option value="Ayatsuri">Ayatsuri</option>
+                <option value="Kaguya">Kaguya</option>
+                <option value="Raimei">Raimei</option>
+                <option value="Salamandre">Salamandre</option>
+                <option value="Fuma">Fuma</option>
+                <option value="Hoshigaki">Hoshigaki</option>
+                <option value="Hozuki">Hozuki</option>
+                <option value="Yokushin">Yokushin</option>
+                <option value="Karatachi">Karatachi</option>
+              </select>
+            </div>
+            
+            <div class="form-cell">
+              <label for="statusInput" class="ed hidden">Statut</label>
+              <select id="statusInput" class="ed hidden">
+                <option value="">-- Sélectionner un statut --</option>
+                <option value="alive">En vie</option>
+                <option value="deceased">Décédé</option>
+              </select>
+            </div>
+          </div> <div id="natureInput" class="ed ed-checkbox-group hidden">
             <label>Natures de Chakra :</label>
             <div class="checkbox-options">
               <label><input type="checkbox" name="chakraNatures" value="Katon"> Katon</label>
@@ -284,17 +307,12 @@
             <p class="checkbox-hint">Maximum 2 natures.</p>
           </div>
 
+          <label for="informationInput" class="ed hidden form-label-full">Information (utilisez Ctrl+B pour gras, Ctrl+I pour italique)</label>
           <div id="informationInput" class="ed ed-textarea hidden" 
                contenteditable="true" 
                role="textbox" 
                aria-multiline="true"
-               placeholder="Information (utilisez Ctrl+B pour gras, Ctrl+I pour italique)"></div>
-          
-          <select id="statusInput" class="ed hidden">
-            <option value="">-- Sélectionner un statut --</option>
-            <option value="alive">En vie</option>
-            <option value="deceased">Décédé</option>
-          </select>
+               placeholder="Information..."></div>
           
           <div class="admin-row hidden" id="editActions">
             <button id="saveBtn" class="icon-btn">💾 Enregistrer</button>
