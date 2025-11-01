@@ -231,7 +231,7 @@ function openModalReadOnly(p){
     clanInfo.classList.add("hidden");
   }
   
-  // Village -- CORRECTION ALIGNEMENT LOGO
+  // Village -- FIX #1 : CORRECTION ALIGNEMENT LOGO
   const villageInfo = $("#villageInfo");
   const villageLogo = $("#modalVillageLogo"); // On sélectionne la nouvelle balise img
   if (p.village) {
@@ -289,7 +289,7 @@ function openModalReadOnly(p){
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden"); 
 
-  // --- CORRECTION BUG AFFICHAGE ---
+  // --- FIX #2 : CORRECTION BUG AFFICHAGE CHAMPS VIDES ---
   // On affiche le nom et la grille d'info (Grade/Village/Clan)
   $("#modalNameView").classList.remove("hidden");
   $(".info-grid.ro").classList.remove("hidden");
@@ -314,8 +314,8 @@ function openModalEdit(p){
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
   $("#statusInput").value = p?.status || ""; // Gère 'null'
-
-  // Gère l'affichage du statut
+  
+  // --- FIX #3 : Gère l'affichage du statut en mode édition ---
   if (p?.status === 'deceased') {
     $("#modalPhoto").classList.add('deceased');
     $("#modalNameView").classList.add('deceased');
@@ -363,6 +363,7 @@ personModal.addEventListener("cancel", (e) => {
   e.preventDefault();
 });
 
+// --- FIX #3 : Réinitialisation de la modale à la fermeture ---
 personModal.addEventListener("close", () => {
   // Réinitialiser l'état pour éviter les fuites de données entre les sessions
   currentEditingId = null;
@@ -544,7 +545,7 @@ document.addEventListener("paste", (e)=>{
   }
 });
 
-// CORRIGÉ : Tous les champs ENUM envoient 'null' au lieu de '""'
+// --- FIX #4 : CORRECTION BUG RAFRAÎCHISSEMENT (STALE DATA) ---
 $("#saveBtn").addEventListener("click", async ()=>{
   const p = {
     id: currentEditingId || undefined, 
@@ -563,19 +564,35 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("Prénom et nom sont obligatoires."); return;
   }
   
-  const { error } = await supabaseClient
+  // On utilise .select().single() pour récupérer la donnée modifiée
+  const { data: updatedPerson, error } = await supabaseClient
     .from('people')
     .upsert(p)
-    .select();
+    .select()
+    .single(); // .single() est la clé
 
   if(error){
     console.error("Erreur de sauvegarde:", error.message);
     alert(`La sauvegarde a échoué: ${error.message}`);
   } else {
-    await loadPeople();
+    // Au lieu de recharger tout, on met à jour notre array local 'PEOPLE'
+    if (currentEditingId) {
+      // C'est une mise à jour d'une personne existante
+      const index = PEOPLE.findIndex(person => person.id === currentEditingId);
+      if (index > -1) {
+        PEOPLE[index] = updatedPerson; // On remplace l'ancienne fiche par la nouvelle
+      }
+    } else {
+      // C'est une nouvelle personne
+      PEOPLE.push(updatedPerson); // On ajoute la nouvelle fiche
+    }
+    
+    sortPeople(); // On re-trie au cas où le nom a changé
+    renderGrid(); // On rafraîchit la grille
     personModal.close();
   }
 });
+
 
 $("#closeEditBtn").addEventListener("click", ()=> personModal.close());
 
