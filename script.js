@@ -6,6 +6,7 @@ let FILTER = "";
 let VILLAGE_FILTER = "";
 let KEKKEI_FILTER = "";
 let CLAN_FILTER = "";
+let STATUS_FILTER = ""; // AJOUT : Variable pour le filtre de statut
 let isAdmin = false;
 let adminMode = false;
 let currentSortKey = "lastName";
@@ -28,14 +29,12 @@ const sortButtons = {
   firstName: $("#sortFirstNameBtn"),
 };
 
-// AJOUT : Sélecteur pour le conteneur des onglets
+// Sélecteur pour le conteneur des onglets
 const villageTabsContainer = $(".village-tabs"); 
-
-// SUPPRIMÉ : L'ancien sélecteur de village
-// const villageFilter = $("#villageFilter");
 
 const kekkeiFilter = $("#kekkeiFilter");
 const clanFilter = $("#clanFilter");
+const statusFilter = $("#statusFilter"); // AJOUT : Sélecteur pour le filtre de statut
 const clearFiltersBtn = $("#clearFiltersBtn");
 
 const personModal = $("#personModal");
@@ -142,7 +141,7 @@ function personMatches(p, term){
   return hay.includes(term.toLowerCase());
 }
 
-// MODIFIÉ : Ajout du tri par statut (en vie / décédé)
+// Ajout du tri par statut (en vie / décédé)
 function sortPeople() {
   PEOPLE.sort((a, b) => {
     // 1. Priorité au statut (en vie vs décédé)
@@ -179,10 +178,9 @@ function renderGrid(){
   
   const filtered = PEOPLE.filter(p => {
     const searchMatch = personMatches(p, FILTER);
-    // La variable VILLAGE_FILTER est toujours utilisée, la logique reste la même
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
     
-    // --- CORRIGÉ : Logique de filtre pour gérer "Aucun" (IS_NULL) ---
+    // --- Logique de filtre pour gérer "Aucun" (IS_NULL) ---
     let kekkeiMatch = true;
     if (KEKKEI_FILTER === "IS_NULL") {
       kekkeiMatch = !p.kekkeiGenkai; // Vrai si p.kekkeiGenkai est null ou ""
@@ -198,7 +196,16 @@ function renderGrid(){
     }
     // --- FIN DE LA CORRECTION ---
 
-    return searchMatch && villageMatch && kekkeiMatch && clanMatch;
+    // AJOUT : Logique de filtre pour le statut
+    let statusMatch = true;
+    if (STATUS_FILTER === 'alive') {
+      statusMatch = p.status !== 'deceased'; // 'alive' ou 'null'
+    } else if (STATUS_FILTER === 'deceased') {
+      statusMatch = p.status === 'deceased';
+    }
+    // FIN AJOUT
+
+    return searchMatch && villageMatch && kekkeiMatch && clanMatch && statusMatch; // MODIFIÉ
   });
   
   filtered.forEach(p=>{
@@ -211,7 +218,6 @@ function renderGrid(){
     
     // Logique du logo KG
     const kgLogo = c.querySelector('.card-kg-logo');
-    // On n'affiche pas le logo si c'est "Aucun" (logique inchangée)
     if (p.kekkeiGenkai && p.kekkeiGenkai !== 'Aucun') { 
       kgLogo.src = `kg/${p.kekkeiGenkai.toLowerCase()}.png`;
       kgLogo.alt = p.kekkeiGenkai;
@@ -244,18 +250,16 @@ function renderGrid(){
     // Logique du logo Kage (chapeau)
     const kageLogo = c.querySelector('.card-kage-logo');
     if (p.grade === 'Kage') {
-      const kageImg = getKageImage(p.village); // On utilise la nouvelle fonction
-      
-      // Si on a trouvé une image de chapeau pour ce village
+      const kageImg = getKageImage(p.village); 
       if (kageImg) {
-        kageLogo.src = `kage/${kageImg}`; // On utilise le dossier 'kage/'
+        kageLogo.src = `kage/${kageImg}`; 
         kageLogo.alt = p.village;
         kageLogo.classList.remove('hidden');
       } else {
-        kageLogo.classList.add('hidden'); // Cache si ce n'est pas un des 5 Kage
+        kageLogo.classList.add('hidden'); 
       }
     } else {
-      kageLogo.classList.add('hidden'); // Cache si le grade n'est pas Kage
+      kageLogo.classList.add('hidden'); 
     }
 
     // Gère le statut décédé
@@ -314,13 +318,13 @@ function openModalReadOnly(p){
     gradeInfo.classList.add("hidden");
   }
 
-  // Logique "Clan" (Inchangée, elle était correcte)
+  // Logique "Clan"
   const clanInfo = $("#clanInfo");
   $("#modalClanView").textContent = p.clan || "Aucun"; 
   clanInfo.classList.remove("hidden"); 
 
   
-  // Village -- FIX #1 : CORRECTION ALIGNEMENT LOGO
+  // Village
   const villageInfo = $("#villageInfo");
   const villageLogo = $("#modalVillageLogo"); 
   if (p.village) {
@@ -339,7 +343,7 @@ function openModalReadOnly(p){
     villageInfo.classList.add("hidden"); 
   }
 
-  // Logique "Kekkei Genkai" (Inchangée, elle était correcte)
+  // Logique "Kekkei Genkai"
   const kekkeiBox = $("#kekkeiInfo");
   const kekkeiLogo = $("#modalKekkeiLogo");
   const kekkeiView = $("#modalKekkeiView"); 
@@ -378,7 +382,6 @@ function openModalReadOnly(p){
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden"); 
 
-  // MODIFIÉ : On cache/montre le conteneur du nom
   $(".modal-name-header.ro").classList.remove("hidden");
   $(".info-grid.ro").classList.remove("hidden");
   
@@ -395,8 +398,6 @@ function openModalEdit(p){
   $("#lastNameInput").value = p?.lastName || "";
   $("#gradeInput").value = p?.grade || "";
   $("#villageInput").value = p?.village || "";
-  // CI-DESSOUS : Si p.clan est null, il mettra ""
-  // ce qui sélectionnera notre option <option value="">Aucun</option>
   $("#kekkeiGenkaiInput").value = p?.kekkeiGenkai || ""; 
   $("#clanInput").value = p?.clan || "";
   $("#informationInput").innerHTML = p?.information || ""; // Utilise innerHTML
@@ -455,8 +456,6 @@ personModal.addEventListener("close", () => {
   photoDataUrl = null;
   $("#modalPhoto").classList.remove('deceased');
   $("#modalNameView").classList.remove('deceased');
-  
-  // Cacher le logo Kage à la fermeture
   $("#modalKageLogoView").classList.add("hidden");
 });
 
@@ -640,8 +639,6 @@ $("#saveBtn").addEventListener("click", async ()=>{
     photoUrl: photoDataUrl || null,
     grade: $("#gradeInput").value || null,
     village: $("#villageInput").value || null,
-    // CI-DESSOUS : Si la valeur est "" (notre option "Aucun"), 
-    // || null la transformera en NULL pour la BDD.
     kekkeiGenkai: $("#kekkeiGenkaiInput").value || null,
     clan: $("#clanInput").value || null,
     information: $("#informationInput").innerHTML.trim() || null,
@@ -652,31 +649,27 @@ $("#saveBtn").addEventListener("click", async ()=>{
     alert("Prénom et nom sont obligatoires."); return;
   }
   
-  // On utilise .select().single() pour récupérer la donnée modifiée
   const { data: updatedPerson, error } = await supabaseClient
     .from('people')
     .upsert(p)
     .select()
-    .single(); // .single() est la clé
+    .single(); 
 
   if(error){
     console.error("Erreur de sauvegarde:", error.message);
     alert(`La sauvegarde a échoué: ${error.message}`);
   } else {
-    // Au lieu de recharger tout, on met à jour notre array local 'PEOPLE'
     if (currentEditingId) {
-      // C'est une mise à jour d'une personne existante
       const index = PEOPLE.findIndex(person => person.id === currentEditingId);
       if (index > -1) {
-        PEOPLE[index] = updatedPerson; // On remplace l'ancienne fiche par la nouvelle
+        PEOPLE[index] = updatedPerson; 
       }
     } else {
-      // C'est une nouvelle personne
-      PEOPLE.push(updatedPerson); // On ajoute la nouvelle fiche
+      PEOPLE.push(updatedPerson); 
     }
     
-    sortPeople(); // On re-trie au cas où le nom a changé
-    renderGrid(); // On rafraîchit la grille
+    sortPeople(); 
+    renderGrid(); 
     personModal.close();
   }
 });
@@ -720,32 +713,19 @@ sortButtons.firstName.addEventListener("click", () => {
 
 // Filtres
 
-// SUPPRIMÉ : Ancien écouteur pour le <select> de village
-/*
-villageFilter.addEventListener("input", (e) => {
-  VILLAGE_FILTER = e.target.value;
-  renderGrid();
-});
-*/
-
-// AJOUT : Nouvel écouteur pour les onglets de village
+// Nouvel écouteur pour les onglets de village
 villageTabsContainer.addEventListener("click", (e) => {
   const target = e.target.closest(".village-tab");
-  if (!target) return; // On a cliqué à côté d'un bouton
+  if (!target) return; 
 
-  // 1. Mettre à jour la variable de filtre
   VILLAGE_FILTER = target.dataset.village;
 
-  // 2. Mettre à jour la classe 'active'
-  // Enlever 'active' de l'ancien bouton
   const oldActive = villageTabsContainer.querySelector(".active");
   if (oldActive) {
     oldActive.classList.remove("active");
   }
-  // Ajouter 'active' au nouveau
   target.classList.add("active");
 
-  // 3. Rendre la grille à jour
   renderGrid();
 });
 
@@ -759,21 +739,28 @@ clanFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
+// AJOUT : Écouteur pour le filtre de statut
+statusFilter.addEventListener("input", (e) => {
+  STATUS_FILTER = e.target.value;
+  renderGrid();
+});
+
 // MODIFIÉ : Mettre à jour le bouton d'effacement
 clearFiltersBtn.addEventListener("click", () => {
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
   CLAN_FILTER = "";
+  STATUS_FILTER = ""; // AJOUT
   
   kekkeiFilter.value = "";
   clanFilter.value = "";
+  statusFilter.value = ""; // AJOUT
   
-  // AJOUT : Réinitialiser les onglets de village
+  // Réinitialiser les onglets de village
   const oldActive = villageTabsContainer.querySelector(".active");
   if (oldActive) {
     oldActive.classList.remove("active");
   }
-  // Activer le bouton "Tous les villages"
   villageTabsContainer.querySelector('[data-village=""]').classList.add("active");
 
   renderGrid();

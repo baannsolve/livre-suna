@@ -96,6 +96,13 @@
               <option value="Yokushin">Yokushin</option>
               <option value="Karatachi">Karatachi</option>
             </select>
+            
+            <select id="statusFilter" class="filter-select" aria-label="Filtrer par statut">
+              <option value="">Statut (Tous)</option>
+              <option value="alive">En vie</option>
+              <option value="deceased">Décédé</option>
+            </select>
+            
             <button id="clearFiltersBtn" class="icon-btn" title="Effacer les filtres">✕</button>
           </div>
         </div>
@@ -106,6 +113,7 @@
         </div>
 
       </div>
+
       <section id="grid" class="grid" role="list" aria-label="Personnes"></section>
 
       <template id="cardTemplate">
