@@ -28,7 +28,12 @@ const sortButtons = {
   firstName: $("#sortFirstNameBtn"),
 };
 
-const villageFilter = $("#villageFilter");
+// AJOUT : Sélecteur pour le conteneur des onglets
+const villageTabsContainer = $(".village-tabs"); 
+
+// SUPPRIMÉ : L'ancien sélecteur de village
+// const villageFilter = $("#villageFilter");
+
 const kekkeiFilter = $("#kekkeiFilter");
 const clanFilter = $("#clanFilter");
 const clearFiltersBtn = $("#clearFiltersBtn");
@@ -110,7 +115,7 @@ function getRankImage(grade) {
   }
 }
 
-// AJOUTÉ : Fonction pour traduire le village en image de Kage
+// Fonction pour traduire le village en image de Kage
 function getKageImage(village) {
   if (!village) return null;
   const v = village.toLowerCase();
@@ -157,6 +162,7 @@ function renderGrid(){
   
   const filtered = PEOPLE.filter(p => {
     const searchMatch = personMatches(p, FILTER);
+    // La variable VILLAGE_FILTER est toujours utilisée, la logique reste la même
     const villageMatch = !VILLAGE_FILTER || p.village === VILLAGE_FILTER;
     
     // --- CORRIGÉ : Logique de filtre pour gérer "Aucun" (IS_NULL) ---
@@ -218,7 +224,7 @@ function renderGrid(){
       rankLogo.classList.add('hidden');
     }
     
-    // AJOUTÉ : Logique du logo Kage (chapeau)
+    // Logique du logo Kage (chapeau)
     const kageLogo = c.querySelector('.card-kage-logo');
     if (p.grade === 'Kage') {
       const kageImg = getKageImage(p.village); // On utilise la nouvelle fonction
@@ -258,7 +264,7 @@ function openModalReadOnly(p){
   $("#modalPhoto").src = p.photoUrl || PLACEHOLDER_IMG;
   $("#modalNameView").textContent = `${p.firstName} ${p.lastName}`;
   
-  // AJOUTÉ : Logique Kage (chapeau) pour le modal
+  // Logique Kage (chapeau) pour le modal
   const kageLogoModal = $("#modalKageLogoView");
   if (p.grade === 'Kage') {
     const kageImg = getKageImage(p.village);
@@ -433,7 +439,7 @@ personModal.addEventListener("close", () => {
   $("#modalPhoto").classList.remove('deceased');
   $("#modalNameView").classList.remove('deceased');
   
-  // AJOUTÉ : Cacher le logo Kage à la fermeture
+  // Cacher le logo Kage à la fermeture
   $("#modalKageLogoView").classList.add("hidden");
 });
 
@@ -696,8 +702,33 @@ sortButtons.firstName.addEventListener("click", () => {
 });
 
 // Filtres
+
+// SUPPRIMÉ : Ancien écouteur pour le <select> de village
+/*
 villageFilter.addEventListener("input", (e) => {
   VILLAGE_FILTER = e.target.value;
+  renderGrid();
+});
+*/
+
+// AJOUT : Nouvel écouteur pour les onglets de village
+villageTabsContainer.addEventListener("click", (e) => {
+  const target = e.target.closest(".village-tab");
+  if (!target) return; // On a cliqué à côté d'un bouton
+
+  // 1. Mettre à jour la variable de filtre
+  VILLAGE_FILTER = target.dataset.village;
+
+  // 2. Mettre à jour la classe 'active'
+  // Enlever 'active' de l'ancien bouton
+  const oldActive = villageTabsContainer.querySelector(".active");
+  if (oldActive) {
+    oldActive.classList.remove("active");
+  }
+  // Ajouter 'active' au nouveau
+  target.classList.add("active");
+
+  // 3. Rendre la grille à jour
   renderGrid();
 });
 
@@ -711,13 +742,23 @@ clanFilter.addEventListener("input", (e) => {
   renderGrid();
 });
 
+// MODIFIÉ : Mettre à jour le bouton d'effacement
 clearFiltersBtn.addEventListener("click", () => {
   VILLAGE_FILTER = "";
   KEKKEI_FILTER = "";
   CLAN_FILTER = "";
-  villageFilter.value = "";
+  
   kekkeiFilter.value = "";
   clanFilter.value = "";
+  
+  // AJOUT : Réinitialiser les onglets de village
+  const oldActive = villageTabsContainer.querySelector(".active");
+  if (oldActive) {
+    oldActive.classList.remove("active");
+  }
+  // Activer le bouton "Tous les villages"
+  villageTabsContainer.querySelector('[data-village=""]').classList.add("active");
+
   renderGrid();
 });
 

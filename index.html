@@ -38,25 +38,27 @@
     </header>
 
     <main id="main" tabindex="-1">
+      
+      <nav class="village-tabs" aria-label="Filtrer par village">
+        <button class="village-tab active" data-village="">Tous les villages</button>
+        <button class="village-tab" data-village="Suna">Suna</button>
+        <button class="village-tab" data-village="Konoha">Konoha</button>
+        <button class="village-tab" data-village="Kiri">Kiri</button>
+        <button class="village-tab" data-village="Iwa">Iwa</button>
+        <button class="village-tab" data-village="Kumo">Kumo</button>
+        <button class="village-tab" data-village="Nukenin">Nukenin</button>
+        <button class="village-tab" data-village="Samourai">Samourai</button>
+        <button class="village-tab" data-village="Oto">Oto</button>
+        <button class="village-tab" data-village="Ame">Ame</button>
+        <button class="village-tab" data-village="Kusa">Kusa</button>
+        <button class="village-tab" data-village="Taki">Taki</button>
+      </nav>
+      
       <div class="toolbar">
         <div id="stats" class="stats" aria-live="polite">0 / 0 personnes</div>
         
         <div class="controls-group">
           <div class="filter-group">
-            <select id="villageFilter" class="filter-select" aria-label="Filtrer par village">
-              <option value="">Tous les villages</option>
-              <option value="Suna">Suna</option>
-              <option value="Konoha">Konoha</option>
-              <option value="Kiri">Kiri</option>
-              <option value="Iwa">Iwa</option>
-              <option value="Kumo">Kumo</option>
-              <option value="Nukenin">Nukenin</option>
-              <option value="Oto">Oto</option>
-              <option value="Samourai">Samourai</option>
-              <option value="Ame">Ame</option>
-              <option value="Kusa">Kusa</option>
-              <option value="Taki">Taki</option>
-            </select>
             <select id="kekkeiFilter" class="filter-select" aria-label="Filtrer par Kekkei Genkai">
               <option value="">Tous les Kekkei</option>
               <option value="IS_NULL">Aucun</option> 
