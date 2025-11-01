@@ -231,7 +231,7 @@ function openModalReadOnly(p){
     clanInfo.classList.add("hidden");
   }
   
-// Village
+  // Village -- CORRECTION ALIGNEMENT LOGO
   const villageInfo = $("#villageInfo");
   const villageLogo = $("#modalVillageLogo"); // On sélectionne la nouvelle balise img
   if (p.village) {
@@ -285,11 +285,18 @@ function openModalReadOnly(p){
     infoView.classList.add("hidden");
   }
   
-  $("#modalNameView").classList.remove("hidden");
   $$(".ed").forEach(el=>el.classList.add("hidden"));
   $("#editActions").classList.add("hidden");
   dropZone.classList.add("hidden"); 
 
+  // --- CORRECTION BUG AFFICHAGE ---
+  // On affiche le nom et la grille d'info (Grade/Village/Clan)
+  $("#modalNameView").classList.remove("hidden");
+  $(".info-grid.ro").classList.remove("hidden");
+  
+  // Les autres .ro (#kekkeiInfo et #modalInfoView) sont déjà gérés
+  // par leur propre logique if/else plus haut dans la fonction
+  
   personModal.showModal();
   requestAnimationFrame(() => $("#modalClose").focus());
 }
