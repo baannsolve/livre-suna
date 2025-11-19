@@ -52,11 +52,13 @@ const getRankImage = (grade) => {
   return map[grade.toLowerCase()] || null;
 };
 
+// Mis à jour pour ne refléter que les villages actifs
 const getKageImage = (village) => {
   if (!village) return null;
   const map = {
-    'konoha': 'hokage.png', 'suna': 'kazekage.png',
-    'kiri': 'mizukage.png', 'kumo': 'raikage.png', 'iwa': 'tsuchikage.png'
+    'konoha': 'hokage.png', 
+    'suna': 'kazekage.png',
+    'kiri': 'mizukage.png'
   };
   return map[village.toLowerCase()] || null;
 };
