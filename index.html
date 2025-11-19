@@ -3,201 +3,235 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b0f14" />
-    <title>Livre de Sajin</title>
+    <meta name="theme-color" content="#0f172a" />
+    <title>Livre de Sajin - Bingo Book</title>
 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <a class="skip-link" href="#grid">Aller au contenu</a>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="app-overlay"></div>
 
-    <header class="site-header" role="banner">
-      <div class="brand" aria-label="Marque">
-        <span class="logo" aria-hidden="true">📇</span>
-        <h1 class="site-title">Livre de Sajin</h1>
+    <div id="toast-container" class="toast-container"></div>
+
+    <header class="site-header glass-panel">
+      <div class="brand">
+        <span class="logo-icon">📇</span>
+        <div>
+          <h1 class="site-title">Livre de Sajin</h1>
+          <span class="site-subtitle">Registre Secret du Kazekage</span>
+        </div>
       </div>
 
       <div class="header-actions">
-        <label class="searchbar" aria-label="Recherche">
-          <input id="searchInput" type="search" placeholder="Rechercher..." autocomplete="off" aria-label="Rechercher une personne" />
-          <button id="clearSearch" class="icon-btn ghost" type="button" aria-label="Effacer la recherche" style="padding: 0.4rem 0.8rem; border:none;">✕</button>
-        </label>
-
-        <div class="admin-toolbar">
-          <button id="adminLoginToggle" class="icon-btn" type="button" aria-label="Se connecter en admin">🔐 Admin</button>
-          <button id="addBtn" class="icon-btn hidden" type="button" aria-label="Ajouter une fiche">＋</button>
-          <button id="exportBtn" class="icon-btn hidden" type="button" aria-label="Exporter JSON">📤</button>
+        <div class="search-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" type="search" placeholder="Rechercher un ninja..." autocomplete="off" />
+          <button id="clearSearch" class="icon-btn ghost hidden" aria-label="Effacer">✕</button>
         </div>
+
+        <button id="adminLoginToggle" class="btn-secondary">
+          <span class="lock-icon">🔒</span> <span id="adminText">Admin</span>
+        </button>
+        <button id="addBtn" class="btn-primary hidden" title="Ajouter">+ Nouveau</button>
+        <button id="exportBtn" class="btn-icon hidden" title="Exporter JSON">📥</button>
       </div>
     </header>
 
-    <main id="main" tabindex="-1">
+    <main id="main">
+      <div class="tabs-container">
+        <nav class="village-tabs glass-panel" aria-label="Filtres Villages">
+          <button class="village-tab active" data-village="Suna">Suna</button>
+          <button class="village-tab" data-village="Konoha">Konoha</button>
+          <button class="village-tab" data-village="Kiri">Kiri</button>
+          <button class="village-tab" data-village="Iwa">Iwa</button>
+          <button class="village-tab" data-village="Kumo">Kumo</button>
+          <button class="village-tab" data-village="Nukenin">Nukenin</button>
+          <button class="village-tab" data-village="Samourai">Samourai</button>
+          <button class="village-tab" data-village="Oto">Oto</button>
+          <button class="village-tab" data-village="Ame">Ame</button>
+          <button class="village-tab" data-village="Kusa">Kusa</button>
+          <button class="village-tab" data-village="Taki">Taki</button>
+          <button class="village-tab" data-village="">Tous</button>
+        </nav>
+      </div>
       
-      <nav class="village-tabs" aria-label="Filtrer par village">
-        <button class="village-tab active" data-village="Suna">Suna</button>
-        <button class="village-tab" data-village="Konoha">Konoha</button>
-        <button class="village-tab" data-village="Kiri">Kiri</button>
-        <button class="village-tab" data-village="Iwa">Iwa</button>
-        <button class="village-tab" data-village="Kumo">Kumo</button>
-        <button class="village-tab" data-village="Nukenin">Nukenin</button>
-        <button class="village-tab" data-village="Samourai">Samourai</button>
-        <button class="village-tab" data-village="Oto">Oto</button>
-        <button class="village-tab" data-village="Ame">Ame</button>
-        <button class="village-tab" data-village="Kusa">Kusa</button>
-        <button class="village-tab" data-village="Taki">Taki</button>
-        <button class="village-tab" data-village="">Tous</button>
-      </nav>
-      
-      <div class="toolbar">
-        <div class="controls-group-left">
-          <div id="stats" class="stats" aria-live="polite">Chargement...</div>
-          
-          <div class="filter-group">
-            <select id="kekkeiFilter" class="filter-select" aria-label="Filtrer par Kekkei Genkai">
-              <option value="">Tous les Kekkei</option>
-              <option value="IS_NULL">Aucun</option> 
-              <option value="Meiton">Meiton</option>
-              <option value="Deiton">Deiton</option>
-              <option value="Taiton">Taiton</option>
-              <option value="Futton">Futton</option>
-              <option value="Bakuton">Bakuton</option>
-              <option value="Hyoton">Hyoton</option>
-              <option value="Yoton">Yoton</option>
-              <option value="Shakuton">Shakuton</option>
-              <option value="Jiton">Jiton</option>
-              <option value="Kaminari">Kaminari</option>
-              <option value="Kami">Kami</option>
-              <option value="Shoton">Shoton</option>
-              <option value="Inkuton">Inkuton</option>
-              <option value="Jinton">Jinton</option>
-            </select>
+      <div class="toolbar glass-panel">
+        <div class="stats-badge" id="stats">Chargement des données...</div>
+        
+        <div class="filters-row">
+            <div class="select-wrapper">
+              <select id="kekkeiFilter" class="modern-select">
+                <option value="">Kekkei Genkai</option>
+                <option value="IS_NULL">Aucun</option> 
+                <option value="Meiton">Meiton</option>
+                <option value="Deiton">Deiton</option>
+                <option value="Taiton">Taiton</option>
+                <option value="Futton">Futton</option>
+                <option value="Bakuton">Bakuton</option>
+                <option value="Hyoton">Hyoton</option>
+                <option value="Yoton">Yoton</option>
+                <option value="Shakuton">Shakuton</option>
+                <option value="Jiton">Jiton</option>
+                <option value="Kaminari">Kaminari</option>
+                <option value="Kami">Kami</option>
+                <option value="Shoton">Shoton</option>
+                <option value="Inkuton">Inkuton</option>
+                <option value="Jinton">Jinton</option>
+              </select>
+            </div>
 
-            <select id="clanFilter" class="filter-select" aria-label="Filtrer par Clan">
-              <option value="">Tous les clans</option>
-              <option value="IS_NULL">Aucun</option>
-              <option value="Uchiha">Uchiha</option>
-              <option value="Senju">Senju</option>
-              <option value="Aburame">Aburame</option>
-              <option value="Hyuga">Hyuga</option>
-              <option value="Ensho">Ensho</option>
-              <option value="Jishaku">Jishaku</option>
-              <option value="Mugen">Mugen</option>
-              <option value="Ayatsuri">Ayatsuri</option>
-              <option value="Kaguya">Kaguya</option>
-              <option value="Raimei">Raimei</option>
-              <option value="Salamandre">Salamandre</option>
-              <option value="Fuma">Fuma</option>
-              <option value="Hoshigaki">Hoshigaki</option>
-              <option value="Hozuki">Hozuki</option>
-              <option value="Yokushin">Yokushin</option>
-              <option value="Karatachi">Karatachi</option>
-            </select>
+            <div class="select-wrapper">
+              <select id="clanFilter" class="modern-select">
+                <option value="">Clan</option>
+                <option value="IS_NULL">Sans Clan</option>
+                <option value="Uchiha">Uchiha</option>
+                <option value="Senju">Senju</option>
+                <option value="Aburame">Aburame</option>
+                <option value="Hyuga">Hyuga</option>
+                <option value="Ensho">Ensho</option>
+                <option value="Jishaku">Jishaku</option>
+                <option value="Mugen">Mugen</option>
+                <option value="Ayatsuri">Ayatsuri</option>
+                <option value="Kaguya">Kaguya</option>
+                <option value="Raimei">Raimei</option>
+                <option value="Salamandre">Salamandre</option>
+                <option value="Fuma">Fuma</option>
+                <option value="Hoshigaki">Hoshigaki</option>
+                <option value="Hozuki">Hozuki</option>
+                <option value="Yokushin">Yokushin</option>
+                <option value="Karatachi">Karatachi</option>
+              </select>
+            </div>
             
-            <select id="natureFilter" class="filter-select" aria-label="Filtrer par nature de chakra">
-              <option value="">Toutes les natures</option>
-              <option value="Katon">Katon</option>
-              <option value="Suiton">Suiton</option>
-              <option value="Raiton">Raiton</option>
-              <option value="Doton">Doton</option>
-              <option value="Futon">Futon</option>
-            </select>
+            <div class="select-wrapper">
+              <select id="natureFilter" class="modern-select">
+                <option value="">Nature</option>
+                <option value="Katon">Katon</option>
+                <option value="Suiton">Suiton</option>
+                <option value="Raiton">Raiton</option>
+                <option value="Doton">Doton</option>
+                <option value="Futon">Futon</option>
+              </select>
+            </div>
 
-            <select id="statusFilter" class="filter-select" aria-label="Filtrer par statut">
-              <option value="">Statut (Tous)</option>
-              <option value="alive" selected>En vie</option>
-              <option value="deceased">Décédé</option>
-            </select>
+            <div class="select-wrapper">
+              <select id="statusFilter" class="modern-select">
+                <option value="">Statut</option>
+                <option value="alive" selected>En vie</option>
+                <option value="deceased">Décédé</option>
+              </select>
+            </div>
             
-            <button id="clearFiltersBtn" class="icon-btn ghost" title="Effacer les filtres">Effacer filtres</button>
-          </div>
+            <button id="clearFiltersBtn" class="btn-text">Réinitialiser</button>
         </div>
       </div>
 
-      <section id="grid" class="grid" role="list" aria-label="Personnes"></section>
+      <section id="grid" class="grid" role="list"></section>
 
       <template id="cardTemplate">
-        <article class="card" role="listitem" tabindex="0">
+        <article class="card glass-card" role="listitem" tabindex="0">
           <div class="card-img-wrapper">
+            <div class="img-overlay"></div>
             <img class="card-img" alt="" loading="lazy" />
-            <img class="card-kg-logo hidden" alt="" src="" />
-            <img class="card-village-logo hidden" alt="" src="" />
-            <span class="card-status-badge hidden">Décédé</span>
+            
+            <img class="card-kg-logo hidden" alt="" src="" title="Kekkei Genkai" />
+            <img class="card-village-logo hidden" alt="" src="" title="Village" />
+            
+            <div class="status-badge dead hidden">MORT</div>
+            
             <div class="card-natures-wrapper hidden"></div>
           </div>
+          
           <div class="card-content">
-            <h3 class="card-name"></h3>
-            <div style="display:flex; gap:5px;">
-              <img class="card-kage-logo hidden" alt="Kage" src="" />
-              <img class="card-rank-logo hidden" alt="Rang" src="" />
+            <div class="card-header">
+              <h3 class="card-name"></h3>
+              <div class="card-icons">
+                <img class="card-kage-logo hidden" alt="Kage" src="" title="Kage" />
+                <img class="card-rank-logo hidden" alt="Rang" src="" title="Rang" />
+              </div>
             </div>
           </div>
-          <button class="card-del hidden" title="Supprimer">🗑️</button>
+          
+          <button class="card-del hidden" title="Supprimer">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </article>
       </template>
     </main>
 
-    <dialog id="loginModal" class="modal modal--small" aria-label="Connexion administrateur">
-      <button class="modal-close" id="loginClose" type="button" aria-label="Fermer">✕</button>
-      <div class="modal-body">
-        <form id="loginForm" class="login-form">
-          <h2 style="color:var(--text); text-align:center;">Connexion Admin</h2>
-          <label for="loginEmail">Email</label>
-          <input id="loginEmail" type="email" class="ed" required>
-          <label for="loginPassword">Mot de passe</label>
-          <input id="loginPassword" type="password" class="ed" required>
-          <p id="loginError" class="login-error hidden" role="alert"></p>
-          <div class="admin-row" style="justify-content: center;">
-            <button id="loginSubmitBtn" type="submit" class="icon-btn">Se connecter</button>
-          </div>
-        </form>
-      </div>
+    <dialog id="loginModal" class="modal modal-small glass-panel">
+      <button class="modal-close" id="loginClose">✕</button>
+      <form id="loginForm" class="login-form">
+        <h2>Accès Réservé</h2>
+        <p class="modal-subtitle">Veuillez vous identifier pour modifier le registre.</p>
+        <div class="input-group">
+            <input id="loginEmail" type="email" placeholder="Identifiant" required class="modern-input">
+        </div>
+        <div class="input-group">
+            <input id="loginPassword" type="password" placeholder="Mot de passe" required class="modern-input">
+        </div>
+        <button id="loginSubmitBtn" type="submit" class="btn-primary full-width">Connexion</button>
+      </form>
     </dialog>
 
-    <dialog id="personModal" class="modal" aria-label="Détails de la personne">
-      <button class="modal-close" id="modalClose" type="button" aria-label="Fermer">✕</button>
+    <dialog id="personModal" class="modal modal-large glass-panel">
+      <button class="modal-close" id="modalClose">✕</button>
       <div class="modal-body">
         
-        <div class="photo-col">
-          <img id="modalPhoto" alt="Photo" />
-          <div id="dropZone" class="dropzone hidden" aria-label="Glissez-déposez une image ou cliquez pour choisir">
-            <div class="dz-hint">
-              <p>Glissez ou cliquez pour changer la photo</p>
+        <div class="modal-left-col">
+          <div class="photo-frame">
+            <img id="modalPhoto" alt="Photo" />
+            <div id="dropZone" class="dropzone hidden">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Changer la photo</span>
             </div>
+            <input id="photoFile" type="file" accept="image/*" hidden>
           </div>
-          <input id="photoFile" type="file" accept="image/*" hidden>
+          
+          <div class="quick-stats ro">
+             <div id="villageInfo" class="stat-pill hidden">
+                <img id="modalVillageLogo" src="" alt=""> <span id="modalVillageView"></span>
+             </div>
+             <div id="clanInfo" class="stat-pill hidden">
+                <span class="pill-label">Clan</span> <span id="modalClanView"></span>
+             </div>
+          </div>
         </div>
 
-        <div class="modal-info">
+        <div class="modal-right-col">
           
-          <div class="modal-name-header ro">
-            <h2 id="modalNameView"></h2>
+          <div class="modal-header-view ro">
+            <div>
+              <h2 id="modalNameView"></h2>
+              <div class="rank-display" id="gradeInfo">
+                 <img id="modalGradeLogo" class="hidden" src="" alt=""> 
+                 <span id="modalGradeView"></span>
+              </div>
+            </div>
             <img id="modalKageLogoView" class="kage-logo-modal hidden" src="" alt="Kage">
           </div>
 
           <div class="form-grid ed hidden">
-             <div class="form-cell">
-               <label class="ed">Prénom</label>
-               <input id="firstNameInput" class="ed" placeholder="Prénom">
+             <div class="form-group">
+               <label>Prénom</label>
+               <input id="firstNameInput" class="modern-input" placeholder="Ex: Naruto">
              </div>
-             <div class="form-cell">
-               <label class="ed">Nom</label>
-               <input id="lastNameInput" class="ed" placeholder="Nom">
+             <div class="form-group">
+               <label>Nom</label>
+               <input id="lastNameInput" class="modern-input" placeholder="Ex: Uzumaki">
              </div>
-          </div>
-
-          <div class="info-grid ro">
-            <p id="gradeInfo" class="hidden"><strong>Grade:</strong> <img id="modalGradeLogo" class="grade-logo hidden" src="" alt=""> <span id="modalGradeView"></span></p>
-            <p id="villageInfo" class="hidden"><strong>Village:</strong> <img id="modalVillageLogo" class="village-logo hidden" src="" alt=""> <span id="modalVillageView"></span></p>
-            <p id="clanInfo" class="hidden"><strong>Clan:</strong> <span id="modalClanView"></span></p>
           </div>
 
           <div class="form-grid ed hidden">
-             <div class="form-cell">
-              <label class="ed">Grade</label>
-              <select id="gradeInput" class="ed">
-                <option value="">-- Grade --</option>
+            <div class="form-group">
+              <label>Grade</label>
+              <select id="gradeInput" class="modern-input">
+                <option value="">-- Sélectionner --</option>
                 <option value="Genin">Genin</option>
                 <option value="Genin Confirmé">Genin Confirmé</option>
                 <option value="Chunin">Chunin</option>
@@ -208,10 +242,10 @@
                 <option value="Kage">Kage</option>
               </select>
             </div>
-            <div class="form-cell">
-              <label class="ed">Village</label>
-              <select id="villageInput" class="ed">
-                <option value="">-- Village --</option>
+            <div class="form-group">
+              <label>Village</label>
+              <select id="villageInput" class="modern-input">
+                <option value="">-- Sélectionner --</option>
                 <option value="Suna">Suna</option>
                 <option value="Konoha">Konoha</option>
                 <option value="Kiri">Kiri</option>
@@ -225,9 +259,9 @@
                 <option value="Taki">Taki</option>
               </select>
             </div>
-            <div class="form-cell">
-               <label class="ed">Clan</label>
-               <select id="clanInput" class="ed">
+            <div class="form-group">
+               <label>Clan</label>
+               <select id="clanInput" class="modern-input">
                  <option value="">Aucun</option>
                  <option value="Uchiha">Uchiha</option>
                  <option value="Senju">Senju</option>
@@ -247,9 +281,9 @@
                  <option value="Karatachi">Karatachi</option>
                </select>
             </div>
-             <div class="form-cell">
-               <label class="ed">Kekkei Genkai</label>
-               <select id="kekkeiGenkaiInput" class="ed">
+             <div class="form-group">
+               <label>Kekkei Genkai</label>
+               <select id="kekkeiGenkaiInput" class="modern-input">
                   <option value="">Aucun</option>
                   <option value="Meiton">Meiton</option>
                   <option value="Deiton">Deiton</option>
@@ -267,60 +301,60 @@
                   <option value="Jinton">Jinton</option>
                </select>
              </div>
-             <div class="form-cell">
-               <label class="ed">Statut</label>
-               <select id="statusInput" class="ed">
+             <div class="form-group">
+               <label>Statut</label>
+               <select id="statusInput" class="modern-input">
                  <option value="alive">En vie</option>
                  <option value="deceased">Décédé</option>
                </select>
              </div>
           </div>
 
-          <div id="kekkeiInfo" class="info-box-kg ro hidden">
-            <strong>Kekkei Genkai:</strong>
-            <div id="modalKekkeiContent">
-              <img id="modalKekkeiLogo" class="kg-logo-large" src="" alt="" />
-              <span id="modalKekkeiView" class="kg-name-view"></span> 
+          <div class="abilities-container ro">
+            <div id="kekkeiInfo" class="ability-card hidden">
+                <h4>Kekkei Genkai</h4>
+                <div class="ability-content">
+                    <img id="modalKekkeiLogo" src="" alt="" />
+                    <span id="modalKekkeiView"></span> 
+                </div>
             </div>
-          </div>
-          <div id="natureInfo" class="info-box-natures ro hidden">
-            <strong>Natures de Chakra:</strong>
-            <div id="modalNatureView"></div>
-          </div>
-
-          <div id="natureInput" class="ed ed-checkbox-group hidden">
-            <label style="font-weight:600; margin-bottom:10px; display:block;">Natures de Chakra (Max 2):</label>
-            <div class="checkbox-options">
-              <label><input type="checkbox" name="chakraNatures" value="Katon"> Katon</label>
-              <label><input type="checkbox" name="chakraNatures" value="Futon"> Futon</label>
-              <label><input type="checkbox" name="chakraNatures" value="Raiton"> Raiton</label>
-              <label><input type="checkbox" name="chakraNatures" value="Doton"> Doton</label>
-              <label><input type="checkbox" name="chakraNatures" value="Suiton"> Suiton</label>
+            <div id="natureInfo" class="ability-card hidden">
+                <h4>Nature Chakra</h4>
+                <div id="modalNatureView" class="nature-icons"></div>
             </div>
           </div>
 
-          <div id="modalInfoView" class="ro info-bio hidden"></div>
-
-          <label for="informationInput" class="ed hidden form-label-full">Information (HTML autorisé)</label>
-          <div id="informationInput" class="ed ed-textarea hidden" 
-               contenteditable="true" 
-               role="textbox" 
-               aria-multiline="true"
-               placeholder="Information..."></div>
-          
-          <div class="admin-row hidden" id="editActions">
-            <button id="saveBtn" class="icon-btn">💾 Enregistrer</button>
-            <button id="closeEditBtn" class="ghost">Annuler</button>
+          <div id="natureInput" class="ed nature-selector hidden">
+            <label>Affinités (Max 2)</label>
+            <div class="checkbox-grid">
+              <label class="chk-btn"><input type="checkbox" name="chakraNatures" value="Katon"><span>🔥 Katon</span></label>
+              <label class="chk-btn"><input type="checkbox" name="chakraNatures" value="Futon"><span>💨 Futon</span></label>
+              <label class="chk-btn"><input type="checkbox" name="chakraNatures" value="Raiton"><span>⚡ Raiton</span></label>
+              <label class="chk-btn"><input type="checkbox" name="chakraNatures" value="Doton"><span>🪨 Doton</span></label>
+              <label class="chk-btn"><input type="checkbox" name="chakraNatures" value="Suiton"><span>💧 Suiton</span></label>
+            </div>
           </div>
+
+          <div class="bio-section">
+             <h4 class="ro section-title">Données Ninja</h4>
+             <div id="modalInfoView" class="ro bio-content"></div>
+             
+             <label class="ed hidden">Informations (HTML autorisé)</label>
+             <div id="informationInput" class="ed modern-textarea hidden" contenteditable="true"></div>
+          </div>
+
+          <div class="modal-footer ed hidden" id="editActions">
+            <button id="saveBtn" class="btn-primary">Enregistrer</button>
+            <button id="closeEditBtn" class="btn-secondary">Annuler</button>
+          </div>
+
         </div>
-
       </div>
     </dialog>
 
-    <noscript>Veuillez activer JavaScript pour utiliser ce site.</noscript>
+    <noscript>Veuillez activer JavaScript.</noscript>
 
     <script src="config.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js" type="module"></script>
   </body>
