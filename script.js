@@ -20,6 +20,12 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const sanitize = (html) => window.DOMPurify ? DOMPurify.sanitize(html) : html;
 
+// --- THEME MANAGER ---
+function updateTheme(village) {
+  const themeName = village || "Tous";
+  document.body.setAttribute('data-theme', themeName);
+}
+
 // --- UI HELPERS (TOASTS) ---
 function showToast(message, type = 'success') {
   const container = $("#toast-container");
@@ -52,13 +58,11 @@ const getRankImage = (grade) => {
   return map[grade.toLowerCase()] || null;
 };
 
-// Mis à jour pour ne refléter que les villages actifs
 const getKageImage = (village) => {
   if (!village) return null;
   const map = {
-    'konoha': 'hokage.png', 
-    'suna': 'kazekage.png',
-    'kiri': 'mizukage.png'
+    'konoha': 'hokage.png', 'suna': 'kazekage.png',
+    'kiri': 'mizukage.png', 'kumo': 'raikage.png', 'iwa': 'tsuchikage.png'
   };
   return map[village.toLowerCase()] || null;
 };
@@ -270,12 +274,21 @@ $("#grid").addEventListener("click", e => {
   openModal(p, STATE.isAdmin);
 });
 
-// Tabs
+// Tabs (Village Filters & Themes)
 $(".village-tabs").addEventListener("click", e => {
   if(!e.target.classList.contains("village-tab")) return;
+  
+  // UI Updates
   $(".village-tab.active").classList.remove("active");
   e.target.classList.add("active");
-  STATE.filters.village = e.target.dataset.village;
+  
+  // Logic Updates
+  const villageName = e.target.dataset.village;
+  STATE.filters.village = villageName;
+  
+  // Update Theme
+  updateTheme(villageName);
+  
   renderGrid();
 });
 
@@ -303,9 +316,17 @@ $("#clearSearch").addEventListener("click", () => {
 $("#clearFiltersBtn").addEventListener("click", () => {
   $$("select").forEach(s => s.value = "");
   $("#searchInput").value = "";
+  
+  // Reset UI
   $(".village-tab.active").classList.remove("active");
-  $('.village-tab[data-village=""]').classList.add("active");
+  // Reset to default Suna? Or All? Let's reset to "All" or Suna as per preference.
+  // Let's default to Suna as requested in original prompt, or user preference.
+  // Here resetting to "Tous" for better UX
+  const defaultTab = $('.village-tab[data-village=""]');
+  if(defaultTab) defaultTab.classList.add("active");
+  
   STATE.filters = { search:"", village:"", kekkei:"", clan:"", status:"", nature:"" };
+  updateTheme(""); // Reset theme
   renderGrid();
 });
 
@@ -422,6 +443,9 @@ async function loadData() {
 }
 
 $$(".modal-close, #closeEditBtn").forEach(b => b.onclick = function(){ this.closest("dialog").close() });
+
+// Set Initial Theme (Suna)
+updateTheme("Suna");
 
 loadData();
 checkSession();
