@@ -1,5 +1,5 @@
 // config.js
 window.APP_CONFIG = {
-  supabaseUrl: "https://zvegxxzpwkvychcexsqs.supabase.co",
-  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2ZWd4eHpwd2t2eWNoY2V4c3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4NjQyNTcsImV4cCI6MjA3NzQ0MDI1N30.JzhYBOZdDYQDqtHBiDW-dFVM_dnytg8BvUsXxg8x6ko"
+  supabaseUrl: "https://lblvghqahnmnmqfzuhbi.supabase.co",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxibHZnaHFhaG5tbm1xZnp1aGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1ODU3MjgsImV4cCI6MjA3OTE2MTcyOH0.zlBOd_ZXR5pbEUQ_OIDZ3FinbiF41kwdn1plBbLiV7I"
 };
