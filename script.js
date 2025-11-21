@@ -9,55 +9,69 @@ const STATE = {
     currentPhotoUrl: null,
 };
 
-// --- SYSTÈME DE SÉCURITÉ CIBLÉ (GRID ONLY) ---
+// --- SYSTÈME DE SÉCURITÉ (PIN & GLITCH) ---
 const SecuritySystem = {
     config: {
-        isEnabled: localStorage.getItem('seal_enabled') !== 'false', // Activé par défaut
-        pinCode: localStorage.getItem('seal_pin') || '0000',       // Code par défaut
+        // On lit le localStorage (String) et on convertit en Booléen correct
+        isEnabled: localStorage.getItem('seal_enabled') !== 'false', 
+        pinCode: localStorage.getItem('seal_pin') || '1234', // 1234 par défaut si vide
         isUnlocked: sessionStorage.getItem('seal_unlocked') === 'true'
     },
 
     init() {
+        const pinInput = document.getElementById('pinInput');
+
+        // Vérification au chargement de la page
+        this.applySecurityState();
+
+        // Écouteur sur l'input du code PIN
+        if(pinInput) {
+            pinInput.addEventListener('keyup', (e) => {
+                if (e.target.value.length === 4) {
+                    this.checkPin(e.target.value);
+                }
+            });
+        }
+    },
+
+    // Applique l'état visuel (Flou ou Clair) selon la config actuelle
+    applySecurityState() {
         const overlay = document.getElementById('grid-lock-overlay');
         const grid = document.getElementById('grid');
         const pinInput = document.getElementById('pinInput');
 
-        // 1. Vérifier l'état
+        // Cas 1 : Sécurité DÉSACTIVÉE ou Session DÉJÀ DÉVERROUILLÉE
         if (!this.config.isEnabled || this.config.isUnlocked) {
-            this.unlockVisuals(true);
-            return;
-        }
-
-        // 2. Verrouiller (Flou + Overlay)
-        overlay.classList.remove('hidden');
-        grid.classList.add('blur-locked');
-        
-        // 3. Focus automatique pratique pour l'utilisateur
-        // On attend un peu que le DOM soit prêt visuellement
-        setTimeout(() => pinInput?.focus(), 500);
-
-        // 4. Écoute saisie PIN
-        pinInput.addEventListener('keyup', (e) => {
-            if (e.target.value.length === 4) {
-                this.checkPin(e.target.value);
+            this.unlockVisuals(true); // true = immédiat, pas d'animation
+        } 
+        // Cas 2 : Sécurité ACTIVE et Session VERROUILLÉE
+        else {
+            overlay.classList.remove('hidden');
+            overlay.style.opacity = '1';
+            grid.classList.add('blur-locked');
+            if(pinInput) {
+                pinInput.value = ''; // Reset champ
+                setTimeout(() => pinInput.focus(), 100); // Focus auto
             }
-        });
+        }
     },
 
     checkPin(inputCode) {
         const errorMsg = document.getElementById('pinErrorMsg');
         const inputField = document.getElementById('pinInput');
 
+        // On compare avec la config en mémoire (qui est à jour)
         if (inputCode === this.config.pinCode) {
             // SUCCÈS
             this.unlockVisuals();
             sessionStorage.setItem('seal_unlocked', 'true');
+            this.config.isUnlocked = true;
             inputField.blur();
         } else {
             // ÉCHEC
             errorMsg.classList.remove('hidden');
             inputField.value = '';
-            inputField.classList.add('shake-anim'); // Animation CSS si dispo
+            // Petit effet visuel d'erreur si possible via CSS
             setTimeout(() => errorMsg.classList.add('hidden'), 2000);
         }
     },
@@ -70,30 +84,40 @@ const SecuritySystem = {
             overlay.classList.add('hidden');
             grid.classList.remove('blur-locked');
         } else {
-            // Petite transition de sortie
+            // Animation de transition douce
+            overlay.style.transition = 'opacity 0.5s ease';
             overlay.style.opacity = '0';
-            overlay.style.transition = 'opacity 0.5s';
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 grid.classList.remove('blur-locked');
-                // Reset style pour prochaine fois
-                overlay.style.opacity = '';
+                overlay.style.opacity = '1'; // Reset pour la prochaine fois
             }, 500);
         }
     },
 
+    // C'est ici que la magie opère pour tes paramètres Admin
     updateSettings(isEnabled, newPin) {
-        this.config.isEnabled = isEnabled;
-        this.config.pinCode = newPin;
-
+        // 1. Sauvegarde dans le navigateur (Persistance)
         localStorage.setItem('seal_enabled', isEnabled);
         localStorage.setItem('seal_pin', newPin);
 
-        showToast("Paramètres de sécurité mis à jour !");
-        
-        // Si on active la sécurité, on recharge pour appliquer le flou
-        if (isEnabled && !sessionStorage.getItem('seal_unlocked')) {
-            setTimeout(() => location.reload(), 500);
+        // 2. Mise à jour de la configuration en mémoire vive
+        this.config.isEnabled = isEnabled;
+        this.config.pinCode = newPin;
+
+        // 3. Application immédiate des effets
+        if (!isEnabled) {
+            // Si on DÉSACTIVE : On déverrouille tout de suite visuellement
+            this.unlockVisuals(true);
+            showToast("Sécurité désactivée 🔓");
+        } else {
+            // Si on ACTIVE ou CHANGE LE CODE :
+            // On force le reverrouillage pour tester le nouveau code
+            sessionStorage.removeItem('seal_unlocked');
+            this.config.isUnlocked = false;
+            
+            this.applySecurityState(); // Ré-applique le flou et l'overlay
+            showToast(`Code modifié : ${newPin} 🔒`);
         }
     }
 };
@@ -115,7 +139,7 @@ function showToast(message, type = 'success') {
     const container = $("#toast-container");
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<span style="font-size:1.2rem">${type === 'success' ? '✅' : '❌'}</span><span>${message}</span>`;
+    toast.innerHTML = `<span style="font-size:1.2rem">${type === 'success' ? '✅' : 'ℹ️'}</span><span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => {
         toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)';
@@ -174,6 +198,7 @@ const UIManager = {
             card.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
             
             const setLogo = (sel, src) => { const el = card.querySelector(sel); if(src) { el.src = src; el.classList.remove('hidden'); } };
+            
             setLogo('.card-kg-logo', p.kekkeiGenkai && p.kekkeiGenkai !== 'Aucun' ? `kg/${p.kekkeiGenkai.toLowerCase()}.png` : null);
             setLogo('.card-village-logo', p.village ? `villages/${p.village.toLowerCase()}.png` : null);
             setLogo('.card-rank-logo', this.getRankImage(p.grade) ? `rangs/${this.getRankImage(p.grade)}` : null);
@@ -199,7 +224,6 @@ const UIManager = {
             }
 
             card.onclick = (e) => { 
-                // Petite sécurité supplémentaire : empêcher le clic si flouté (géré aussi par CSS pointer-events)
                 if(document.getElementById('grid').classList.contains('blur-locked')) return;
                 if(!e.target.closest('.card-del')) this.openModal(p, STATE.isAdmin); 
             };
@@ -311,18 +335,26 @@ const DataManager = {
 document.addEventListener('DOMContentLoaded', () => {
     SecuritySystem.init(); 
     
-    // Settings
+    // Configuration Bouton Paramètres
     $("#settingsBtn").onclick = () => {
+        // On charge les valeurs actuelles dans la modale avant de l'afficher
         $("#sealToggle").checked = SecuritySystem.config.isEnabled;
         $("#adminPinInput").value = SecuritySystem.config.pinCode;
         $("#settingsModal").showModal();
     };
     $("#settingsClose").onclick = () => $("#settingsModal").close();
     
+    // Bouton VALIDER dans les Paramètres
     $("#saveSettingsBtn").onclick = () => {
         const enabled = $("#sealToggle").checked;
         const pin = $("#adminPinInput").value;
-        if(pin.length !== 4 || isNaN(pin)) { showToast("Le code doit faire 4 chiffres", "error"); return; }
+        
+        if(pin.length !== 4 || isNaN(pin)) { 
+            showToast("Le code doit faire 4 chiffres", "error"); 
+            return; 
+        }
+        
+        // Appel de la fonction qui met à jour ET applique les changements
         SecuritySystem.updateSettings(enabled, pin);
         $("#settingsModal").close();
     };
@@ -338,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $(".village-tabs").onclick = e => { if(e.target.classList.contains("village-tab")) { $(".village-tab.active").classList.remove("active"); e.target.classList.add("active"); STATE.filters.village = e.target.dataset.village; updateTheme(STATE.filters.village); UIManager.renderGrid(); } };
     ["kekkeiFilter", "clanFilter", "statusFilter", "natureFilter"].forEach(id => { $(`#${id}`).oninput = e => { STATE.filters[id.replace("Filter", "")] = e.target.value; UIManager.renderGrid(); }; });
 
-    // Admin
+    // Admin Login
     $("#adminLoginToggle").onclick = async () => { if(STATE.isAdmin) { await supabaseClient.auth.signOut(); location.reload(); } else { $("#loginModal").showModal(); } };
     $("#loginForm").onsubmit = async e => { e.preventDefault(); const { error } = await supabaseClient.auth.signInWithPassword({ email: $("#loginEmail").value, password: $("#loginPassword").value }); if(error) showToast("Erreur identifiants", 'error'); else { $("#loginModal").close(); checkSession(); } };
 
