@@ -1,5 +1,38 @@
 const CONFIG = window.APP_CONFIG;
 
+// --- GESTION DU SCEAU ---
+function initSeal() {
+    const overlay = document.getElementById('seal-overlay');
+    const btn = document.getElementById('breakSealBtn');
+    
+    // Vérifier si le sceau a déjà été brisé dans cette session
+    if (sessionStorage.getItem('sealBroken') === 'true') {
+        overlay.classList.add('hidden'); // Cache immédiatement
+        return;
+    }
+
+    btn.addEventListener('click', () => {
+        // Animation visuelle du bouton
+        btn.classList.add('seal-shatter');
+        
+        setTimeout(() => {
+            // Faire disparaître l'overlay
+            overlay.classList.add('broken');
+            
+            // Enregistrer l'état pour la session en cours
+            sessionStorage.setItem('sealBroken', 'true');
+            
+            // Retirer complètement du DOM après la transition CSS (0.8s)
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 800);
+        }, 400); // Attendre un peu que l'animation du bouton commence
+    });
+}
+
+// Appeler la fonction d'initialisation
+document.addEventListener('DOMContentLoaded', initSeal);
+
 // --- STATE ---
 const STATE = {
   people: [],
