@@ -1,38 +1,58 @@
 const CONFIG = window.APP_CONFIG;
 
-// --- GESTION DU SCEAU ---
-function initSeal() {
+// --- GESTION DU SCEAU V3 (Forbidden Scroll) ---
+function initSealV3() {
     const overlay = document.getElementById('seal-overlay');
-    const container = document.querySelector('.seal-container'); 
     const btn = document.getElementById('breakSealBtn');
-    
-    // Vérifier si le sceau a déjà été brisé dans cette session
+    const ofudaContainer = document.getElementById('ofuda-circle');
+    const particlesContainer = document.getElementById('particles-container');
+
+    // Vérif session
     if (sessionStorage.getItem('sealBroken') === 'true') {
-        overlay.classList.add('hidden'); // Cache immédiatement
+        overlay.classList.add('hidden');
         return;
     }
 
-    btn.addEventListener('click', () => {
-        // On applique l'animation sur le conteneur parent pour affecter les anneaux + le bouton
-        container.classList.add('seal-shatter-anim');
-        
-        // Petite vibration de l'écran (optionnel)
-        document.body.style.transform = "scale(1.01)";
-        setTimeout(() => document.body.style.transform = "none", 100);
+    // 1. Générer les Talismans (Ofuda) en cercle
+    const numOfuda = 12; // Nombre de papiers
+    for (let i = 0; i < numOfuda; i++) {
+        const ofuda = document.createElement('div');
+        ofuda.className = 'ofuda';
+        ofuda.innerText = "禁"; // Kanji "Interdit"
+        // Calculer la rotation
+        const rotation = (360 / numOfuda) * i;
+        ofuda.style.transform = `rotate(${rotation}deg) translate(0, -160px)`; // -160px = rayon du cercle
+        ofudaContainer.appendChild(ofuda);
+    }
 
+    // 2. Générer des particules (Braises)
+    function createEmber() {
+        const ember = document.createElement('div');
+        ember.className = 'ember';
+        ember.style.left = Math.random() * 100 + 'vw';
+        ember.style.animationDuration = Math.random() * 3 + 2 + 's'; // Entre 2 et 5s
+        particlesContainer.appendChild(ember);
+        // Supprimer après l'anim
+        setTimeout(() => ember.remove(), 5000);
+    }
+    setInterval(createEmber, 200); // Une braise toutes les 200ms
+
+    // 3. Action de Briser le Sceau
+    btn.addEventListener('click', () => {
+        // Déclencher l'anim CSS de brûlure
+        overlay.classList.add('burn-effect');
+        
+        // Son (optionnel, ici visuel)
+        
         setTimeout(() => {
-            overlay.classList.add('broken');
+            overlay.classList.add('hidden');
             sessionStorage.setItem('sealBroken', 'true');
-            
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-            }, 800);
-        }, 500); // Synchro avec la fin de l'implosion
+        }, 1400); // Synchro avec la fin de l'animation CSS
     });
 }
 
-// Appeler la fonction d'initialisation
-document.addEventListener('DOMContentLoaded', initSeal);
+// Lancer l'init
+document.addEventListener('DOMContentLoaded', initSealV3);
 
 // --- STATE ---
 const STATE = {

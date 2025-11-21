@@ -525,141 +525,112 @@ body {
   .tabs-container { padding: 1rem; }
 }
 
-/* --- SCEAU DE PROTECTION V2 (Fûinjutsu Style) --- */
+/* --- SCEAU V3 (FORBIDDEN SCROLL) --- */
 .seal-overlay {
     position: fixed; inset: 0; z-index: 10000;
-    background: radial-gradient(circle at center, #1a1205 0%, #000000 100%);
+    background: radial-gradient(circle, #2b2315 0%, #000000 100%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: all 0.8s ease-in-out;
+    transition: all 1s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+    overflow: hidden;
 }
 
-.seal-overlay.broken {
-    opacity: 0; visibility: hidden; pointer-events: none;
-    transform: scale(1.1); filter: blur(10px);
+/* Particles (Braises) */
+#particles-container {
+    position: absolute; inset: 0; pointer-events: none;
+}
+.ember {
+    position: absolute; width: 4px; height: 4px;
+    background: #ff6b00; border-radius: 50%;
+    box-shadow: 0 0 10px #ff6b00;
+    animation: floatUp linear infinite;
+    opacity: 0;
 }
 
-.seal-container {
-    position: relative; width: 300px; height: 300px;
+/* Structure principale */
+.seal-main-wrapper {
+    position: relative; width: 400px; height: 400px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 2rem;
+    animation: levitate 6s ease-in-out infinite;
 }
 
-/* -- Les Anneaux de Chakra -- */
-.chakra-ring {
-    position: absolute; border-radius: 50%;
-    border: 1px solid transparent;
-    box-shadow: 0 0 15px rgba(234, 179, 8, 0.1);
-    pointer-events: none;
+/* Anneau de talismans (Ofuda) */
+.ofuda-ring {
+    position: absolute; width: 100%; height: 100%;
+    animation: rotateOfuda 60s linear infinite;
 }
-
-/* Anneau Extérieur : Grand, lent, avec des "runes" (pointillés) */
-.ring-outer {
-    width: 280px; height: 280px;
-    border: 2px dashed rgba(234, 179, 8, 0.3);
-    border-top-color: var(--primary); border-bottom-color: var(--primary);
-    animation: spin 20s linear infinite;
-}
-
-/* Anneau Milieu : Vitesse moyenne, sens inverse */
-.ring-middle {
-    width: 220px; height: 220px;
-    border: 1px solid rgba(249, 115, 22, 0.4); /* Orange */
-    border-left: 4px solid var(--primary);
-    border-right: 4px solid var(--primary);
-    animation: spin-reverse 12s linear infinite;
-}
-
-/* Anneau Intérieur : Rapide, proche du centre */
-.ring-inner {
-    width: 160px; height: 160px;
-    border: 2px dotted var(--primary);
-    animation: spin 8s linear infinite;
-    opacity: 0.6;
-}
-
-/* -- Le Cœur du Sceau (Bouton) -- */
-.seal-core {
-    width: 120px; height: 120px;
-    border-radius: 50%; border: none;
-    background: radial-gradient(circle, rgba(234,179,8,0.2) 0%, rgba(0,0,0,0.8) 80%);
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    font-family: 'Courier New', serif; 
-    cursor: pointer; position: relative; z-index: 10;
+.ofuda {
+    position: absolute; top: 50%; left: 50%;
+    width: 30px; height: 80px;
+    background: #f0e6d2;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 0 30px rgba(234, 179, 8, 0.2), inset 0 0 20px rgba(234, 179, 8, 0.2);
+    font-family: serif; color: #8b0000; font-weight: bold;
+    font-size: 14px; writing-mode: vertical-rl;
+    transform-origin: center 200px; /* Éloignement du centre */
+    border: 1px solid #8b0000;
+}
+.ofuda::before {
+    content: ''; position: absolute; top: 5px; width: 60%; height: 2px; background: #8b0000;
 }
 
-.kanji-main {
-    font-size: 4rem; font-weight: 900;
-    text-shadow: 0 0 15px var(--primary), 0 0 30px var(--accent);
-    animation: pulse-kanji 3s infinite ease-in-out;
+/* Anneaux d'encre */
+.ink-ring {
+    position: absolute; border-radius: 50%; border: 3px solid rgba(40, 40, 40, 0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    filter: blur(1px);
 }
+.ring-1 { width: 250px; height: 250px; border-style: solid; opacity: 0.7; animation: rotateInk 20s linear infinite reverse; }
+.ring-2 { width: 300px; height: 300px; border-style: dashed; opacity: 0.5; animation: rotateInk 30s linear infinite; }
 
-/* Effet de lueur interne pulsante */
-.core-glow {
-    position: absolute; inset: -5px; border-radius: 50%;
-    border: 2px solid var(--primary);
-    opacity: 0; transform: scale(0.8);
-    transition: 0.3s;
+/* Cœur du sceau */
+.seal-core-v3 {
+    width: 140px; height: 140px;
+    border-radius: 50%; border: 4px double #eab308;
+    background: radial-gradient(circle, #3f0000 0%, #000000 100%);
+    color: #eab308;
+    font-family: 'Courier New', serif;
+    font-size: 5rem;
+    cursor: pointer; position: relative; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 50px rgba(234, 179, 8, 0.3);
+    transition: all 0.3s;
 }
-
-/* -- Textes -- */
-.seal-message { text-align: center; position: relative; z-index: 10; }
-
-.seal-title {
-    font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: 6px;
-    color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;
-    text-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
-}
-.seal-instruction {
-    font-family: var(--font-body); font-size: 0.8rem; color: var(--text-muted);
-    letter-spacing: 2px; text-transform: uppercase; opacity: 0.7;
-}
-
-/* -- Interactions (Hover) -- */
-.seal-core:hover {
+.seal-core-v3:hover {
     transform: scale(1.1);
-    background: rgba(234, 179, 8, 0.1);
-    box-shadow: 0 0 50px var(--primary), inset 0 0 30px var(--primary);
-    letter-spacing: 5px; /* Petit glitch visuel */
+    background: #590000;
+    box-shadow: 0 0 80px rgba(234, 179, 8, 0.6);
 }
 
-.seal-core:hover .core-glow {
-    opacity: 1; transform: scale(1.3); border-color: rgba(234,179,8, 0.3);
-    animation: spin 2s linear infinite;
+.kanji-v3 {
+    position: relative; z-index: 2;
+    text-shadow: 0 0 10px red;
 }
 
-/* Les anneaux accélèrent au survol */
-.seal-container:hover .ring-outer { animation-duration: 5s; border-color: var(--primary); }
-.seal-container:hover .ring-middle { animation-duration: 3s; border-color: var(--accent); }
-.seal-container:hover .ring-inner { animation-duration: 1s; border-color: white; }
-
-/* -- Animation de rupture (Click) -- */
-.seal-shatter-anim .seal-core {
-    animation: implodeExplode 0.6s forwards;
+/* Texte du bas */
+.seal-text-container {
+    margin-top: 3rem; text-align: center; z-index: 10;
 }
-.seal-shatter-anim .chakra-ring {
-    animation: expandFade 0.5s forwards;
+.seal-title-v3 {
+    font-family: serif; font-size: 2.5rem; letter-spacing: 8px;
+    color: #eab308; text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
 }
-
-/* -- Keyframes -- */
-@keyframes spin { 100% { transform: rotate(360deg); } }
-@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
-
-@keyframes pulse-kanji {
-    0%, 100% { text-shadow: 0 0 15px var(--primary); opacity: 0.8; }
-    50% { text-shadow: 0 0 30px var(--primary), 0 0 50px var(--accent); opacity: 1; transform: scale(1.05); }
+.seal-sub-v3 {
+    color: #d4d4d8; font-size: 0.9rem; letter-spacing: 4px; text-transform: uppercase; opacity: 0.6; margin-top: 10px;
 }
 
-@keyframes implodeExplode {
-    0% { transform: scale(1); filter: brightness(1); }
-    40% { transform: scale(0.5); filter: brightness(5); background: white; color: transparent; }
-    100% { transform: scale(3); opacity: 0; filter: blur(20px); }
-}
+/* Animations */
+@keyframes rotateOfuda { to { transform: rotate(360deg); } }
+@keyframes rotateInk { to { transform: rotate(360deg); } }
+@keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+@keyframes floatUp { from { transform: translateY(100vh) scale(0.5); opacity: 1; } to { transform: translateY(-100px) scale(1.5); opacity: 0; } }
 
-@keyframes expandFade {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; border-width: 10px; }
+/* Animation de destruction (Burn Away) */
+.burn-effect {
+    animation: burnAway 1.5s forwards ease-in;
+}
+@keyframes burnAway {
+    0% { filter: brightness(1) hue-rotate(0deg); opacity: 1; }
+    50% { filter: brightness(5) hue-rotate(-45deg) blur(2px); transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.5); filter: grayscale(1) brightness(0); }
 }
