@@ -1,43 +1,44 @@
 const CONFIG = window.APP_CONFIG;
 
-// --- STATE ---
+// --- STATE (DÉFINI AU DÉBUT) ---
 const STATE = {
   people: [],
   filters: { search: "", village: "Suna", kekkei: "", clan: "", status: "alive", nature: "" },
   isAdmin: false,
   currentEditingId: null,
   currentPhotoUrl: null,
-  // Paramètres globaux (simulés localement)
+  // Gestion robuste du booléen (String "true"/"false" convertie en vrai booléen)
   settings: {
-      sealEnabled: localStorage.getItem('site_seal_enabled') !== 'false' // Par défaut TRUE
+      sealEnabled: localStorage.getItem('site_seal_enabled') !== 'false' // Par défaut TRUE (activé)
   }
 };
 
-// --- INITIALISATION DU SCEAU (V3 FIXED) ---
+// --- INITIALISATION DU SCEAU ---
 function initSealSystem() {
     const overlay = document.getElementById('seal-overlay');
-    
-    // 1. Vérifier si le sceau est ACTIVÉ globalement
+    const btn = document.getElementById('breakSealBtn');
+    const ofudaRing = document.getElementById('ofuda-circle');
+    const particles = document.getElementById('particles-container');
+
+    // 1. Si le sceau est DÉSACTIVÉ dans les options, on le cache et on arrête tout.
     if (!STATE.settings.sealEnabled) {
         overlay.classList.add('hidden');
         return;
     }
 
-    // 2. Vérifier si l'utilisateur a DÉJÀ brisé le sceau dans cette session
+    // 2. Si l'utilisateur l'a déjà brisé dans cette session, on le cache.
     if (sessionStorage.getItem('sealBroken') === 'true') {
         overlay.classList.add('hidden');
         return;
     }
 
-    // Si on arrive ici, on affiche et on anime le sceau
-    const btn = document.getElementById('breakSealBtn');
-    const ofudaRing = document.getElementById('ofuda-circle');
-    const particles = document.getElementById('particles-container');
+    // Sinon, on affiche le sceau et on lance les animations
+    overlay.classList.remove('hidden');
 
-    // Création des Talismans
+    // Génération des Talismans (Mathématique propre)
     const count = 12; 
     const radius = 190; 
-    ofudaRing.innerHTML = ''; // Reset au cas où
+    ofudaRing.innerHTML = ''; // Nettoyage
     
     for (let i = 0; i < count; i++) {
         const el = document.createElement('div');
@@ -58,9 +59,12 @@ function initSealSystem() {
         particles.appendChild(e);
         setTimeout(() => e.remove(), 5000);
     }
-    setInterval(spawnEmber, 150);
+    // Lance les particules uniquement si le sceau est visible
+    if (!overlay.classList.contains('hidden')) {
+        setInterval(spawnEmber, 150);
+    }
 
-    // Interaction (Click)
+    // Interaction (Briser le sceau)
     btn.onclick = () => {
         overlay.classList.add('seal-burn');
         setTimeout(() => {
@@ -70,53 +74,62 @@ function initSealSystem() {
     };
 }
 
-// --- GESTION DES PARAMÈTRES ---
+// --- GESTION DES PARAMÈTRES (ADMIN) ---
 function initSettings() {
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsModal = document.getElementById('settingsModal');
     const saveBtn = document.getElementById('saveSettingsBtn');
     const toggle = document.getElementById('sealToggle');
+    const closeBtn = document.getElementById('settingsClose');
 
-    // Ouvrir
+    // Ouvrir la modale
     settingsBtn.addEventListener('click', () => {
-        // Charger l'état actuel
+        // On met à jour le switch visuel avec la vraie valeur actuelle
         toggle.checked = STATE.settings.sealEnabled;
         settingsModal.showModal();
     });
 
-    // Sauvegarder
+    // Fermer la modale
+    closeBtn.addEventListener('click', () => settingsModal.close());
+
+    // Sauvegarder les changements
     saveBtn.addEventListener('click', () => {
-        const newState = toggle.checked;
-        STATE.settings.sealEnabled = newState;
+        const isEnabled = toggle.checked;
         
-        // Persistance (Local Storage pour démo, DB pour prod)
-        localStorage.setItem('site_seal_enabled', newState);
+        // 1. Mise à jour de l'état global
+        STATE.settings.sealEnabled = isEnabled;
+        
+        // 2. Persistance (Sauvegarde dans le navigateur)
+        localStorage.setItem('site_seal_enabled', isEnabled);
         
         settingsModal.close();
-        showToast("Paramètres sauvegardés !");
         
-        // Appliquer immédiatement (recharger pour voir l'effet du sceau si activé)
-        if (newState) {
-            // Si on réactive, on reset la session pour le revoir
+        // 3. Application immédiate de l'effet
+        const overlay = document.getElementById('seal-overlay');
+        
+        if (isEnabled) {
+            // Si on active : On reset la session pour forcer l'apparition et on recharge
             sessionStorage.removeItem('sealBroken');
-            location.reload(); 
+            showToast("Sceau activé ! Rechargement...");
+            setTimeout(() => location.reload(), 1000);
         } else {
-            // Si on désactive, on le cache direct
-            document.getElementById('seal-overlay').classList.add('hidden');
+            // Si on désactive : On cache l'overlay immédiatement
+            overlay.classList.add('hidden');
+            showToast("Sceau désactivé.");
         }
     });
-    
-    document.getElementById('settingsClose').onclick = () => settingsModal.close();
 }
 
-// Lancement au chargement
+// --- INITIALISATION GLOBALE ---
 document.addEventListener('DOMContentLoaded', () => {
     initSealSystem();
     initSettings();
+    loadData(); // Chargement des données Supabase
+    checkSession(); // Vérif admin
 });
 
 
-// --- SUPABASE & LOGIQUE MÉTIER ---
+// --- CLIENT SUPABASE & OUTILS ---
 const { createClient } = supabase;
 const supabaseClient = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
 const $ = (sel) => document.querySelector(sel);
@@ -141,6 +154,7 @@ function showToast(message, type = 'success') {
   }, 3000);
 }
 
+// --- LOGIQUE MÉTIER (Cartes, Tri, Modales) ---
 const getRankImage = (grade) => {
   if (!grade) return null;
   const map = { 'genin': 'rangd.png', 'genin confirmé': 'rangc.png', 'chunin': 'rangb.png', 'tokubetsu chunin': 'rangb.png', 'chunin confirmé': 'ranga.png', 'tokubetsu jonin': 'ranga.png', 'jonin': 'rangs.png', 'commandant jonin': 'rangs.png', 'kage': 'rangss.png' };
@@ -251,7 +265,7 @@ async function checkSession() {
     $("#adminText").textContent = "Déconnexion";
     $("#addBtn").classList.remove("hidden");
     $("#exportBtn").classList.remove("hidden");
-    $("#settingsBtn").classList.remove("hidden"); // Afficher le bouton settings
+    $("#settingsBtn").classList.remove("hidden");
     renderGrid(); 
   }
 }
@@ -285,4 +299,5 @@ $("#addBtn").addEventListener("click", () => openModal(null, true));
 $("#exportBtn").addEventListener("click", () => { const blob = new Blob([JSON.stringify(STATE.people, null, 2)], {type : 'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Sajin_Backup.json`; a.click(); });
 $$(".modal-close, #closeEditBtn").forEach(b => b.onclick = function(){ this.closest("dialog").close() });
 
-updateTheme("Suna"); loadData(); checkSession();
+// Initialisation finale
+updateTheme("Suna");
