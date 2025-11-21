@@ -9,7 +9,7 @@ const STATE = {
     currentPhotoUrl: null,
 };
 
-// --- SYSTÈME DE SÉCURITÉ (PIN & GLITCH) ---
+// --- SYSTÈME DE SÉCURITÉ CIBLÉ (GRID ONLY) ---
 const SecuritySystem = {
     config: {
         isEnabled: localStorage.getItem('seal_enabled') !== 'false', // Activé par défaut
@@ -18,48 +18,25 @@ const SecuritySystem = {
     },
 
     init() {
-        const overlay = document.getElementById('security-overlay');
-        const content = document.getElementById('main-content-wrapper');
+        const overlay = document.getElementById('grid-lock-overlay');
+        const grid = document.getElementById('grid');
         const pinInput = document.getElementById('pinInput');
-        const particles = document.getElementById('particles-container');
 
-        // Animation du sceau visuel
-        const ring = document.getElementById('ofuda-circle');
-        if(ring) {
-            ring.innerHTML = '';
-            for (let i = 0; i < 12; i++) {
-                const el = document.createElement('div');
-                el.className = 'ofuda';
-                el.innerText = "禁";
-                el.style.transform = `rotate(${i * 30}deg) translateY(-190px)`;
-                ring.appendChild(el);
-            }
-        }
-        
-        // Particules de fond
-        const spawnEmber = () => {
-            if (overlay.classList.contains('hidden')) return;
-            const e = document.createElement('div');
-            e.className = 'ember';
-            e.style.left = Math.random() * 100 + '%';
-            e.style.animationDuration = (Math.random() * 2 + 3) + 's';
-            particles.appendChild(e);
-            setTimeout(() => e.remove(), 5000);
-        };
-        if (!overlay.classList.contains('hidden')) setInterval(spawnEmber, 150);
-
-        // Vérification état initial
+        // 1. Vérifier l'état
         if (!this.config.isEnabled || this.config.isUnlocked) {
-            this.unlockUI(true);
+            this.unlockVisuals(true);
             return;
         }
 
-        // Verrouillage
+        // 2. Verrouiller (Flou + Overlay)
         overlay.classList.remove('hidden');
-        content.classList.add('content-locked');
-        pinInput.focus();
+        grid.classList.add('blur-locked');
+        
+        // 3. Focus automatique pratique pour l'utilisateur
+        // On attend un peu que le DOM soit prêt visuellement
+        setTimeout(() => pinInput?.focus(), 500);
 
-        // Écoute saisie PIN
+        // 4. Écoute saisie PIN
         pinInput.addEventListener('keyup', (e) => {
             if (e.target.value.length === 4) {
                 this.checkPin(e.target.value);
@@ -72,29 +49,36 @@ const SecuritySystem = {
         const inputField = document.getElementById('pinInput');
 
         if (inputCode === this.config.pinCode) {
-            this.unlockUI();
+            // SUCCÈS
+            this.unlockVisuals();
             sessionStorage.setItem('seal_unlocked', 'true');
             inputField.blur();
         } else {
+            // ÉCHEC
             errorMsg.classList.remove('hidden');
             inputField.value = '';
+            inputField.classList.add('shake-anim'); // Animation CSS si dispo
             setTimeout(() => errorMsg.classList.add('hidden'), 2000);
         }
     },
 
-    unlockUI(immediate = false) {
-        const overlay = document.getElementById('security-overlay');
-        const content = document.getElementById('main-content-wrapper');
+    unlockVisuals(immediate = false) {
+        const overlay = document.getElementById('grid-lock-overlay');
+        const grid = document.getElementById('grid');
 
         if (immediate) {
             overlay.classList.add('hidden');
-            content.classList.remove('content-locked');
+            grid.classList.remove('blur-locked');
         } else {
-            overlay.classList.add('seal-burn');
+            // Petite transition de sortie
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.5s';
             setTimeout(() => {
                 overlay.classList.add('hidden');
-                content.classList.remove('content-locked');
-            }, 1000);
+                grid.classList.remove('blur-locked');
+                // Reset style pour prochaine fois
+                overlay.style.opacity = '';
+            }, 500);
         }
     },
 
@@ -105,9 +89,9 @@ const SecuritySystem = {
         localStorage.setItem('seal_enabled', isEnabled);
         localStorage.setItem('seal_pin', newPin);
 
-        showToast("Sécurité mise à jour !");
+        showToast("Paramètres de sécurité mis à jour !");
         
-        // Reload si on active pour forcer le test
+        // Si on active la sécurité, on recharge pour appliquer le flou
         if (isEnabled && !sessionStorage.getItem('seal_unlocked')) {
             setTimeout(() => location.reload(), 500);
         }
@@ -139,7 +123,7 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// --- LOGIQUE MÉTIER ---
+// --- UI MANAGER ---
 const UIManager = {
     getRankImage(grade) {
         if (!grade) return null;
@@ -190,7 +174,6 @@ const UIManager = {
             card.querySelector('.card-name').textContent = `${p.firstName} ${p.lastName}`;
             
             const setLogo = (sel, src) => { const el = card.querySelector(sel); if(src) { el.src = src; el.classList.remove('hidden'); } };
-            
             setLogo('.card-kg-logo', p.kekkeiGenkai && p.kekkeiGenkai !== 'Aucun' ? `kg/${p.kekkeiGenkai.toLowerCase()}.png` : null);
             setLogo('.card-village-logo', p.village ? `villages/${p.village.toLowerCase()}.png` : null);
             setLogo('.card-rank-logo', this.getRankImage(p.grade) ? `rangs/${this.getRankImage(p.grade)}` : null);
@@ -215,7 +198,11 @@ const UIManager = {
                 delBtn.onclick = (e) => { e.stopPropagation(); if(confirm(`Supprimer ${p.firstName} ?`)) DataManager.deletePerson(p.id); };
             }
 
-            card.onclick = (e) => { if(!e.target.closest('.card-del')) this.openModal(p, STATE.isAdmin); };
+            card.onclick = (e) => { 
+                // Petite sécurité supplémentaire : empêcher le clic si flouté (géré aussi par CSS pointer-events)
+                if(document.getElementById('grid').classList.contains('blur-locked')) return;
+                if(!e.target.closest('.card-del')) this.openModal(p, STATE.isAdmin); 
+            };
             frag.appendChild(clone);
         });
         grid.appendChild(frag);
@@ -254,7 +241,6 @@ const UIManager = {
             $$(".ro").forEach(e => e.classList.remove("hidden")); 
             $("#dropZone").classList.add("hidden");
         } else {
-            // Mode Edition (Admin)
             STATE.currentEditingId = p?.id || null; 
             STATE.currentPhotoUrl = p?.photoUrl || null;
             $("#modalPhoto").src = p?.photoUrl || PLACEHOLDER_IMG;
@@ -287,7 +273,6 @@ const DataManager = {
         if(error) { console.error(error); showToast("Erreur de chargement", "error"); } 
         else { 
             STATE.people = data.sort((a, b) => {
-                // Tri par grade puis statut puis nom
                 const getVal = (g) => { const vals = {'kage':10, 'commandant jonin':9, 'jonin':8, 'tokubetsu jonin':7, 'chunin confirmé':6, 'chunin':5, 'tokubetsu chunin':4, 'genin confirmé':3, 'genin':2}; return vals[(g||'').toLowerCase()] || 1; };
                 const rankDiff = getVal(b.grade) - getVal(a.grade);
                 if (rankDiff !== 0) return rankDiff;
@@ -324,9 +309,9 @@ const DataManager = {
 
 // --- INITIALISATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    SecuritySystem.init(); // Lancement de la sécurité
+    SecuritySystem.init(); 
     
-    // Settings Modale
+    // Settings
     $("#settingsBtn").onclick = () => {
         $("#sealToggle").checked = SecuritySystem.config.isEnabled;
         $("#adminPinInput").value = SecuritySystem.config.pinCode;
@@ -345,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     DataManager.load();
     checkSession();
     
-    // Events UI
+    // UI Events
     $("#searchInput").oninput = e => { STATE.filters.search = e.target.value; $("#clearSearch").classList.toggle("hidden", !e.target.value); UIManager.renderGrid(); };
     $("#clearSearch").onclick = () => { $("#searchInput").value = ""; STATE.filters.search = ""; UIManager.renderGrid(); };
     $("#clearFiltersBtn").onclick = () => { $$("select").forEach(s => s.value = ""); $("#searchInput").value = ""; STATE.filters = { search:"", village:"", kekkei:"", clan:"", status:"", nature:"" }; updateTheme(""); UIManager.renderGrid(); };
@@ -353,11 +338,11 @@ document.addEventListener('DOMContentLoaded', () => {
     $(".village-tabs").onclick = e => { if(e.target.classList.contains("village-tab")) { $(".village-tab.active").classList.remove("active"); e.target.classList.add("active"); STATE.filters.village = e.target.dataset.village; updateTheme(STATE.filters.village); UIManager.renderGrid(); } };
     ["kekkeiFilter", "clanFilter", "statusFilter", "natureFilter"].forEach(id => { $(`#${id}`).oninput = e => { STATE.filters[id.replace("Filter", "")] = e.target.value; UIManager.renderGrid(); }; });
 
-    // Admin Login
+    // Admin
     $("#adminLoginToggle").onclick = async () => { if(STATE.isAdmin) { await supabaseClient.auth.signOut(); location.reload(); } else { $("#loginModal").showModal(); } };
     $("#loginForm").onsubmit = async e => { e.preventDefault(); const { error } = await supabaseClient.auth.signInWithPassword({ email: $("#loginEmail").value, password: $("#loginPassword").value }); if(error) showToast("Erreur identifiants", 'error'); else { $("#loginModal").close(); checkSession(); } };
 
-    // Modal Edit
+    // Edition
     $("#saveBtn").onclick = () => DataManager.save();
     $("#closeEditBtn").onclick = () => $("#personModal").close();
     $("#dropZone").onclick = () => $("#photoFile").click();

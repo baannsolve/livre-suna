@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f172a" />
     <title>Livre de Sajin - Archives</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -16,28 +15,6 @@
     <div class="bg-orb bg-orb-2"></div>
     <div class="app-overlay"></div>
     <div id="toast-container" class="toast-container"></div>
-
-    <div id="security-overlay" class="seal-overlay hidden">
-        <div class="glitch-bg"></div>
-        <div class="seal-main-wrapper">
-            <div id="ofuda-circle" class="ofuda-ring"></div>
-            <div class="ink-ring ring-1"></div>
-            <div class="ink-ring ring-2"></div>
-            
-            <div class="seal-core-v3" id="seal-core">
-                <div class="pin-interface">
-                    <div class="kanji-lock">封</div>
-                    <input type="password" id="pinInput" maxlength="4" placeholder="••••" autocomplete="off" inputmode="numeric">
-                </div>
-            </div>
-        </div>
-        <div class="seal-text-container">
-            <h1 class="seal-title-v3">ACCÈS RESTREINT</h1>
-            <div class="seal-sub-v3">Veuillez entrer le code de scellement</div>
-            <div id="pinErrorMsg" class="error-msg hidden">Code Erroné</div>
-        </div>
-        <div id="particles-container"></div>
-    </div>
 
     <div id="main-content-wrapper">
         <header class="site-header glass-panel">
@@ -100,7 +77,23 @@
                     <button id="clearFiltersBtn" class="btn-text">Réinitialiser</button>
                 </div>
             </div>
-            <section id="grid" class="grid" role="list"></section>
+
+            <div class="grid-security-wrapper">
+                <div id="grid-lock-overlay" class="grid-lock hidden">
+                    <div class="lock-content glass-panel">
+                        <div class="lock-icon">🔒</div>
+                        <h3>Archives Scellées</h3>
+                        <p>Entrez le code pour révéler les fiches</p>
+                        <div class="pin-interface-mini">
+                            <input type="password" id="pinInput" maxlength="4" placeholder="• • • •" autocomplete="off" inputmode="numeric">
+                            <div id="pinErrorMsg" class="error-msg-mini hidden">Code Incorrect</div>
+                        </div>
+                    </div>
+                </div>
+
+                <section id="grid" class="grid" role="list"></section>
+            </div>
+
         </main>
     </div>
 
@@ -145,7 +138,7 @@
         <div class="login-header"><h2>Sécurité</h2><p>Configuration du Sceau</p></div>
         <div class="settings-list">
             <div class="setting-item">
-                <div class="setting-info"><span class="setting-label">Protection Active</span><span class="setting-desc">Floute le contenu sans code</span></div>
+                <div class="setting-info"><span class="setting-label">Protection Visuelle</span><span class="setting-desc">Floute les cartes si verrouillé</span></div>
                 <label class="switch"><input type="checkbox" id="sealToggle" checked><span class="slider round"></span></label>
             </div>
             <div class="setting-item vertical">
