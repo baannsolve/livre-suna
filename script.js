@@ -21,7 +21,7 @@ const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000
 // --- SYSTÈME DE SÉCURITÉ GLOBAL (Via Supabase) ---
 const SecuritySystem = {
     config: {
-        isEnabled: true,  // Par défaut TRUE en attendant la réponse de la BDD
+        isEnabled: true,  // Valeur par défaut en attendant Supabase
         pinCode: '0000',
         isUnlocked: sessionStorage.getItem('seal_unlocked') === 'true'
     },
@@ -31,19 +31,19 @@ const SecuritySystem = {
         const grid = document.getElementById('grid');
         const overlay = document.getElementById('grid-lock-overlay');
 
-        // 1. Appliquer le flou immédiatement pour éviter le "flash" de contenu
+        // 1. Appliquer le flou immédiatement si non déverrouillé (pour éviter le flash)
         if(!this.config.isUnlocked) {
             grid.classList.add('blur-locked');
             overlay.classList.remove('hidden');
         }
 
-        // 2. Récupérer la vraie configuration depuis Supabase
+        // 2. Récupérer la configuration depuis Supabase
         await this.fetchGlobalSettings();
 
-        // 3. Appliquer l'état final
+        // 3. Appliquer l'état final (Active ou Désactive selon la BDD)
         this.applySecurityState();
 
-        // 4. Écouteur input
+        // 4. Écouteur sur l'input PIN
         if(pinInput) {
             pinInput.addEventListener('keyup', (e) => {
                 if (e.target.value.length === 4) {
@@ -52,19 +52,15 @@ const SecuritySystem = {
             });
         }
         
-        // 5. Écouteur Temps Réel (Si un autre admin change le code, ça se met à jour chez toi)
+        // 5. Écouteur Temps Réel (Met à jour si un autre admin change le code)
         supabaseClient
             .channel('settings-updates')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'settings' }, (payload) => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, (payload) => {
                 console.log('Changement détecté !', payload.new);
-                this.config.isEnabled = payload.new.seal_enabled;
-                this.config.pinCode = payload.new.seal_pin;
-                
-                // Si la sécurité est réactivée à distance, on verrouille l'utilisateur local
-                if(this.config.isEnabled && !this.config.isUnlocked) {
-                    this.applySecurityState();
-                } else if (!this.config.isEnabled) {
-                    this.unlockVisuals(true);
+                if(payload.new) {
+                    this.config.isEnabled = payload.new.seal_enabled;
+                    this.config.pinCode = payload.new.seal_pin;
+                    this.applySecurityState(); // Réapplique l'état (verrouille ou déverrouille)
                 }
             })
             .subscribe();
@@ -80,9 +76,9 @@ const SecuritySystem = {
         if (data) {
             this.config.isEnabled = data.seal_enabled;
             this.config.pinCode = data.seal_pin;
-        } else if (error) {
-            console.error("Erreur lecture config:", error);
-            // Fallback : on reste verrouillé par sécurité
+        } else {
+            // Si aucune config trouvée, on reste sur les défauts (Activé / 0000)
+            console.log("Aucune config trouvée, utilisation des valeurs par défaut.");
         }
     },
 
@@ -91,15 +87,21 @@ const SecuritySystem = {
         const grid = document.getElementById('grid');
         const pinInput = document.getElementById('pinInput');
 
-        // Si désactivé globalement OU si l'utilisateur a déjà le code
-        if (!this.config.isEnabled || this.config.isUnlocked) {
+        // CAS 1 : La sécurité est DÉSACTIVÉE (bouton switch OFF)
+        // OU l'utilisateur a déjà entré le bon code.
+        if (this.config.isEnabled === false || this.config.isUnlocked === true) {
             this.unlockVisuals(true);
-        } else {
-            // Sinon on verrouille
+        } 
+        // CAS 2 : Sécurité ACTIVE et utilisateur NON AUTHENTIFIÉ
+        else {
             overlay.classList.remove('hidden');
             overlay.style.opacity = '1';
             grid.classList.add('blur-locked');
-            if(pinInput) setTimeout(() => pinInput.focus(), 100);
+            if(pinInput) {
+                pinInput.value = ''; 
+                // Petit focus auto pour le confort
+                setTimeout(() => pinInput.focus(), 100);
+            }
         }
     },
 
@@ -108,11 +110,13 @@ const SecuritySystem = {
         const inputField = document.getElementById('pinInput');
 
         if (inputCode === this.config.pinCode) {
-            this.unlockVisuals();
-            sessionStorage.setItem('seal_unlocked', 'true');
+            // Code Bon -> On déverrouille
             this.config.isUnlocked = true;
+            sessionStorage.setItem('seal_unlocked', 'true');
+            this.unlockVisuals();
             inputField.blur();
         } else {
+            // Code Mauvais
             errorMsg.classList.remove('hidden');
             inputField.value = '';
             setTimeout(() => errorMsg.classList.add('hidden'), 2000);
@@ -139,26 +143,28 @@ const SecuritySystem = {
 
     // ADMIN : Mise à jour vers Supabase
     async updateSettings(isEnabled, newPin) {
-        // Mise à jour visuelle immédiate (Optimistic UI)
+        // On met à jour localement tout de suite pour effet immédiat
         this.config.isEnabled = isEnabled;
         this.config.pinCode = newPin;
 
-        // Envoi à la base de données
+        // IMPORTANT : On utilise UPSERT ici.
+        // Si la ligne ID 1 n'existe pas, elle sera créée. Si elle existe, elle sera mise à jour.
         const { error } = await supabaseClient
             .from('settings')
-            .update({ seal_enabled: isEnabled, seal_pin: newPin })
-            .eq('id', 1);
+            .upsert({ id: 1, seal_enabled: isEnabled, seal_pin: newPin });
 
         if (error) {
             showToast("Erreur sauvegarde : " + error.message, "error");
             return;
         }
 
+        // Logique d'application après sauvegarde
         if (!isEnabled) {
+            // Si on a désactivé, on déverrouille tout pour tout le monde
             this.unlockVisuals(true);
-            showToast("Sécurité désactivée pour TOUS 🔓");
+            showToast("Sécurité désactivée 🔓");
         } else {
-            // On force le test local
+            // Si on a activé ou changé le code, on force le reverrouillage local pour tester
             sessionStorage.removeItem('seal_unlocked');
             this.config.isUnlocked = false;
             this.applySecurityState();
@@ -370,10 +376,9 @@ const DataManager = {
 
 // --- INITIALISATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Lancement sécurité (attends Supabase)
     SecuritySystem.init(); 
     
-    // Configuration Bouton Paramètres
+    // Settings
     $("#settingsBtn").onclick = () => {
         $("#sealToggle").checked = SecuritySystem.config.isEnabled;
         $("#adminPinInput").value = SecuritySystem.config.pinCode;
@@ -381,17 +386,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     $("#settingsClose").onclick = () => $("#settingsModal").close();
     
-    // Bouton VALIDER dans les Paramètres
     $("#saveSettingsBtn").onclick = () => {
         const enabled = $("#sealToggle").checked;
         const pin = $("#adminPinInput").value;
+        if(pin.length !== 4 || isNaN(pin)) { showToast("Le code doit faire 4 chiffres", "error"); return; }
         
-        if(pin.length !== 4 || isNaN(pin)) { 
-            showToast("Le code doit faire 4 chiffres", "error"); 
-            return; 
-        }
-        
-        // Mise à jour globale via Supabase
+        // On appelle la mise à jour (cela créera la ligne si elle n'existe pas via Upsert)
         SecuritySystem.updateSettings(enabled, pin);
         $("#settingsModal").close();
     };
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     DataManager.load();
     checkSession();
     
-    // UI Events (Recherche, Filtres...)
+    // UI Events
     $("#searchInput").oninput = e => { STATE.filters.search = e.target.value; $("#clearSearch").classList.toggle("hidden", !e.target.value); UIManager.renderGrid(); };
     $("#clearSearch").onclick = () => { $("#searchInput").value = ""; STATE.filters.search = ""; UIManager.renderGrid(); };
     $("#clearFiltersBtn").onclick = () => { $$("select").forEach(s => s.value = ""); $("#searchInput").value = ""; STATE.filters = { search:"", village:"", kekkei:"", clan:"", status:"", nature:"" }; updateTheme(""); UIManager.renderGrid(); };
