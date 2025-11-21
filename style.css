@@ -433,7 +433,15 @@ body {
 /* Modal Header */
 .modal-header-view { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
 .modal-header-view h2 { font-family: var(--font-heading); font-size: 2.5rem; line-height: 1.1; margin-bottom: 0.5rem; }
+
+/* CORRECTIF 1 : Taille du logo de rang dans la modale */
 .rank-display { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; color: var(--primary); font-weight: 600; }
+.rank-display img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
 .kage-logo-modal { width: 80px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
 
 /* Abilities */
@@ -442,7 +450,21 @@ body {
   padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border);
 }
 .ability-card h4 { color: var(--primary); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px; }
-.ability-content { display: flex; align-items: center; gap: 1rem; font-weight: 700; font-size: 1.2rem; }
+
+/* CORRECTIF 2 : Taille et alignement des Kekkei Genkai */
+.ability-content { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  font-weight: 700; 
+  font-size: 1.2rem; 
+}
+.ability-content img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
 .nature-icons { display: flex; gap: 1rem; }
 .nature-icons img { width: 40px; height: 40px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); }
 
