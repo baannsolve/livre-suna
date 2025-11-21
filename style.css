@@ -525,127 +525,141 @@ body {
   .tabs-container { padding: 1rem; }
 }
 
-/* --- SCEAU DE PROTECTION (OVERLAY) --- */
+/* --- SCEAU DE PROTECTION V2 (Fûinjutsu Style) --- */
 .seal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: var(--bg-deep);
-    z-index: 10000; /* Au-dessus de tout */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.8s ease-in-out, visibility 0.8s;
+    position: fixed; inset: 0; z-index: 10000;
+    background: radial-gradient(circle at center, #1a1205 0%, #000000 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: all 0.8s ease-in-out;
 }
 
-/* Classe pour cacher le sceau une fois brisé */
 .seal-overlay.broken {
-    opacity: 0;
-    visibility: hidden;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transform: scale(1.1); filter: blur(10px);
+}
+
+.seal-container {
+    position: relative; width: 300px; height: 300px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2rem;
+}
+
+/* -- Les Anneaux de Chakra -- */
+.chakra-ring {
+    position: absolute; border-radius: 50%;
+    border: 1px solid transparent;
+    box-shadow: 0 0 15px rgba(234, 179, 8, 0.1);
     pointer-events: none;
 }
 
-.seal-content {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
+/* Anneau Extérieur : Grand, lent, avec des "runes" (pointillés) */
+.ring-outer {
+    width: 280px; height: 280px;
+    border: 2px dashed rgba(234, 179, 8, 0.3);
+    border-top-color: var(--primary); border-bottom-color: var(--primary);
+    animation: spin 20s linear infinite;
 }
 
-/* Cercles mystiques */
-.seal-circle-outer {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px; height: 300px;
-    border: 2px dashed var(--primary);
-    border-radius: 50%;
-    animation: spinSlow 20s linear infinite;
-    opacity: 0.3;
-    pointer-events: none;
+/* Anneau Milieu : Vitesse moyenne, sens inverse */
+.ring-middle {
+    width: 220px; height: 220px;
+    border: 1px solid rgba(249, 115, 22, 0.4); /* Orange */
+    border-left: 4px solid var(--primary);
+    border-right: 4px solid var(--primary);
+    animation: spin-reverse 12s linear infinite;
 }
 
-.seal-circle-inner {
-    position: relative;
+/* Anneau Intérieur : Rapide, proche du centre */
+.ring-inner {
     width: 160px; height: 160px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 2px dotted var(--primary);
+    animation: spin 8s linear infinite;
+    opacity: 0.6;
 }
 
-/* Le bouton Sceau */
-.seal-btn {
-    width: 140px; height: 140px;
-    border-radius: 50%;
-    border: 4px solid var(--primary);
-    background: rgba(0, 0, 0, 0.5);
+/* -- Le Cœur du Sceau (Bouton) -- */
+.seal-core {
+    width: 120px; height: 120px;
+    border-radius: 50%; border: none;
+    background: radial-gradient(circle, rgba(234,179,8,0.2) 0%, rgba(0,0,0,0.8) 80%);
+    border: 2px solid var(--primary);
     color: var(--primary);
-    font-family: 'Courier New', Courier, monospace; /* Style brut */
-    font-size: 5rem;
-    cursor: pointer;
-    position: relative;
-    box-shadow: 0 0 30px var(--primary-glow), inset 0 0 20px var(--primary-glow);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px);
-    z-index: 10;
+    font-family: 'Courier New', serif; 
+    cursor: pointer; position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 30px rgba(234, 179, 8, 0.2), inset 0 0 20px rgba(234, 179, 8, 0.2);
 }
 
-.seal-kanji {
-    display: block;
-    margin-top: -10px; /* Ajustement visuel */
+.kanji-main {
+    font-size: 4rem; font-weight: 900;
+    text-shadow: 0 0 15px var(--primary), 0 0 30px var(--accent);
+    animation: pulse-kanji 3s infinite ease-in-out;
 }
 
-/* Effets au survol et clic */
-.seal-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 50px var(--primary-glow), inset 0 0 30px var(--primary-glow);
+/* Effet de lueur interne pulsante */
+.core-glow {
+    position: absolute; inset: -5px; border-radius: 50%;
+    border: 2px solid var(--primary);
+    opacity: 0; transform: scale(0.8);
+    transition: 0.3s;
+}
+
+/* -- Textes -- */
+.seal-message { text-align: center; position: relative; z-index: 10; }
+
+.seal-title {
+    font-family: var(--font-heading); font-size: 1.5rem; letter-spacing: 6px;
+    color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;
+    text-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+}
+.seal-instruction {
+    font-family: var(--font-body); font-size: 0.8rem; color: var(--text-muted);
+    letter-spacing: 2px; text-transform: uppercase; opacity: 0.7;
+}
+
+/* -- Interactions (Hover) -- */
+.seal-core:hover {
+    transform: scale(1.1);
     background: rgba(234, 179, 8, 0.1);
+    box-shadow: 0 0 50px var(--primary), inset 0 0 30px var(--primary);
+    letter-spacing: 5px; /* Petit glitch visuel */
 }
 
-.seal-btn:active {
-    transform: scale(0.95);
+.seal-core:hover .core-glow {
+    opacity: 1; transform: scale(1.3); border-color: rgba(234,179,8, 0.3);
+    animation: spin 2s linear infinite;
 }
 
-/* Textes */
-.seal-text {
-    font-family: var(--font-heading);
-    font-size: 2rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--text);
-    margin: 0;
-    text-shadow: 0 2px 10px black;
+/* Les anneaux accélèrent au survol */
+.seal-container:hover .ring-outer { animation-duration: 5s; border-color: var(--primary); }
+.seal-container:hover .ring-middle { animation-duration: 3s; border-color: var(--accent); }
+.seal-container:hover .ring-inner { animation-duration: 1s; border-color: white; }
+
+/* -- Animation de rupture (Click) -- */
+.seal-shatter-anim .seal-core {
+    animation: implodeExplode 0.6s forwards;
+}
+.seal-shatter-anim .chakra-ring {
+    animation: expandFade 0.5s forwards;
 }
 
-.seal-subtext {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    animation: pulseText 2s infinite ease-in-out;
+/* -- Keyframes -- */
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+
+@keyframes pulse-kanji {
+    0%, 100% { text-shadow: 0 0 15px var(--primary); opacity: 0.8; }
+    50% { text-shadow: 0 0 30px var(--primary), 0 0 50px var(--accent); opacity: 1; transform: scale(1.05); }
 }
 
-/* Animations */
-@keyframes spinSlow {
-    from { transform: translate(-50%, -50%) rotate(0deg); }
-    to { transform: translate(-50%, -50%) rotate(360deg); }
+@keyframes implodeExplode {
+    0% { transform: scale(1); filter: brightness(1); }
+    40% { transform: scale(0.5); filter: brightness(5); background: white; color: transparent; }
+    100% { transform: scale(3); opacity: 0; filter: blur(20px); }
 }
 
-@keyframes pulseText {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-}
-
-/* Animation de bris du sceau */
-.seal-shatter {
-    animation: shatter 0.6s forwards ease-out;
-}
-
-@keyframes shatter {
+@keyframes expandFade {
     0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.5; border-color: white; color: white; }
-    100% { transform: scale(1.5); opacity: 0; }
+    100% { transform: scale(2); opacity: 0; border-width: 10px; }
 }

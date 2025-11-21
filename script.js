@@ -3,6 +3,7 @@ const CONFIG = window.APP_CONFIG;
 // --- GESTION DU SCEAU ---
 function initSeal() {
     const overlay = document.getElementById('seal-overlay');
+    const container = document.querySelector('.seal-container'); 
     const btn = document.getElementById('breakSealBtn');
     
     // Vérifier si le sceau a déjà été brisé dans cette session
@@ -12,21 +13,21 @@ function initSeal() {
     }
 
     btn.addEventListener('click', () => {
-        // Animation visuelle du bouton
-        btn.classList.add('seal-shatter');
+        // On applique l'animation sur le conteneur parent pour affecter les anneaux + le bouton
+        container.classList.add('seal-shatter-anim');
         
+        // Petite vibration de l'écran (optionnel)
+        document.body.style.transform = "scale(1.01)";
+        setTimeout(() => document.body.style.transform = "none", 100);
+
         setTimeout(() => {
-            // Faire disparaître l'overlay
             overlay.classList.add('broken');
-            
-            // Enregistrer l'état pour la session en cours
             sessionStorage.setItem('sealBroken', 'true');
             
-            // Retirer complètement du DOM après la transition CSS (0.8s)
             setTimeout(() => {
                 overlay.classList.add('hidden');
             }, 800);
-        }, 400); // Attendre un peu que l'animation du bouton commence
+        }, 500); // Synchro avec la fin de l'implosion
     });
 }
 

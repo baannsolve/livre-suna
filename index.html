@@ -13,15 +13,20 @@
   </head>
   <body>
     <div id="seal-overlay" class="seal-overlay">
-        <div class="seal-content">
-            <div class="seal-circle-outer"></div>
-            <div class="seal-circle-inner">
-                <button id="breakSealBtn" class="seal-btn">
-                    <span class="seal-kanji">封</span>
-                </button>
-            </div>
-            <p class="seal-text">Livre Scellé</p>
-            <p class="seal-subtext">Touchez le sceau pour l'ouvrir</p>
+        <div class="seal-container">
+            <div class="chakra-ring ring-outer"></div>
+            <div class="chakra-ring ring-middle"></div>
+            <div class="chakra-ring ring-inner"></div>
+            
+            <button id="breakSealBtn" class="seal-core">
+                <span class="kanji-main">封</span>
+                <div class="core-glow"></div>
+            </button>
+        </div>
+        
+        <div class="seal-message">
+            <h2 class="seal-title">LIVRE SCELLÉ</h2>
+            <p class="seal-instruction">Infusez votre chakra pour briser le sceau</p>
         </div>
     </div>
     <div class="bg-orb bg-orb-1"></div>
