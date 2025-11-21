@@ -30,7 +30,7 @@ body {
   transition: background-color 0.5s ease;
 }
 
-/* --- THEMES DYNAMIQUES (Vos thèmes existants) --- */
+/* --- THEMES DYNAMIQUES --- */
 body[data-theme="Konoha"] { --bg-deep: #051a08; --primary: #4ade80; --accent: #f97316; }
 body[data-theme="Kiri"] { --bg-deep: #020617; --primary: #06b6d4; --accent: #3b82f6; }
 body[data-theme="Oto"] { --bg-deep: #180324; --primary: #d946ef; --accent: #8b5cf6; }
@@ -74,7 +74,6 @@ body[data-theme="Tous"] { --bg-deep: #0f172a; --primary: #64748b; }
 
 .ofuda {
     position: absolute;
-    /* Centrage du point de pivot */
     top: -40px; left: -15px; 
     width: 30px; height: 80px;
     background: #f3e9d2;
@@ -83,9 +82,8 @@ body[data-theme="Tous"] { --bg-deep: #0f172a; --primary: #64748b; }
     display: flex; align-items: center; justify-content: center;
     font-family: serif; color: #8b0000; font-weight: 700;
     font-size: 16px; 
-    writing-mode: vertical-rl; /* Texte vertical japonais */
+    writing-mode: vertical-rl;
     z-index: 5;
-    /* La position finale est gérée par JS uniquement */
 }
 .ofuda::before {
     content: ''; position: absolute; top: 4px; width: 60%; height: 3px; background: #8b0000;
@@ -98,7 +96,7 @@ body[data-theme="Tous"] { --bg-deep: #0f172a; --primary: #64748b; }
     box-shadow: 0 0 30px rgba(234, 179, 8, 0.1);
     pointer-events: none;
     top: 50%; left: 50%;
-    transform: translate(-50%, -50%); /* Centrage absolu */
+    transform: translate(-50%, -50%);
 }
 .ring-1 { width: 240px; height: 240px; border-style: solid; animation: spinReverse 20s linear infinite; }
 .ring-2 { width: 290px; height: 290px; border-style: dashed; animation: spin 40s linear infinite; }
@@ -171,7 +169,24 @@ body[data-theme="Tous"] { --bg-deep: #0f172a; --primary: #64748b; }
     100% { filter: grayscale(1) brightness(0) blur(10px); transform: scale(1.5); opacity: 0; }
 }
 
-/* --- LE RESTE DE VOTRE CSS EXISTANT --- */
+/* --- PARAMÈTRES (SETTINGS) --- */
+.settings-list { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; width: 100%; }
+.setting-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; border: 1px solid var(--border); }
+.setting-info { display: flex; flex-direction: column; gap: 0.2rem; }
+.setting-label { font-weight: 700; color: var(--text); font-family: var(--font-heading); }
+.setting-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Switch CSS */
+.switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(24px); }
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
+
+/* --- RESTE DU CSS (Pour garantir l'affichage) --- */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }

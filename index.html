@@ -17,10 +17,8 @@
         
         <div class="seal-main-wrapper">
             <div id="ofuda-circle" class="ofuda-ring"></div>
-            
             <div class="ink-ring ring-1"></div>
             <div class="ink-ring ring-2"></div>
-
             <button id="breakSealBtn" class="seal-core-v3">
                 <span class="kanji-v3">封</span>
             </button>
@@ -52,6 +50,10 @@
           <input id="searchInput" type="search" placeholder="Rechercher un ninja..." autocomplete="off" />
           <button id="clearSearch" class="icon-btn ghost hidden" aria-label="Effacer">✕</button>
         </div>
+
+        <button id="settingsBtn" class="icon-btn hidden" title="Paramètres">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
 
         <button id="adminLoginToggle" class="admin-btn-trigger">
           <div class="admin-icon-box">
@@ -187,23 +189,45 @@
           <h2>Identification</h2>
           <p>Veuillez présenter vos accréditations.</p>
         </div>
-        
         <form id="loginForm" class="login-form-modern">
           <div class="input-wrapper">
              <span class="input-icon">📧</span>
              <input id="loginEmail" type="email" placeholder="Email Ninja" required>
           </div>
-          
           <div class="input-wrapper">
              <span class="input-icon">🔑</span>
              <input id="loginPassword" type="password" placeholder="Code Secret" required>
           </div>
-          
           <button id="loginSubmitBtn" type="submit" class="btn-login-glow">
             Ouvrir le Sceau
             <span class="btn-flare"></span>
           </button>
         </form>
+      </div>
+    </dialog>
+
+    <dialog id="settingsModal" class="modal login-modal-design">
+      <button class="modal-close" id="settingsClose">✕</button>
+      <div class="login-container">
+        <div class="login-header">
+          <h2>Paramètres</h2>
+          <p>Configuration du système</p>
+        </div>
+        
+        <div class="settings-list">
+            <div class="setting-item">
+                <div class="setting-info">
+                    <span class="setting-label">Protection par Sceau</span>
+                    <span class="setting-desc">Bloque l'accès au livre pour les visiteurs</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="sealToggle" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        
+        <button id="saveSettingsBtn" class="btn-primary" style="width:100%; margin-top:1rem;">Valider</button>
       </div>
     </dialog>
 
