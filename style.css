@@ -326,3 +326,106 @@ input:checked + .slider:before { transform: translateX(24px); }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .hidden { display: none !important; }
 @media (max-width: 768px) { .modal-body { flex-direction: column; } .modal-left-col, .modal-right-col { width: 100%; border: none; padding: 1.5rem; } .header-actions { gap: 0.5rem; } .site-title { font-size: 1.2rem; } .search-wrapper { width: 100%; display: none; } .tabs-container { padding: 1rem; } }
+
+/* --- SÉCURITÉ & GLITCH EFFECT --- */
+
+/* Conteneur Global Flouté */
+.content-locked {
+    filter: blur(15px) grayscale(0.8);
+    pointer-events: none;
+    user-select: none;
+    transform: scale(0.98);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+#main-content-wrapper {
+    transition: all 0.5s ease;
+    width: 100%;
+}
+
+/* Interface PIN Input dans le Sceau */
+.pin-interface {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    height: 100%;
+}
+
+.kanji-lock {
+    font-size: 2rem;
+    margin-bottom: -5px;
+    opacity: 0.8;
+    text-shadow: 0 0 10px var(--primary);
+}
+
+#pinInput {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--primary);
+    color: var(--primary);
+    font-family: 'Courier New', monospace;
+    font-size: 2rem;
+    width: 100px;
+    text-align: center;
+    letter-spacing: 8px;
+    outline: none;
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--primary-glow);
+}
+
+#pinInput::placeholder {
+    color: rgba(234, 179, 8, 0.3);
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.error-msg {
+    color: #ef4444;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: shake 0.4s ease-in-out;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    background: rgba(0,0,0,0.8);
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ef4444;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Effet Glitch Arrière-plan */
+.glitch-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Settings spécifiques */
+.setting-item.vertical {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+.setting-item.vertical .input-wrapper {
+    width: 100%;
+}
+
+/* Ajustement Sceau pour input */
+.seal-core-v3 {
+    /* S'assurer qu'il est assez grand pour l'input */
+    width: 160px; 
+    height: 160px;
+}
