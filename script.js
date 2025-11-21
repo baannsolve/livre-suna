@@ -1,58 +1,67 @@
 const CONFIG = window.APP_CONFIG;
 
-// --- GESTION DU SCEAU V3 (Forbidden Scroll) ---
-function initSealV3() {
+// --- INITIALISATION DU SCEAU (V3 FIXED) ---
+function initSealSystem() {
     const overlay = document.getElementById('seal-overlay');
     const btn = document.getElementById('breakSealBtn');
-    const ofudaContainer = document.getElementById('ofuda-circle');
-    const particlesContainer = document.getElementById('particles-container');
+    const ofudaRing = document.getElementById('ofuda-circle');
+    const particles = document.getElementById('particles-container');
 
-    // Vérif session
+    // Vérification de session (si déjà ouvert, on cache direct)
     if (sessionStorage.getItem('sealBroken') === 'true') {
         overlay.classList.add('hidden');
         return;
     }
 
-    // 1. Générer les Talismans (Ofuda) en cercle
-    const numOfuda = 12; // Nombre de papiers
-    for (let i = 0; i < numOfuda; i++) {
-        const ofuda = document.createElement('div');
-        ofuda.className = 'ofuda';
-        ofuda.innerText = "禁"; // Kanji "Interdit"
-        // Calculer la rotation
-        const rotation = (360 / numOfuda) * i;
-        ofuda.style.transform = `rotate(${rotation}deg) translate(0, -160px)`; // -160px = rayon du cercle
-        ofudaContainer.appendChild(ofuda);
+    // 1. Création des Talismans (Mathématique propre)
+    const count = 12; 
+    const radius = 190; // Distance du centre augmentée pour éviter le chevauchement
+    
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'ofuda';
+        el.innerText = "禁"; // Kanji "Interdit"
+        
+        // Calcul de l'angle
+        const angle = (360 / count) * i;
+        
+        // Transformation : On tourne d'abord, PUIS on pousse vers l'extérieur
+        // Cela garantit que la base du talisman pointe vers le centre
+        el.style.transform = `rotate(${angle}deg) translateY(-${radius}px)`;
+        
+        ofudaRing.appendChild(el);
     }
 
-    // 2. Générer des particules (Braises)
-    function createEmber() {
-        const ember = document.createElement('div');
-        ember.className = 'ember';
-        ember.style.left = Math.random() * 100 + 'vw';
-        ember.style.animationDuration = Math.random() * 3 + 2 + 's'; // Entre 2 et 5s
-        particlesContainer.appendChild(ember);
-        // Supprimer après l'anim
-        setTimeout(() => ember.remove(), 5000);
+    // 2. Système de Particules (Braises)
+    function spawnEmber() {
+        if (overlay.classList.contains('hidden')) return;
+        
+        const e = document.createElement('div');
+        e.className = 'ember';
+        e.style.left = Math.random() * 100 + '%';
+        e.style.animationDuration = (Math.random() * 2 + 3) + 's'; // Durée aléatoire
+        particles.appendChild(e);
+        
+        setTimeout(() => e.remove(), 5000); // Nettoyage
     }
-    setInterval(createEmber, 200); // Une braise toutes les 200ms
+    setInterval(spawnEmber, 150);
 
-    // 3. Action de Briser le Sceau
+    // 3. Interaction (Click)
     btn.addEventListener('click', () => {
-        // Déclencher l'anim CSS de brûlure
-        overlay.classList.add('burn-effect');
+        // Activation de l'animation de brûlure
+        overlay.classList.add('seal-burn');
         
-        // Son (optionnel, ici visuel)
-        
+        // Retrait du DOM après l'animation
         setTimeout(() => {
             overlay.classList.add('hidden');
             sessionStorage.setItem('sealBroken', 'true');
-        }, 1400); // Synchro avec la fin de l'animation CSS
+        }, 1000);
     });
 }
 
-// Lancer l'init
-document.addEventListener('DOMContentLoaded', initSealV3);
+// Lancement au chargement
+document.addEventListener('DOMContentLoaded', initSealSystem);
+
 
 // --- STATE ---
 const STATE = {
