@@ -18,7 +18,7 @@ const sanitize = (html) => window.DOMPurify ? DOMPurify.sanitize(html) : html;
 const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Crect width='600' height='600' fill='%230f172a'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='40' fill='%23334155'%3ESHINOBI%3C/text%3E%3C/svg%3E";
 
 
-// --- SYSTÈME DE SÉCURITÉ GLOBAL (Via Supabase) ---
+// --- SYSTÈME DE SÉCURITÉ BLINDÉ ---
 const SecuritySystem = {
     config: {
         isEnabled: true, 
@@ -27,117 +27,110 @@ const SecuritySystem = {
     },
 
     async init() {
-        const pinInput = document.getElementById('pinInput');
-        const grid = document.getElementById('grid');
-        const overlay = document.getElementById('grid-lock-overlay');
+        // 1. Verrouillage visuel immédiat au chargement
+        this.applySecurityState(true); // true = force check
 
-        // 1. Verrouillage préventif au chargement (anti-flash)
-        if(!this.config.isUnlocked) {
-            grid.classList.add('blur-locked');
-            overlay.classList.remove('hidden');
-        }
-
-        // 2. Récupérer la configuration serveur
+        // 2. Récupérer la config serveur
         await this.fetchGlobalSettings();
 
-        // 3. Appliquer l'état initial
-        this.applySecurityState();
-
-        // 4. Écouteur saisie PIN
+        // 3. Gestionnaire d'input PIN
+        const pinInput = document.getElementById('pinInput');
         if(pinInput) {
             pinInput.addEventListener('keyup', (e) => {
-                if (e.target.value.length === 4) {
-                    this.checkPin(e.target.value);
-                }
+                if (e.target.value.length === 4) this.checkPin(e.target.value);
             });
         }
         
-        // 5. SURVEILLANCE TEMPS RÉEL (La partie importante pour toi)
-        // Permet de bloquer instantanément les utilisateurs si l'admin change le code
+        // 4. ÉCOUTE TEMPS RÉEL (C'est ici que ça se joue)
         supabaseClient
-            .channel('settings-updates')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'settings' }, (payload) => {
+            .channel('public:settings')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, (payload) => {
+                console.log("🔔 Changement détecté :", payload);
+                
                 const newSettings = payload.new;
-                const oldPin = this.config.pinCode;
-                const wasEnabled = this.config.isEnabled;
+                if (!newSettings) return;
 
-                // Mise à jour de la config locale
+                const oldPin = this.config.pinCode;
+                
+                // Mise à jour de la config en mémoire
                 this.config.isEnabled = newSettings.seal_enabled;
                 this.config.pinCode = newSettings.seal_pin;
 
-                // CAS 1 : La sécurité vient d'être DÉSACTIVÉE
+                // ANALYSE DES CHANGEMENTS POUR VERRROUILLER
+                // Si la sécurité est désactivée => On ouvre tout
                 if (!this.config.isEnabled) {
-                    this.unlockVisuals(true);
+                    this.unlockVisuals();
+                    showToast("Sceau levé par l'administrateur 🔓");
                     return;
                 }
 
-                // CAS 2 : La sécurité est ACTIVE
-                // On vérifie si le code a changé OU si on vient de l'activer
-                const pinHasChanged = newSettings.seal_pin !== oldPin;
-                const justActivated = !wasEnabled && this.config.isEnabled;
-
-                if (pinHasChanged || justActivated) {
-                    // SÉCURITÉ MAXIMALE : On révoque l'accès immédiatement
-                    console.log("Changement de sécurité détecté : Verrouillage immédiat.");
+                // Si le code PIN a changé OU si la sécurité vient d'être activée
+                // ON VERROUILLE TOUT LE MONDE (Sauf si on vient de taper le bon code à l'instant)
+                if (newSettings.seal_pin !== oldPin || newSettings.seal_enabled === true) {
+                    console.warn("🔒 Code modifié ou Sceau activé : RE-VERROUILLAGE GLOBAL");
+                    
+                    // On révoque l'accès
                     this.config.isUnlocked = false;
-                    sessionStorage.removeItem('seal_unlocked'); // On supprime le "cookie" de session
+                    sessionStorage.removeItem('seal_unlocked');
                     
-                    // On réapplique le flou et l'overlay
-                    this.applySecurityState(); 
+                    // On applique le flou
+                    this.applySecurityState();
                     
-                    if(pinHasChanged) showToast("Le code d'accès a été modifié.", "error");
+                    showToast("⚠️ Le code du Sceau a changé !", "error");
                 }
             })
-            .subscribe();
+            .subscribe((status) => {
+                console.log("Statut connexion Realtime :", status);
+            });
     },
 
     async fetchGlobalSettings() {
-        const { data, error } = await supabaseClient
-            .from('settings')
-            .select('*')
-            .eq('id', 1)
-            .single();
-
+        const { data, error } = await supabaseClient.from('settings').select('*').eq('id', 1).single();
         if (data) {
             this.config.isEnabled = data.seal_enabled;
             this.config.pinCode = data.seal_pin;
+            this.applySecurityState(); // On réapplique après avoir eu la vraie info
         }
     },
 
-    applySecurityState() {
+    applySecurityState(force = false) {
         const overlay = document.getElementById('grid-lock-overlay');
         const grid = document.getElementById('grid');
         const pinInput = document.getElementById('pinInput');
 
-        // Si désactivé globalement OU si l'utilisateur a le bon token de session
-        if (this.config.isEnabled === false || this.config.isUnlocked === true) {
+        // EST-CE QU'ON DOIT AFFICHER LE CONTENU ?
+        // OUI SI : (Sécurité OFF) OU (Déjà déverrouillé ET Sécurité ON)
+        const shouldBeOpen = (!this.config.isEnabled) || (this.config.isUnlocked && this.config.isEnabled);
+
+        if (shouldBeOpen) {
             this.unlockVisuals(true);
         } else {
-            // Sinon VERROUILLAGE
+            // SINON ON VERROUILLE
             overlay.classList.remove('hidden');
             overlay.style.opacity = '1';
             grid.classList.add('blur-locked');
-            if(pinInput) {
-                pinInput.value = '';
-                // Focus automatique si l'utilisateur est actif
-                if (document.activeElement !== document.body) setTimeout(() => pinInput.focus(), 100);
+            if(pinInput) { 
+                pinInput.value = ''; 
+                // Focus seulement si l'utilisateur n'est pas ailleurs
+                if(!document.activeElement || document.activeElement === document.body) {
+                    setTimeout(() => pinInput.focus(), 100);
+                }
             }
         }
     },
 
     checkPin(inputCode) {
         const errorMsg = document.getElementById('pinErrorMsg');
-        const inputField = document.getElementById('pinInput');
-
+        
         if (inputCode === this.config.pinCode) {
-            this.unlockVisuals();
-            sessionStorage.setItem('seal_unlocked', 'true');
             this.config.isUnlocked = true;
-            inputField.blur();
+            sessionStorage.setItem('seal_unlocked', 'true');
+            this.unlockVisuals();
+            document.getElementById('pinInput').blur();
         } else {
             errorMsg.classList.remove('hidden');
-            inputField.value = '';
-            setTimeout(() => errorMsg.classList.add('hidden'), 2000);
+            document.getElementById('pinInput').value = '';
+            setTimeout(() => errorMsg.classList.add('hidden'), 1500);
         }
     },
 
@@ -159,35 +152,36 @@ const SecuritySystem = {
         }
     },
 
-    // ADMIN : Mise à jour vers Supabase
+    // ADMIN : Sauvegarde
     async updateSettings(isEnabled, newPin) {
-        // On met à jour localement tout de suite (Optimistic UI)
-        // Note: L'écouteur realtime se déclenchera aussi, mais ce n'est pas grave
+        // Optimistic Update (On applique tout de suite pour l'admin)
+        this.config.isEnabled = isEnabled;
+        this.config.pinCode = newPin;
+
+        // Envoi BDD
         const { error } = await supabaseClient
             .from('settings')
             .upsert({ id: 1, seal_enabled: isEnabled, seal_pin: newPin });
 
         if (error) {
-            showToast("Erreur sauvegarde : " + error.message, "error");
+            showToast("Erreur BDD: " + error.message, "error");
             return;
         }
 
-        if (!isEnabled) {
-            this.unlockVisuals(true);
-            showToast("Sécurité désactivée pour TOUS 🔓");
-        } else {
-            // Pour l'admin qui modifie, on re-verrouille aussi pour tester
-            this.config.isEnabled = true;
-            this.config.pinCode = newPin;
+        // Si on active ou change le code, l'admin doit aussi être re-verrouillé pour tester
+        if (isEnabled) {
             this.config.isUnlocked = false;
             sessionStorage.removeItem('seal_unlocked');
             this.applySecurityState();
-            showToast(`Code défini sur : ${newPin} 🔒`);
+            showToast(`Sceau activé. Nouveau code : ${newPin} 🔒`);
+        } else {
+            this.unlockVisuals();
+            showToast("Sceau désactivé 🔓");
         }
     }
 };
 
-// --- TOOLS UI ---
+// --- FONCTIONS UI ---
 function updateTheme(village) {
     const themeName = village || "Tous";
     document.body.setAttribute('data-theme', themeName);
@@ -205,7 +199,7 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// --- UI MANAGER ---
+// --- UI MANAGER (Cartes & Modales) ---
 const UIManager = {
     getRankImage(grade) {
         if (!grade) return null;
@@ -351,7 +345,7 @@ const UIManager = {
 const DataManager = {
     async load() {
         const { data, error } = await supabaseClient.from('people').select('*');
-        if(error) { console.error(error); showToast("Erreur de chargement", "error"); } 
+        if(error) { console.error(error); showToast("Erreur chargement", "error"); } 
         else { 
             STATE.people = data.sort((a, b) => {
                 const getVal = (g) => { const vals = {'kage':10, 'commandant jonin':9, 'jonin':8, 'tokubetsu jonin':7, 'chunin confirmé':6, 'chunin':5, 'tokubetsu chunin':4, 'genin confirmé':3, 'genin':2}; return vals[(g||'').toLowerCase()] || 1; };
@@ -390,7 +384,7 @@ const DataManager = {
 
 // --- INITIALISATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    SecuritySystem.init(); 
+    SecuritySystem.init();
     
     // Settings
     $("#settingsBtn").onclick = () => {
@@ -404,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const enabled = $("#sealToggle").checked;
         const pin = $("#adminPinInput").value;
         if(pin.length !== 4 || isNaN(pin)) { showToast("Le code doit faire 4 chiffres", "error"); return; }
-        
         SecuritySystem.updateSettings(enabled, pin);
         $("#settingsModal").close();
     };
@@ -412,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
     DataManager.load();
     checkSession();
     
-    // UI Events
+    // UI
     $("#searchInput").oninput = e => { STATE.filters.search = e.target.value; $("#clearSearch").classList.toggle("hidden", !e.target.value); UIManager.renderGrid(); };
     $("#clearSearch").onclick = () => { $("#searchInput").value = ""; STATE.filters.search = ""; UIManager.renderGrid(); };
     $("#clearFiltersBtn").onclick = () => { $$("select").forEach(s => s.value = ""); $("#searchInput").value = ""; STATE.filters = { search:"", village:"", kekkei:"", clan:"", status:"", nature:"" }; updateTheme(""); UIManager.renderGrid(); };
@@ -420,11 +413,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $(".village-tabs").onclick = e => { if(e.target.classList.contains("village-tab")) { $(".village-tab.active").classList.remove("active"); e.target.classList.add("active"); STATE.filters.village = e.target.dataset.village; updateTheme(STATE.filters.village); UIManager.renderGrid(); } };
     ["kekkeiFilter", "clanFilter", "statusFilter", "natureFilter"].forEach(id => { $(`#${id}`).oninput = e => { STATE.filters[id.replace("Filter", "")] = e.target.value; UIManager.renderGrid(); }; });
 
-    // Admin Login
     $("#adminLoginToggle").onclick = async () => { if(STATE.isAdmin) { await supabaseClient.auth.signOut(); location.reload(); } else { $("#loginModal").showModal(); } };
     $("#loginForm").onsubmit = async e => { e.preventDefault(); const { error } = await supabaseClient.auth.signInWithPassword({ email: $("#loginEmail").value, password: $("#loginPassword").value }); if(error) showToast("Erreur identifiants", 'error'); else { $("#loginModal").close(); checkSession(); } };
 
-    // Edition
     $("#saveBtn").onclick = () => DataManager.save();
     $("#closeEditBtn").onclick = () => $("#personModal").close();
     $("#dropZone").onclick = () => $("#photoFile").click();
@@ -434,7 +425,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $("#exportBtn").onclick = () => { const blob = new Blob([JSON.stringify(STATE.people, null, 2)], {type : 'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Sajin_Backup.json`; a.click(); };
     
     $$(".modal-close").forEach(b => b.onclick = function(){ this.closest("dialog").close() });
-    
     updateTheme("Suna");
 });
 
