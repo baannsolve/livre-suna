@@ -122,7 +122,6 @@ function initSettings() {
 
 // --- INITIALISATION GLOBALE ---
 document.addEventListener('DOMContentLoaded', () => {
-    initSealSystem();
     initSettings();
     loadData(); // Chargement des données Supabase
     checkSession(); // Vérif admin
