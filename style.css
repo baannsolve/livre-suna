@@ -319,3 +319,11 @@ input:checked + .slider:before { transform: translateX(24px); }
 
 /* --- MOBILE --- */
 @media (max-width: 768px) { .modal-body { flex-direction: column; } .modal-left-col, .modal-right-col { width: 100%; border: none; padding: 1.5rem; } .header-actions { gap: 0.5rem; } .site-title { font-size: 1.2rem; } .search-wrapper { width: 100%; display: none; } .tabs-container { padding: 1rem; } }
+
+.grid.blur-locked {
+    filter: blur(15px) grayscale(0.8);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.6;
+    transition: filter 0.5s ease, opacity 0.5s ease;
+}
