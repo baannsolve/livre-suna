@@ -21,7 +21,7 @@ const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000
 // --- SYSTÈME DE SÉCURITÉ GLOBAL (Via Supabase) ---
 const SecuritySystem = {
     config: {
-        isEnabled: true,  // Valeur par défaut en attendant Supabase
+        isEnabled: true, 
         pinCode: '0000',
         isUnlocked: sessionStorage.getItem('seal_unlocked') === 'true'
     },
@@ -31,19 +31,19 @@ const SecuritySystem = {
         const grid = document.getElementById('grid');
         const overlay = document.getElementById('grid-lock-overlay');
 
-        // 1. Appliquer le flou immédiatement si non déverrouillé (pour éviter le flash)
+        // 1. Verrouillage préventif au chargement (anti-flash)
         if(!this.config.isUnlocked) {
             grid.classList.add('blur-locked');
             overlay.classList.remove('hidden');
         }
 
-        // 2. Récupérer la configuration depuis Supabase
+        // 2. Récupérer la configuration serveur
         await this.fetchGlobalSettings();
 
-        // 3. Appliquer l'état final (Active ou Désactive selon la BDD)
+        // 3. Appliquer l'état initial
         this.applySecurityState();
 
-        // 4. Écouteur sur l'input PIN
+        // 4. Écouteur saisie PIN
         if(pinInput) {
             pinInput.addEventListener('keyup', (e) => {
                 if (e.target.value.length === 4) {
@@ -52,15 +52,40 @@ const SecuritySystem = {
             });
         }
         
-        // 5. Écouteur Temps Réel (Met à jour si un autre admin change le code)
+        // 5. SURVEILLANCE TEMPS RÉEL (La partie importante pour toi)
+        // Permet de bloquer instantanément les utilisateurs si l'admin change le code
         supabaseClient
             .channel('settings-updates')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, (payload) => {
-                console.log('Changement détecté !', payload.new);
-                if(payload.new) {
-                    this.config.isEnabled = payload.new.seal_enabled;
-                    this.config.pinCode = payload.new.seal_pin;
-                    this.applySecurityState(); // Réapplique l'état (verrouille ou déverrouille)
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'settings' }, (payload) => {
+                const newSettings = payload.new;
+                const oldPin = this.config.pinCode;
+                const wasEnabled = this.config.isEnabled;
+
+                // Mise à jour de la config locale
+                this.config.isEnabled = newSettings.seal_enabled;
+                this.config.pinCode = newSettings.seal_pin;
+
+                // CAS 1 : La sécurité vient d'être DÉSACTIVÉE
+                if (!this.config.isEnabled) {
+                    this.unlockVisuals(true);
+                    return;
+                }
+
+                // CAS 2 : La sécurité est ACTIVE
+                // On vérifie si le code a changé OU si on vient de l'activer
+                const pinHasChanged = newSettings.seal_pin !== oldPin;
+                const justActivated = !wasEnabled && this.config.isEnabled;
+
+                if (pinHasChanged || justActivated) {
+                    // SÉCURITÉ MAXIMALE : On révoque l'accès immédiatement
+                    console.log("Changement de sécurité détecté : Verrouillage immédiat.");
+                    this.config.isUnlocked = false;
+                    sessionStorage.removeItem('seal_unlocked'); // On supprime le "cookie" de session
+                    
+                    // On réapplique le flou et l'overlay
+                    this.applySecurityState(); 
+                    
+                    if(pinHasChanged) showToast("Le code d'accès a été modifié.", "error");
                 }
             })
             .subscribe();
@@ -76,9 +101,6 @@ const SecuritySystem = {
         if (data) {
             this.config.isEnabled = data.seal_enabled;
             this.config.pinCode = data.seal_pin;
-        } else {
-            // Si aucune config trouvée, on reste sur les défauts (Activé / 0000)
-            console.log("Aucune config trouvée, utilisation des valeurs par défaut.");
         }
     },
 
@@ -87,20 +109,18 @@ const SecuritySystem = {
         const grid = document.getElementById('grid');
         const pinInput = document.getElementById('pinInput');
 
-        // CAS 1 : La sécurité est DÉSACTIVÉE (bouton switch OFF)
-        // OU l'utilisateur a déjà entré le bon code.
+        // Si désactivé globalement OU si l'utilisateur a le bon token de session
         if (this.config.isEnabled === false || this.config.isUnlocked === true) {
             this.unlockVisuals(true);
-        } 
-        // CAS 2 : Sécurité ACTIVE et utilisateur NON AUTHENTIFIÉ
-        else {
+        } else {
+            // Sinon VERROUILLAGE
             overlay.classList.remove('hidden');
             overlay.style.opacity = '1';
             grid.classList.add('blur-locked');
             if(pinInput) {
-                pinInput.value = ''; 
-                // Petit focus auto pour le confort
-                setTimeout(() => pinInput.focus(), 100);
+                pinInput.value = '';
+                // Focus automatique si l'utilisateur est actif
+                if (document.activeElement !== document.body) setTimeout(() => pinInput.focus(), 100);
             }
         }
     },
@@ -110,13 +130,11 @@ const SecuritySystem = {
         const inputField = document.getElementById('pinInput');
 
         if (inputCode === this.config.pinCode) {
-            // Code Bon -> On déverrouille
-            this.config.isUnlocked = true;
-            sessionStorage.setItem('seal_unlocked', 'true');
             this.unlockVisuals();
+            sessionStorage.setItem('seal_unlocked', 'true');
+            this.config.isUnlocked = true;
             inputField.blur();
         } else {
-            // Code Mauvais
             errorMsg.classList.remove('hidden');
             inputField.value = '';
             setTimeout(() => errorMsg.classList.add('hidden'), 2000);
@@ -143,12 +161,8 @@ const SecuritySystem = {
 
     // ADMIN : Mise à jour vers Supabase
     async updateSettings(isEnabled, newPin) {
-        // On met à jour localement tout de suite pour effet immédiat
-        this.config.isEnabled = isEnabled;
-        this.config.pinCode = newPin;
-
-        // IMPORTANT : On utilise UPSERT ici.
-        // Si la ligne ID 1 n'existe pas, elle sera créée. Si elle existe, elle sera mise à jour.
+        // On met à jour localement tout de suite (Optimistic UI)
+        // Note: L'écouteur realtime se déclenchera aussi, mais ce n'est pas grave
         const { error } = await supabaseClient
             .from('settings')
             .upsert({ id: 1, seal_enabled: isEnabled, seal_pin: newPin });
@@ -158,15 +172,15 @@ const SecuritySystem = {
             return;
         }
 
-        // Logique d'application après sauvegarde
         if (!isEnabled) {
-            // Si on a désactivé, on déverrouille tout pour tout le monde
             this.unlockVisuals(true);
-            showToast("Sécurité désactivée 🔓");
+            showToast("Sécurité désactivée pour TOUS 🔓");
         } else {
-            // Si on a activé ou changé le code, on force le reverrouillage local pour tester
-            sessionStorage.removeItem('seal_unlocked');
+            // Pour l'admin qui modifie, on re-verrouille aussi pour tester
+            this.config.isEnabled = true;
+            this.config.pinCode = newPin;
             this.config.isUnlocked = false;
+            sessionStorage.removeItem('seal_unlocked');
             this.applySecurityState();
             showToast(`Code défini sur : ${newPin} 🔒`);
         }
@@ -391,7 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const pin = $("#adminPinInput").value;
         if(pin.length !== 4 || isNaN(pin)) { showToast("Le code doit faire 4 chiffres", "error"); return; }
         
-        // On appelle la mise à jour (cela créera la ligne si elle n'existe pas via Upsert)
         SecuritySystem.updateSettings(enabled, pin);
         $("#settingsModal").close();
     };
